@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Description of FirstRhinoplugin")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+3b91ed8956ae0cc7228d0a98499213b507c07662")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+96aeac627b3f46840897f9a5ec996a1b26ed082c")]
 [assembly: System.Reflection.AssemblyProductAttribute("FirstRhinoplugin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FirstRhinoplugin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

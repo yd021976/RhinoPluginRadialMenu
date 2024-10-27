@@ -1,4 +1,5 @@
 
+using System.Drawing;
 using System.Reflection;
 using Eto.Forms;
 using Grasshopper.Kernel.Special;
@@ -24,6 +25,9 @@ namespace customControls
 
         // current button border color
         protected Eto.Drawing.Color currentBorderColor;
+
+        protected string macroCommand;
+        protected Eto.Drawing.Icon icon;
 
         public RoundedButton() : base()
         {
@@ -61,6 +65,11 @@ namespace customControls
             var size = new Eto.Drawing.Rectangle(0, 0, radius, radius);
             graphic.FillEllipse(backgroundBrush, size);
             graphic.DrawEllipse(borderPen, size);
+            if (this.icon != null)
+            {
+                var img = this.icon.GetFrame(1).Bitmap;
+                graphic.DrawImage(img, new Eto.Drawing.PointF(0, 0));
+            }
         }
         /**
         When mouse click down, raise "onClick" event of this class
@@ -92,6 +101,19 @@ namespace customControls
                 {
                     // Get the macro of the dropped toolbar item
                     var lMacro = obj.GetType().GetProperty("LeftMacro").GetValue(obj, null);
+
+                    // List methods of ToolBarItemController
+                    var toolbarItemController = lMacro.GetType().GetMethods(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public);
+
+                    // Seems that "CreateIcon" is a good condidate to get the Rhino toolbar item icon
+                    var iconCreateMethod = lMacro.GetType().GetMethod("CreateIcon");
+                    var icon = iconCreateMethod.Invoke(lMacro, new object[] { new Eto.Drawing.Size(28, 28), true });
+                    if (icon != null)
+                    {
+                        this.icon = (Eto.Drawing.Icon)icon;
+                        this.Invalidate(); // readraw button control (testing)
+                    }
+                    // Get the macro "script" command
                     var macroScript = lMacro.GetType().GetProperty("Script").GetValue(lMacro, null);
                 }
             }
