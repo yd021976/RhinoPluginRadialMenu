@@ -1,4 +1,5 @@
 
+using System.Reflection;
 using Eto.Forms;
 using Grasshopper.Kernel.Special;
 
@@ -78,16 +79,29 @@ namespace customControls
             this.currentBorderColor = this.borderColor;
             this.Invalidate(false); // redraw button
         }
-        protected void testDragDrop(object sender, DragEventArgs e) {
+        protected void testDragDrop(object sender, DragEventArgs e)
+        {
             var test = 0;
         }
-        protected void testDragEnter(object sender, DragEventArgs e) {
+        protected void testDragEnter(object sender, DragEventArgs e)
+        {
             var obj = e.Source;
+            if (obj != null)
+            {
+                if (obj.GetType().ToString() == "Rhino.UI.Internal.TabPanels.Controls.ToolBarControlItem")
+                {
+                    // Get the macro of the dropped toolbar item
+                    var lMacro = obj.GetType().GetProperty("LeftMacro").GetValue(obj, null);
+                    var macroScript = lMacro.GetType().GetProperty("Script").GetValue(lMacro, null);
+                }
+            }
         }
-        protected void testDragLeave(object sender, DragEventArgs e) {
+        protected void testDragLeave(object sender, DragEventArgs e)
+        {
             var test = 0;
         }
-        protected void testDragOver(object sender, DragEventArgs e) {
+        protected void testDragOver(object sender, DragEventArgs e)
+        {
             var test = 0;
         }
     }
