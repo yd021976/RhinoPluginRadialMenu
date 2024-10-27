@@ -1,0 +1,14 @@
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/bin/Debug/net7.0/FirstRhinoplugin.deps.json
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/bin/Debug/net7.0/FirstRhinoplugin.runtimeconfig.json
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/bin/Debug/net7.0/FirstRhinoplugin.rhp
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/bin/Debug/net7.0/FirstRhinoplugin.pdb
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.csproj.AssemblyReference.cache
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.GeneratedMSBuildEditorConfig.editorconfig
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.AssemblyInfoInputs.cache
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.AssemblyInfo.cs
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.csproj.CoreCompileInputs.cache
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.rhp
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/refint/FirstRhinoplugin.rhp
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.pdb
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/FirstRhinoplugin.genruntimeconfig.cache
+/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net7.0/ref/FirstRhinoplugin.rhp

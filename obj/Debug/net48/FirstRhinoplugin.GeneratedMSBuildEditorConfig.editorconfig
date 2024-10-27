@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = FirstRhinoplugin
+build_property.ProjectDir = /Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
