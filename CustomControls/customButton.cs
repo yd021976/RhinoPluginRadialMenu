@@ -1,4 +1,5 @@
 
+using System;
 using System.Drawing;
 using System.Reflection;
 using Eto.Forms;
@@ -6,16 +7,38 @@ using Grasshopper.Kernel.Special;
 
 namespace customControls
 {
+    public class RhinoToolBarItem
+    {
+        public string script { get; set; }
+        public Eto.Drawing.Icon icon { get; set; }
+        public RhinoToolBarItem(string script, Eto.Drawing.Icon icon)
+        {
+            this.script = script;
+            this.icon = icon;
+        }
+    }
+    public class buttonInfoUpdatedEventArgs
+    {
+        public RhinoToolBarItem item { get; }
+        public buttonInfoUpdatedEventArgs(RhinoToolBarItem item)
+        {
+            this.item = item;
+        }
+    };
     class RoundedButton : Eto.Forms.Drawable
     {
         // click event
         public event System.EventHandler onclick;
 
+        public delegate void buttonInfoUpdatedEventHandler(object sender, buttonInfoUpdatedEventArgs e);
+        // Button infos is updated
+        public event buttonInfoUpdatedEventHandler onButtonInfoUpdated;
+
         // Radius of circle button
         public int radius = 35;
 
         // button base border color
-        public Eto.Drawing.Color borderColor = Eto.Drawing.Colors.Gray;
+        public Eto.Drawing.Color borderColor = Eto.Drawing.Colors.Black;
 
         // button mouse Hover border color
         public Eto.Drawing.Color hoverBorderColor = Eto.Drawing.Colors.Red;
@@ -26,9 +49,7 @@ namespace customControls
         // current button border color
         protected Eto.Drawing.Color currentBorderColor;
 
-        protected string macroCommand;
-        protected Eto.Drawing.Icon icon;
-
+        protected RhinoToolBarItem buttonItemInfos;
         public RoundedButton() : base()
         {
             // Event handler for mouse down => Will raise onclick event of this class
@@ -38,19 +59,16 @@ namespace customControls
             this.Size = new Eto.Drawing.Size(this.radius, this.radius);
             this.currentBorderColor = this.borderColor;
 
-            this.DragDrop += this.testDragDrop;
-            this.DragEnter += this.testDragEnter;
             this.DragLeave += this.testDragLeave;
-            this.DragOver += this.testDragOver;
-            this.DragEnd += this.testDragDrop;
-            this.AllowDrop = true;
+            // this.DragOver += this.testDragOver; // Should be helpfull when dragging occurs and we need to re-arrange Radial Menu items (in the futur)
+            this.AllowDrop = true; // Mandatory for drag & drop feature to work
         }
         public RoundedButton(string id) : this()
         {
             this.ID = id;
         }
         /**
-        Draw the control
+         Draw the control
         **/
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -65,10 +83,12 @@ namespace customControls
             var size = new Eto.Drawing.Rectangle(0, 0, radius, radius);
             graphic.FillEllipse(backgroundBrush, size);
             graphic.DrawEllipse(borderPen, size);
-            if (this.icon != null)
+            if (this.buttonItemInfos != null)
             {
-                var img = this.icon.GetFrame(1).Bitmap;
-                graphic.DrawImage(img, new Eto.Drawing.PointF(0, 0));
+                var img = this.buttonItemInfos.icon.GetFrame(1).Bitmap;
+                var posx = (this.radius - img.Width) / 2;
+                var posy = (this.radius - img.Height) / 2;
+                graphic.DrawImage(img, new Eto.Drawing.PointF(posx, posy));
             }
         }
         /**
@@ -88,11 +108,32 @@ namespace customControls
             this.currentBorderColor = this.borderColor;
             this.Invalidate(false); // redraw button
         }
-        protected void testDragDrop(object sender, DragEventArgs e)
-        {
-            var test = 0;
-        }
+
         protected void testDragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+        protected void testDragLeave(object sender, DragEventArgs e)
+        {
+            var r = this.getDroppedToolbarItem(e);
+            if (r != null)
+            {
+                this.buttonItemInfos = r;
+                this.onButtonInfoUpdated?.Invoke(this, new buttonInfoUpdatedEventArgs((RhinoToolBarItem)this.buttonItemInfos)); // Send event
+                this.Invalidate();
+            }
+        }
+        /**
+        <summary>
+            When a drop event occurs (dragLeave), check if drop item is a Rhino toolbar item
+            If so, try to get the script command macro and the associated icon
+        </summary>
+        <returns>
+            RhinoToolBarItem or null if drop item is not type of "Rhino.UI.Internal.TabPanels.Controls.ToolBarControlItem" or command or icon is not found
+        </returns>
+        **/
+
+        private RhinoToolBarItem getDroppedToolbarItem(DragEventArgs e)
         {
             var obj = e.Source;
             if (obj != null)
@@ -110,21 +151,19 @@ namespace customControls
                     var icon = iconCreateMethod.Invoke(lMacro, new object[] { new Eto.Drawing.Size(28, 28), true });
                     if (icon != null)
                     {
-                        this.icon = (Eto.Drawing.Icon)icon;
+                        this.buttonItemInfos.icon = (Eto.Drawing.Icon)icon;
                         this.Invalidate(); // readraw button control (testing)
                     }
                     // Get the macro "script" command
                     var macroScript = lMacro.GetType().GetProperty("Script").GetValue(lMacro, null);
+                    return new RhinoToolBarItem((string)macroScript, (Eto.Drawing.Icon)icon);
+                }
+                else
+                {
+                    return null;
                 }
             }
-        }
-        protected void testDragLeave(object sender, DragEventArgs e)
-        {
-            var test = 0;
-        }
-        protected void testDragOver(object sender, DragEventArgs e)
-        {
-            var test = 0;
+            return null;
         }
     }
 }

@@ -33,6 +33,9 @@ namespace customControls
             for (int i = 1; i <= this.buttonsNumber; i++)
             {
                 var btn = new customControls.RoundedButton(i.ToString());
+                btn.onButtonInfoUpdated += (object sender, customControls.buttonInfoUpdatedEventArgs e) =>
+                {
+                };
                 this.buttons.Add(btn);
             }
             this.closeBtn.onclick += onCloseClick;
