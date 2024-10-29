@@ -26,7 +26,7 @@ namespace FirstRhinoplugin
 
         protected override Result RunCommand(RhinoDoc doc, RunMode mode)
         {
-            this.form = new TransparentForm();
+            this.form = new TransparentForm(this.PlugIn);
             this.form.Show();
             return Result.Nothing;
         }

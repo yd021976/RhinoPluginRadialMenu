@@ -17,7 +17,6 @@ namespace FirstRhinoplugin
         public FirstRhinopluginPlugin()
         {
             Instance = this;
-            this.SettingsSaved += this.onSavedSetting;
         }
 
         ///<summary>Gets the only instance of the FirstRhinopluginPlugin plug-in.</summary>
@@ -26,18 +25,6 @@ namespace FirstRhinoplugin
         // You can override methods here to change the plug-in behavior on
         // loading and shut down, add options pages to the Rhino _Option command
         // and maintain plug-in wide options in a document.
-        protected override LoadReturnCode OnLoad(ref string errorMessage)
-        {
-            // var rootDir = this.SettingsDirectory;
-            // var pluginSettingsDir = rootDir + "/" + this.Id;
-            this.Settings.AddChild("testMyFirstSettingsKey");
-            this.SaveSettings();
-            return 0;
-        }
-
-        protected void onSavedSetting(object sender, PersistentSettingsSavedEventArgs e)
-        {
-            var a = 0;
-        }
+        
     }
 }

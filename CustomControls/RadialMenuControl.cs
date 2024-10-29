@@ -10,6 +10,10 @@ namespace customControls
     {
         // close button click event
         public event System.EventHandler onCloseMenu;
+        public delegate void buttonItemUpdatedEvent(RoundedButton sender, buttonInfoUpdatedEventArgs e);
+
+        // Button infos is updated
+        public event buttonItemUpdatedEvent onButtonInfoUpdated;
 
         // # of buttons
         public int buttonsNumber = 8;
@@ -33,12 +37,17 @@ namespace customControls
             for (int i = 1; i <= this.buttonsNumber; i++)
             {
                 var btn = new customControls.RoundedButton(i.ToString());
-                btn.onButtonInfoUpdated += (object sender, customControls.buttonInfoUpdatedEventArgs e) =>
+                
+                /// Raise event
+                btn.onButtonInfoUpdated += (RoundedButton sender, customControls.buttonInfoUpdatedEventArgs e) =>
                 {
+                    this.onButtonInfoUpdated.Invoke(btn, e);
                 };
+
+                /// Add to layout
                 this.buttons.Add(btn);
             }
-            this.closeBtn.onclick += onCloseClick;
+            this.closeBtn.onclickEvent += onCloseClick;
             // test for drag drop event
             this.DragDrop += this.onDragDrop;
         }
@@ -96,8 +105,8 @@ namespace customControls
         /**
             Drop traget test
         **/
-        private void onDragDrop(object sender, DragEventArgs e){
-            var test = 0;
+        private void onDragDrop(object sender, DragEventArgs e)
+        {
         }
     }
 }
