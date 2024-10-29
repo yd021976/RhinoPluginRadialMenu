@@ -49,7 +49,7 @@ namespace customControls
         public int radius = 50;
 
         // Pen size for external circle
-        public int pen_size = 2;
+        public int pen_size = 4;
 
         // button base border color
         public Eto.Drawing.Color borderColor = Eto.Drawing.Colors.Blue;
@@ -90,16 +90,16 @@ namespace customControls
         }
         private void drawControl(Eto.Drawing.Graphics graphic)
         {
-            // var g = this.CreateGraphics();
-            var backgroundBrush = new Eto.Drawing.SolidBrush(this.backgroundColor);
-            var backgroundBrush2 = new Eto.Drawing.SolidBrush(this.currentBorderColor);
-            var borderPen = new Eto.Drawing.Pen(this.currentBorderColor, pen_size);
-            var rPen = new Eto.Drawing.Pen(Eto.Drawing.Colors.Black, 2);
-            var size = new Eto.Drawing.Rectangle(0, 0, radius - 1, radius - 1);
-            var size2 = new Eto.Drawing.Rectangle(pen_size / 2, pen_size / 2, radius - 1 - pen_size, radius - 1 - pen_size);
-            graphic.FillEllipse(backgroundBrush, size);
-            graphic.DrawEllipse(borderPen, size2);
-            graphic.DrawRectangle(rPen, size);
+            var innerBrushColor = new Eto.Drawing.SolidBrush(this.backgroundColor);
+            var borderBrushColor = new Eto.Drawing.SolidBrush(this.currentBorderColor);
+            var borderSize = new Eto.Drawing.Rectangle(0, 0, radius, radius );
+            var innerSize = new Eto.Drawing.Rectangle(pen_size, pen_size, radius-(pen_size*2), radius-(pen_size*2) );
+            
+            // Draw the icon shape
+            graphic.FillEllipse(borderBrushColor, borderSize);
+            graphic.FillEllipse(innerBrushColor, innerSize);
+           
+           // Draw icon if any
             if (this.buttonItemInfos != null)
             {
                 var img = this.buttonItemInfos.icon.GetFrame(1).Bitmap;

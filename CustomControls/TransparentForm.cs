@@ -2,6 +2,7 @@ using System;
 using Eto.Drawing;
 using Rhino.PlugIns;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace customControls
 {
@@ -95,10 +96,12 @@ namespace customControls
             frame.Bitmap.Save(pluginSettingsPath, ImageFormat.Bitmap);
             return pluginSettingsPath;
         }
-        protected void transparentStyle(customControls.TransparentForm form) {
-            var transparent = Eto.Drawing.Colors.Transparent;
+        protected void transparentStyle(customControls.TransparentForm form)
+        {
+            this.BackgroundColor = Eto.Drawing.Colors.Transparent;
             var win = form.ControlObject;
-            var allowTransp = win.GetType().GetProperty("AllowsTransparency");
-         }
+            var transparentNSColor = AppKit.NSColor.Clear;
+            win.GetType().GetProperty("BackgroundColor").SetValue(win, transparentNSColor);
+        }
     }
 }
