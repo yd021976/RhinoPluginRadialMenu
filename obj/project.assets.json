@@ -161,9 +161,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/FirstRhinoplugin.csproj",
-      "projectName": "FirstRhinoplugin",
-      "projectPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/FirstRhinoplugin.csproj",
+      "projectUniqueName": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
+      "projectName": "RadialMenu",
+      "projectPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
       "packagesPath": "/Users/tigrou/.nuget/packages/",
       "outputPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/obj/",
       "projectStyle": "PackageReference",

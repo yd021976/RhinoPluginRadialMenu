@@ -1,8 +1,4 @@
-﻿using System;
-using Rhino;
-using Rhino.PlugIns;
-
-namespace FirstRhinoplugin
+﻿namespace RadialMenu
 {
     ///<summary>
     /// <para>Every RhinoCommon .rhp assembly must have one and only one PlugIn-derived
@@ -12,15 +8,15 @@ namespace FirstRhinoplugin
     /// attributes in AssemblyInfo.cs (you might need to click "Project" ->
     /// "Show All Files" to see it in the "Solution Explorer" window).</para>
     ///</summary>
-    public class FirstRhinopluginPlugin : Rhino.PlugIns.PlugIn
+    public class RadialMenuPlugin : Rhino.PlugIns.PlugIn
     {
-        public FirstRhinopluginPlugin()
+        public RadialMenuPlugin()
         {
             Instance = this;
         }
 
         ///<summary>Gets the only instance of the FirstRhinopluginPlugin plug-in.</summary>
-        public static FirstRhinopluginPlugin Instance { get; private set; }
+        public static RadialMenuPlugin Instance { get; private set; }
 
         // You can override methods here to change the plug-in behavior on
         // loading and shut down, add options pages to the Rhino _Option command

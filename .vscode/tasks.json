@@ -8,7 +8,7 @@
       "args": [
         "build",
         "-clp:NoSummary",
-        "${workspaceFolder}/FirstRhinoplugin.csproj"
+        "${workspaceFolder}/RadialMenu.csproj"
       ],
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -25,7 +25,7 @@
         "build",
         "-c:Release",
         "-clp:NoSummary",
-        "${workspaceFolder}/FirstRhinoplugin.csproj"
+        "${workspaceFolder}/RadialMenu.csproj"
       ],
       "problemMatcher": "$msCompile",
       "presentation": {

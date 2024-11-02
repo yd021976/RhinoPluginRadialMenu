@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vnY4esQ12iM=",
+  "dgSpecHash": "PYsy8hS3jyc=",
   "success": true,
-  "projectFilePath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/FirstRhinoplugin.csproj",
+  "projectFilePath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
   "expectedPackageFiles": [
     "/Users/tigrou/.nuget/packages/grasshopper/8.0.23304.9001/grasshopper.8.0.23304.9001.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/microsoft.net.illink.analyzers/7.0.100-1.23401.1/microsoft.net.illink.analyzers.7.0.100-1.23401.1.nupkg.sha512",
