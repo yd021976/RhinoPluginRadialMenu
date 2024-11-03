@@ -4,13 +4,7 @@ using Eto.Forms;
 
 namespace customControls
 {
-    enum sourceTypes
-    {
-        self = 0,
-        rhinoItem = 1,
-        unknown = 3
-    }
-    public class SectorsMenuControl : Drawable
+    public class SectorButtonControl : Drawable
     {
         public int innerRadius;
         public int thickness;
@@ -33,7 +27,7 @@ namespace customControls
 
 
 
-        public SectorsMenuControl(Size parentSize, int innerRadius, int thickness, int startAngle = 0, int sweepAngle = 40) : base()
+        public SectorButtonControl(Size parentSize, int innerRadius, int thickness, int startAngle = 0, int sweepAngle = 40) : base()
         {
             this.startAngle = startAngle;
             this.sweepAngle = sweepAngle;
@@ -111,8 +105,6 @@ namespace customControls
 
             var bounds = g.Bounds;
             g.CloseFigure();
-            // g.AddRectangle(outerRect);
-            // g.CloseFigure();
             return bounds;
         }
 
@@ -238,7 +230,7 @@ namespace customControls
         /// <returns></returns>
         private sourceTypes dragSourceType(Control source)
         {
-            if (source.GetType() == typeof(SectorsMenuControl))
+            if (source.GetType() == typeof(SectorButtonControl))
             {
                 return sourceTypes.self;
             }

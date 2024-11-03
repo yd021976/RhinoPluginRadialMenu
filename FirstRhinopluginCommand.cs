@@ -6,6 +6,10 @@ namespace RadialMenu
 {
     public class RadialMenuCommand : Command
     {
+        /// <summary>
+        /// Main plugin form
+        /// </summary>
+        private TransparentForm _form;
         public RadialMenuCommand()
         {
             // Rhino only creates one instance of each command class defined in a
@@ -16,13 +20,8 @@ namespace RadialMenu
         ///<summary>The only instance of this command.</summary>
         public static RadialMenuCommand Instance { get; private set; }
 
-        // The main form
-
-        protected SectorRadialMenuForm form = null;
-
-
         /// <summary>
-        /// 
+        /// Name of the command in Rhino
         /// </summary>
         /// <returns>
         /// The command name as it appears on the Rhino command line.
@@ -31,11 +30,11 @@ namespace RadialMenu
 
         protected override Result RunCommand(RhinoDoc doc, RunMode mode)
         {
-            form = new SectorRadialMenuForm(this.PlugIn);
+            _form = _form == null ? new SectorRadialMenuForm(this.PlugIn) : _form;
             var m = Rhino.UI.MouseCursor.Location;
-            var formSize = form.Size;
-            form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
-            form.Show();
+            var formSize = _form.Size;
+            _form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
+            _form.Show();
             return Result.Nothing;
         }
     }

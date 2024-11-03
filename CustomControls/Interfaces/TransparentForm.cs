@@ -54,7 +54,7 @@ namespace customControls
         **/
         protected virtual void onCloseClickEvent(object sender)
         {
-            this.Close();
+            this.Visible = false;
         }
     }
 }
