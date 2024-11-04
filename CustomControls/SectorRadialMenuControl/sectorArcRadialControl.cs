@@ -21,26 +21,39 @@ namespace customControls
         /// </summary>
         /// <param name="sender"></param>
         public delegate void buttonClickEvent(SectorArcRadialControl sender);
+        
+        /// <summary>
+        /// event to ensure main window has focus
+        /// </summary>
+        public event requestedFocusEvent onRequestedFocus;
+        /// <summary>
+        /// delegate for event to ensure main window has focus
+        /// </summary>
+        /// <param name="sender"></param>
+        public delegate void requestedFocusEvent(SectorArcRadialControl sender);
 
 
         public SectorArcRadialControl() : base()
         {
-            var buttonTheme = new RadialButtonStateColors();
-            buttonTheme.normal = new ButtonColor(Colors.White, Colors.DarkKhaki);
-            buttonTheme.hover = new ButtonColor(Colors.White, Colors.Khaki);
-            buttonTheme.drag = new ButtonColor(Colors.White, Colors.DarkKhaki);
-
             initLevels();
+            Size = new Size((defaultInnerRadius + defaultThickness) * 2, (defaultInnerRadius + defaultThickness) * 2);
             var level = menuLevels.Find(l => l.level == 1);
-            level.sectorData = buildSectors(8, level, buttonTheme);
+            level.sectorData = buildSectors(8, level);
 
-            Size = new Size(500, 500);
             layout = new PixelLayout();
 
             // Draw buttons
             foreach (var sd in level.sectorData)
             {
                 var btn = new SectorArcButton(sd);
+
+                // Get focus requested event
+                btn.onRequestFocusEvent += (s) =>
+                {
+                    onRequestedFocus.Invoke(this);
+                };
+                // handle click event and raise click event
+                // -> Should be handled by main form window to hide when a Rhino command is executed
                 btn.onclickEvent += (s) =>
                 {
                     onclickEvent.Invoke(this);
@@ -48,9 +61,9 @@ namespace customControls
                 layout.Add(btn, (int)sd.bounds.Left, (int)sd.bounds.Top);
             }
 
-            this.Content = layout;
+            Content = layout;
         }
-
+       
         private void initLevels()
         {
             for (int i = 0; i < 3; i++)
@@ -61,7 +74,7 @@ namespace customControls
                 menuLevels.Add(new RadialMenuLevel(i + 1, (int)innerRadius, defaultThickness));
             }
         }
-        private List<SectorData> buildSectors(int sectorsNumber, RadialMenuLevel level, RadialButtonStateColors theme)
+        private List<SectorData> buildSectors(int sectorsNumber, RadialMenuLevel level)
         {
             int angleStart;
             List<SectorData> sectors = new List<SectorData>();
@@ -74,7 +87,7 @@ namespace customControls
                 angleStart = i * sweepAngle;
                 var _graphicsPath = new GraphicsPath();
                 var sectorDrawer = new ArcSectorDrawer();
-                var sectorData = sectorDrawer.drawSector(_graphicsPath, 250, 250, level.innerRadius, level.thickness, angleStart, sweepAngle, theme);
+                var sectorData = sectorDrawer.drawSector(_graphicsPath, Size.Width / 2, Size.Height / 2, level.innerRadius, level.thickness, angleStart, sweepAngle);
 
                 // add sector infos to list
                 sectorData.levelRef = level;

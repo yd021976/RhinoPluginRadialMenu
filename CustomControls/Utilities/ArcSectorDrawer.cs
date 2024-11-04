@@ -1,6 +1,6 @@
 using System;
 using Eto.Drawing;
-using ObjCRuntime;
+using RadialMenu;
 
 namespace customControls
 {
@@ -18,7 +18,7 @@ namespace customControls
         /// <param name="startAngle"></param>
         /// <param name="sweepAngle"></param>
         /// <returns>SectorData</returns>
-        public SectorData drawSector(GraphicsPath g, int x, int y, int innerRadius, int thickness, int startAngle, int sweepAngle, RadialButtonStateColors theme)
+        public SectorData drawSector(GraphicsPath g, int x, int y, int innerRadius, int thickness, int startAngle, int sweepAngle)
         {
             var center = new Point(x, y);
             var outerR = innerRadius + thickness;
@@ -30,13 +30,14 @@ namespace customControls
             g.AddArc(outerRect, startAngle, sweepAngle);
             g.AddArc(innerRect, startAngle + sweepAngle, -sweepAngle);
             g.CloseFigure();
-            return buildSectorImages(g, x, y, innerRadius, thickness, startAngle, sweepAngle, theme);
+            return buildSectorImages(g, x, y, innerRadius, thickness, startAngle, sweepAngle);
         }
 
-        protected SectorData buildSectorImages(GraphicsPath gp, int x, int y, int innerRadius, int thickness, int startAngle, int sweepAngle, RadialButtonStateColors theme)
+        protected SectorData buildSectorImages(GraphicsPath gp, int x, int y, int innerRadius, int thickness, int startAngle, int sweepAngle)
         {
-            var pen = new Pen(theme.normal.pen, 1);
-            var fillColor = theme.normal.fill;
+            // var pen = new Pen(theme.normal.pen, 1);
+            var pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.pen, 1);
+            var fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.fill;
 
             var pathSize = new Size((int)gp.Bounds.Size.Width + 3, (int)gp.Bounds.Size.Height + 3);
             // Create button image for normal state
@@ -49,8 +50,8 @@ namespace customControls
             pen.Dispose();
 
             // Create button image for over state
-            pen = new Pen(theme.hover.pen, 1);
-            fillColor = theme.hover.fill;
+            pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.hover.pen, 1);
+            fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.hover.fill;
             var overStateImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             _graphics = new Graphics(overStateImage);
             _graphics.TranslateTransform(new PointF(-gp.Bounds.Left, -gp.Bounds.Top));
@@ -69,7 +70,7 @@ namespace customControls
             _graphics.Dispose();
             pen.Dispose();
 
-            // REMARK: no specific "drag" image
+            // REMARK: no specific "drag" image. It is same as "normal" state
             var sData = new SectorData()
             {
                 buttonID = generateButtonID(),

@@ -1,4 +1,6 @@
+using System;
 using Eto.Drawing;
+using Eto.Forms;
 using Rhino;
 using Rhino.PlugIns;
 
@@ -11,9 +13,6 @@ namespace customControls
             Size = new Size(500, 500);
             var layout = new Eto.Forms.PixelLayout();
 
-            // Handle mouse over to get focus
-            MouseMove += this.onMouseMove;
-            
             // Get ressource icon for close button
             var img = Bitmap.FromResource("RadialMenu.Bitmaps.close-icon-13612.png");
             var icon = img.WithSize(16, 16);
@@ -32,7 +31,15 @@ namespace customControls
                 this.Visible = false;
                 RhinoApp.SetFocusToMainWindow();
             };
-            layout.Add(ctrl, 0, 0);
+            ctrl.onRequestedFocus += (s) =>
+            {
+                if (!HasFocus)
+                {
+                    Focus();
+                }
+            };
+            layout.Add(ctrl, (Size.Width / 2) - (ctrl.Size.Width / 2), Size.Height / 2 - (ctrl.Size.Height / 2));
+
             Content = layout;
         }
     }

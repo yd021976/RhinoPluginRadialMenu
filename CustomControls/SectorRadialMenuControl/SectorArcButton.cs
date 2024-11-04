@@ -19,6 +19,16 @@ namespace customControls
         /// Event for button click
         /// </summary>
         /// <param name="sender"></param>
+
+        public delegate void buttonRequestFocus(SectorArcButton sender);
+        /// <summary>
+        /// Button click event
+        /// </summary>
+        public event buttonRequestFocus onRequestFocusEvent;
+        /// <summary>
+        /// Event for button click
+        /// </summary>
+        /// <param name="sender"></param>
         public delegate void buttonClickEvent(SectorArcButton sender);
 
         public SectorArcButton(SectorData sectorData) : base()
@@ -72,7 +82,8 @@ namespace customControls
             if (e.Modifiers == Keys.Application)
             {
                 DataObject eventObj = new DataObject();
-                DoDragDrop(eventObj, DragEffects.Link, properties.icon, new PointF(10, 10));
+                DoDragDrop(eventObj, DragEffects.All, properties.icon, new PointF(10, 10));
+
             }
             else
             {
@@ -88,6 +99,10 @@ namespace customControls
         }
         private void mouseMoveHandler(object sender, MouseEventArgs e)
         {
+            // Ensure main plugin windo has focus -> workaround for click event that doesn't work if main window has no focus
+            // If main window has no focus, the click event gives focus to main window and no click event on button occurs
+            this.onRequestFocusEvent?.Invoke(this);
+
             var new_isHovering = _sectorData.isPointInShape(e.Location);
             if (new_isHovering != isHovering)
             {
@@ -172,6 +187,13 @@ namespace customControls
                         {
                             // If drag drop and button had previously an icon/script, restore it
                             properties.isActive = properties.icon != null ? true : false;
+                            Invalidate();
+                        }
+                        else
+                        {
+                            properties.icon = ((SectorArcButton)e.Source).properties.icon;
+                            properties.rhinoScript = ((SectorArcButton)e.Source).properties.rhinoScript;
+                            properties.isActive = true;
                             Invalidate();
                         }
                         break;

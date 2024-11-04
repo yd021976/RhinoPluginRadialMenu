@@ -1,4 +1,6 @@
-﻿namespace RadialMenu
+﻿using customControls;
+
+namespace RadialMenu
 {
     ///<summary>
     /// <para>Every RhinoCommon .rhp assembly must have one and only one PlugIn-derived
@@ -10,9 +12,12 @@
     ///</summary>
     public class RadialMenuPlugin : Rhino.PlugIns.PlugIn
     {
+        public SettingsHelper settingsHelper;
         public RadialMenuPlugin()
         {
             Instance = this;
+            settingsHelper = new SettingsHelper(this);
+            settingsHelper.load();
         }
 
         ///<summary>Gets the only instance of the FirstRhinopluginPlugin plug-in.</summary>
@@ -21,6 +26,6 @@
         // You can override methods here to change the plug-in behavior on
         // loading and shut down, add options pages to the Rhino _Option command
         // and maintain plug-in wide options in a document.
-        
+
     }
 }

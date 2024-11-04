@@ -29,11 +29,11 @@ namespace customControls
 
         public ButtonColor(Color pen, Color fill) { this.pen = pen; this.fill = fill; }
     }
-    public struct RadialButtonStateColors
+    public class RadialButtonStateColors
     {
-        public ButtonColor normal;
-        public ButtonColor hover;
-        public ButtonColor drag;
+        public ButtonColor normal = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
+        public ButtonColor hover = new ButtonColor(Colors.LightGreen, Colors.Khaki);
+        public ButtonColor drag = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
     }
     public class SectorData
     {

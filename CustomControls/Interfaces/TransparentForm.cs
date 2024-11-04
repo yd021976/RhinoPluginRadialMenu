@@ -25,7 +25,7 @@ namespace customControls
         }
         protected void transparentStyle(TransparentForm form)
         {
-            this.BackgroundColor = Colors.Transparent;
+            BackgroundColor = Colors.Transparent;
             var win = form.ControlObject;
             var transparentNSColor = AppKit.NSColor.Clear;
             win.GetType().GetProperty("BackgroundColor").SetValue(win, transparentNSColor);

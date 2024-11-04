@@ -1,5 +1,6 @@
 using Eto.Drawing;
 using Eto.Forms;
+using RadialMenu;
 
 namespace customControls
 {
@@ -7,7 +8,7 @@ namespace customControls
     {
         private Icon icon;
         private int pen_size = 2;
-        private Color borderColor = Colors.Khaki;
+        private Color borderColor;
 
         /// <summary>
         /// Button click event
@@ -21,10 +22,10 @@ namespace customControls
 
         public RoundButton() : base()
         {
-            Style = "RadialMenuTheme";
             MouseDown += onMouseDown;
             MouseEnter += onMouseEnter;
             MouseLeave += onMouseLeave;
+            borderColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.pen;
         }
 
         public void setButtonIcon(Icon icon)
@@ -38,7 +39,7 @@ namespace customControls
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            var innerBrushColor = new SolidBrush(Colors.LightGrey);
+            var innerBrushColor = new SolidBrush(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.fill);
             var borderBrushColor = new SolidBrush(borderColor);
             var borderSize = new Rectangle(0, 0, Width, Height);
             var innerSize = new Rectangle(pen_size, pen_size, Width - (pen_size * 2), Height - (pen_size * 2));
@@ -57,15 +58,15 @@ namespace customControls
         {
             onclickEvent?.Invoke(this); // Raise onclick event to be handled by delegate
         }
-         protected void onMouseEnter(object sender, MouseEventArgs e)
+        protected void onMouseEnter(object sender, MouseEventArgs e)
         {
 
-            borderColor = Colors.Green;
+            borderColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.hover.pen;
             Invalidate(false); // redraw button
         }
         protected void onMouseLeave(object sender, MouseEventArgs e)
         {
-            borderColor = Colors.Khaki;
+            borderColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.pen;
             Invalidate(false); // redraw button
         }
     }
