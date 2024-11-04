@@ -104,9 +104,16 @@ namespace customControls
         {
             var bmData = sectorMask.Lock();
             var p = Point.Round(location);
-            var color = bmData.GetPixel(p);
-            bmData.Dispose();
-            return color.B == 1 ? true : false;
+            try
+            {
+                var color = bmData.GetPixel(p);
+                bmData.Dispose();
+                return color.B == 1 ? true : false;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

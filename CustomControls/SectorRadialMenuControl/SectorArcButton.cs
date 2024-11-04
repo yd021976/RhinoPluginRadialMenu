@@ -79,20 +79,23 @@ namespace customControls
 
         private void mouseDownHandler(object sender, MouseEventArgs e)
         {
-            if (e.Modifiers == Keys.Application)
+            if (!isDraggingIcon)
             {
-                DataObject eventObj = new DataObject();
-                DoDragDrop(eventObj, DragEffects.All, properties.icon, new PointF(10, 10));
-
-            }
-            else
-            {
-                onclickEvent?.Invoke(this); // Raise onclick event to be handled by delegate
-                if (properties.isActive)
+                if (e.Modifiers == Keys.Application && properties.isActive)
                 {
-                    if (properties.rhinoScript != "")
+                    DataObject eventObj = new DataObject();
+                    DoDragDrop(eventObj, DragEffects.All, properties.icon, new PointF(10, 10));
+
+                }
+                else
+                {
+                    if (properties.isActive)
                     {
-                        Rhino.RhinoApp.RunScript(properties.rhinoScript, false);
+                        if (properties.rhinoScript != "")
+                        {
+                            onclickEvent?.Invoke(this); // Raise onclick event to be handled by delegate when rhino command is executed
+                            Rhino.RhinoApp.RunScript(properties.rhinoScript, false);
+                        }
                     }
                 }
             }
@@ -191,7 +194,7 @@ namespace customControls
                         }
                         else
                         {
-                            properties.icon = ((SectorArcButton)e.Source).properties.icon;
+                            properties.icon = ((SectorArcButton)e.Source).properties.icon; //TODO: Ensure icon data are copied to new properties
                             properties.rhinoScript = ((SectorArcButton)e.Source).properties.rhinoScript;
                             properties.isActive = true;
                             Invalidate();
