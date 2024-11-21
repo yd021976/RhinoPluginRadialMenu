@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj": {}
+    "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj": {}
   },
   "projects": {
-    "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj": {
+    "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
+        "projectUniqueName": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj",
         "projectName": "RadialMenu",
-        "projectPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
+        "projectPath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj",
         "packagesPath": "/Users/tigrou/.nuget/packages/",
-        "outputPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/obj/",
+        "outputPath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/obj/",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "configFilePaths": [
@@ -21,6 +21,7 @@
           "net7.0-macos12.0"
         ],
         "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,11 +37,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -51,18 +47,6 @@
               "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "target": "Package",
               "version": "[8.0.23304.9001, )"
-            },
-            "Microsoft.NET.ILLink.Analyzers": {
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[7.0.100-1.23401.1, )",
-              "autoReferenced": true
-            },
-            "Microsoft.NET.ILLink.Tasks": {
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[7.0.100-1.23401.1, )",
-              "autoReferenced": true
             }
           },
           "imports": [
@@ -78,16 +62,8 @@
           "warn": true,
           "downloadDependencies": [
             {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[7.0.20, 7.0.20]"
-            },
-            {
               "name": "Microsoft.macOS.Ref",
               "version": "[13.3.7142, 13.3.7142]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[7.0.20, 7.0.20]"
             }
           ],
           "frameworkReferences": {
@@ -98,7 +74,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.410/RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,9 +1,0 @@
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/bin/Debug/net48/FirstRhinoplugin.rhp
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/bin/Debug/net48/FirstRhinoplugin.pdb
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.csproj.AssemblyReference.cache
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.GeneratedMSBuildEditorConfig.editorconfig
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.AssemblyInfoInputs.cache
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.AssemblyInfo.cs
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.csproj.CoreCompileInputs.cache
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.rhp
-/Volumes/Travail/Programming/macos/C#/FirstRhinoplugin/obj/Debug/net48/FirstRhinoplugin.pdb

@@ -24,18 +24,6 @@
           "build/net48/Grasshopper.targets": {}
         }
       },
-      "Microsoft.NET.ILLink.Analyzers/7.0.100-1.23401.1": {
-        "type": "package",
-        "build": {
-          "build/Microsoft.NET.ILLink.Analyzers.props": {}
-        }
-      },
-      "Microsoft.NET.ILLink.Tasks/7.0.100-1.23401.1": {
-        "type": "package",
-        "build": {
-          "build/Microsoft.NET.ILLink.Tasks.props": {}
-        }
-      },
       "RhinoCommon/8.0.23304.9001": {
         "type": "package",
         "compile": {
@@ -79,53 +67,6 @@
         "lib/net48/Grasshopper.xml"
       ]
     },
-    "Microsoft.NET.ILLink.Analyzers/7.0.100-1.23401.1": {
-      "sha512": "XirkjOLc5Vc3HsXRc2Z6ZbQv6l0RvWgJa/31w7XqZ914MoSi3H3OCNRMWFw7H2EYfsnKbokFfhCcysAmUcEOgw==",
-      "type": "package",
-      "path": "microsoft.net.illink.analyzers/7.0.100-1.23401.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "analyzers/dotnet/cs/ILLink.CodeFixProvider.dll",
-        "analyzers/dotnet/cs/ILLink.RoslynAnalyzer.dll",
-        "build/Microsoft.NET.ILLink.Analyzers.props",
-        "microsoft.net.illink.analyzers.7.0.100-1.23401.1.nupkg.sha512",
-        "microsoft.net.illink.analyzers.nuspec"
-      ]
-    },
-    "Microsoft.NET.ILLink.Tasks/7.0.100-1.23401.1": {
-      "sha512": "mI6vCdPEhluLtMn/GV0texEWg5oAPQWCCE4LWspM+Bmy75Nd4EQsziQXrdOFqNeSBQMrxDX9C/O5Xi3kpKSMIw==",
-      "type": "package",
-      "path": "microsoft.net.illink.tasks/7.0.100-1.23401.1",
-      "hasTools": true,
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "Sdk/Sdk.props",
-        "build/6.0_suppressions.xml",
-        "build/Microsoft.NET.ILLink.Tasks.props",
-        "build/Microsoft.NET.ILLink.targets",
-        "microsoft.net.illink.tasks.7.0.100-1.23401.1.nupkg.sha512",
-        "microsoft.net.illink.tasks.nuspec",
-        "tools/net472/ILLink.Tasks.dll",
-        "tools/net472/Mono.Cecil.dll",
-        "tools/net472/System.Buffers.dll",
-        "tools/net472/System.Collections.Immutable.dll",
-        "tools/net472/System.Memory.dll",
-        "tools/net472/System.Numerics.Vectors.dll",
-        "tools/net472/System.Reflection.Metadata.dll",
-        "tools/net472/System.Runtime.CompilerServices.Unsafe.dll",
-        "tools/net7.0/ILLink.Tasks.deps.json",
-        "tools/net7.0/ILLink.Tasks.dll",
-        "tools/net7.0/Mono.Cecil.Pdb.dll",
-        "tools/net7.0/Mono.Cecil.dll",
-        "tools/net7.0/illink.deps.json",
-        "tools/net7.0/illink.dll",
-        "tools/net7.0/illink.runtimeconfig.json"
-      ]
-    },
     "RhinoCommon/8.0.23304.9001": {
       "sha512": "hWuqXjcj/eb1/z8+bml4Bav/8Oug2p6t0mAVf37GhX9sP+M1aYNO9FappqeN8oefcIBkLBmAzr46DYNhTxFAGQ==",
       "type": "package",
@@ -150,9 +91,7 @@
   },
   "projectFileDependencyGroups": {
     "net7.0-macos12.0": [
-      "Grasshopper >= 8.0.23304.9001",
-      "Microsoft.NET.ILLink.Analyzers >= 7.0.100-1.23401.1",
-      "Microsoft.NET.ILLink.Tasks >= 7.0.100-1.23401.1"
+      "Grasshopper >= 8.0.23304.9001"
     ]
   },
   "packageFolders": {
@@ -161,11 +100,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
+      "projectUniqueName": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj",
       "projectName": "RadialMenu",
-      "projectPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
+      "projectPath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj",
       "packagesPath": "/Users/tigrou/.nuget/packages/",
-      "outputPath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/obj/",
+      "outputPath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/obj/",
       "projectStyle": "PackageReference",
       "crossTargeting": true,
       "configFilePaths": [
@@ -175,6 +114,7 @@
         "net7.0-macos12.0"
       ],
       "sources": {
+        "/usr/local/share/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -190,11 +130,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -205,18 +140,6 @@
             "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "target": "Package",
             "version": "[8.0.23304.9001, )"
-          },
-          "Microsoft.NET.ILLink.Analyzers": {
-            "suppressParent": "All",
-            "target": "Package",
-            "version": "[7.0.100-1.23401.1, )",
-            "autoReferenced": true
-          },
-          "Microsoft.NET.ILLink.Tasks": {
-            "suppressParent": "All",
-            "target": "Package",
-            "version": "[7.0.100-1.23401.1, )",
-            "autoReferenced": true
           }
         },
         "imports": [
@@ -232,16 +155,8 @@
         "warn": true,
         "downloadDependencies": [
           {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[7.0.20, 7.0.20]"
-          },
-          {
             "name": "Microsoft.macOS.Ref",
             "version": "[13.3.7142, 13.3.7142]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[7.0.20, 7.0.20]"
           }
         ],
         "frameworkReferences": {
@@ -252,7 +167,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.410/RuntimeIdentifierGraph.json"
       }
     }
   }

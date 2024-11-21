@@ -26,8 +26,8 @@
       "System.Runtime.InteropServices.BuiltInComInterop.IsSupported": false,
       "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false,
       "System.StartupHookProvider.IsSupported": false,
-      "System.Text.Encoding.EnableUnsafeUTF7Encoding": false,
-      "System.Threading.Thread.EnableAutoreleasePool": true
+      "System.Threading.Thread.EnableAutoreleasePool": true,
+      "System.Text.Encoding.EnableUnsafeUTF7Encoding": false
     }
   }
 }

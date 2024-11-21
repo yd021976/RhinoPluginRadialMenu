@@ -1,6 +1,7 @@
 using Rhino.PlugIns;
 using Eto.Forms;
 using Eto.Drawing;
+using System.Collections.Generic;
 
 namespace customControls
 {
@@ -27,7 +28,8 @@ namespace customControls
         {
             BackgroundColor = Colors.Transparent;
             var win = form.ControlObject;
-            var transparentNSColor = AppKit.NSColor.Clear;
+            // var transparentNSColor = AppKit.NSColor.Clear;
+            var transparentNSColor = AppKit.NSColor.FromRgba(0, 0, 0, 1);
             win.GetType().GetProperty("BackgroundColor").SetValue(win, transparentNSColor);
         }
         protected void onMouseMove(object sender, MouseEventArgs e)
@@ -49,12 +51,12 @@ namespace customControls
             return pluginSettingsPath;
         }
 
-         /**
-         close the form when clicked
-        **/
+        /**
+        close the form when clicked
+       **/
         protected virtual void onCloseClickEvent(object sender)
         {
-            this.Visible = false;
+            Visible = false;
         }
     }
 }

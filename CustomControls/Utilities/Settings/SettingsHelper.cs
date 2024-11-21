@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Eto.Drawing;
 using Rhino;
 using Rhino.PlugIns;
@@ -17,10 +20,31 @@ namespace customControls
         }
         public void load()
         {
+            // Theme
             getChild(plugin.Settings, "theme", out var theme);
             getThemeSettings(theme, "normal", ref settings.buttonColors.normal.pen, ref settings.buttonColors.normal.fill);
             getThemeSettings(theme, "hover", ref settings.buttonColors.hover.pen, ref settings.buttonColors.hover.fill);
             getThemeSettings(theme, "drag", ref settings.buttonColors.drag.pen, ref settings.buttonColors.drag.fill);
+
+            // Button icons path
+            getChild(plugin.Settings, "buttons", out var btns);
+            getChild(btns, "properties", out var btnProps);
+            foreach (var k in btnProps.Keys)
+            {
+                if (btnProps.TryGetStringDictionary(k, out var props))
+                {
+                    var propsDic = new Dictionary<string, string>(props);
+                    var properties = new ButtonProperties();
+                    properties.icon = new Icon(1, new Bitmap(propsDic["iconPath"]));
+                    properties.rhinoScript = propsDic["rhinoScript"];
+                    properties.isActive = propsDic["isActive"] == "true" ? true : false;
+                    settings.buttonProperties.Add(k, properties);
+                }
+                else
+                {
+                    settings.buttonProperties.Add(k, new ButtonProperties());
+                }
+            }
         }
         public void save()
         {
@@ -28,6 +52,39 @@ namespace customControls
             setThemeSettings(theme, "normal", settings.buttonColors.normal.pen, settings.buttonColors.normal.fill);
             setThemeSettings(theme, "hover", settings.buttonColors.hover.pen, settings.buttonColors.hover.fill);
             setThemeSettings(theme, "drag", settings.buttonColors.drag.pen, settings.buttonColors.drag.fill);
+        }
+        /// <summary>
+        /// Save a button icon to plugin folder, update plugin settings, update settings object
+        /// </summary>
+        /// <param name="buttonID"></param>
+        /// <param name="props"></param>
+        public void saveButtonProperties(string buttonID, ButtonProperties props)
+        {
+            getChild(plugin.Settings, "buttons", out var btns);
+            getChild(btns, "properties", out var btnProps);
+            var iconPath = plugin.SettingsDirectoryAllUsers + "/icons/";
+            System.IO.Directory.CreateDirectory(iconPath); // Create directory if does not exist
+            iconPath += buttonID + ".png";
+            props.icon.GetFrame(1).Bitmap.Save(iconPath, ImageFormat.Png);
+
+            var settingsProps = new List<KeyValuePair<string, string>>() {
+                new KeyValuePair<string, string>("iconPath",iconPath),
+                new KeyValuePair<string, string>("rhinoScript",props.rhinoScript),
+                new KeyValuePair<string, string>("isActive",props.isActive==true?"true":"false"),
+                new KeyValuePair<string, string>("isFolder",props.isFolder==true?"true":"false"),
+            };
+
+
+            // upate settings dictionnary
+
+            // remove dictionnary if already created
+            if (btnProps.TryGetStringDictionary(buttonID, out var fake))
+            {
+                btnProps.DeleteItem(buttonID);
+            }
+            // set new dictionary values
+            btnProps.SetStringDictionary(buttonID, settingsProps.ToArray());
+            if (settings.buttonProperties.ContainsKey(buttonID)) settings.buttonProperties[buttonID] = props; else settings.buttonProperties.Add(buttonID, props);
         }
         private void setThemeSettings(PersistentSettings theme, string key, Color pen, Color fill)
         {
@@ -44,7 +101,7 @@ namespace customControls
         /// <param name="key">Theme key name</param>
         /// <param name="pen">Ref to a Color object</param>
         /// <param name="fill">Ref to a Color object</param>
-        private void getThemeSettings(PersistentSettings theme, string key, ref Eto.Drawing.Color pen, ref Eto.Drawing.Color fill)
+        private void getThemeSettings(PersistentSettings theme, string key, ref Color pen, ref Color fill)
         {
             PersistentSettings childThemeSettings;
             System.Drawing.Color penColor;
@@ -53,8 +110,8 @@ namespace customControls
             {
                 if (childThemeSettings.TryGetColor("pen", out penColor) && childThemeSettings.TryGetColor("fill", out fillColor))
                 {
-                    pen = Eto.Drawing.Color.FromArgb(penColor.ToArgb());
-                    fill = Eto.Drawing.Color.FromArgb(fillColor.ToArgb());
+                    pen = Color.FromArgb(penColor.ToArgb());
+                    fill = Color.FromArgb(fillColor.ToArgb());
                 }
             }
         }

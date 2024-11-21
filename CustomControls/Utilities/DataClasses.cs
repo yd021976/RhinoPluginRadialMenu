@@ -1,26 +1,54 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using Eto.Drawing;
+using Eto.Forms;
 using Rhino;
 
 namespace customControls
 {
-    enum sourceTypes
+    enum DragSourceTypes
     {
         self = 0,
         rhinoItem = 1,
         unknown = 3
     }
+
+    /// <summary>
+    /// Menu level class
+    /// </summary>
     public class RadialMenuLevel
     {
+        /// <summary>
+        /// Level number
+        /// </summary>
         public int level;
+
+        /// <summary>
+        /// Inner radius of level
+        /// </summary>
         public int innerRadius;
+
+        /// <summary>
+        /// Sector thickness fro drawing this level
+        /// </summary>
         public int thickness;
 
-        public List<SectorData> sectorData;
+        /// <summary>
+        /// List of sector data
+        /// </summary>
+        public List<SectorData> sectorData = new List<SectorData>();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="innerRadius"></param>
+        /// <param name="thickness"></param>
         public RadialMenuLevel(int level, int innerRadius, int thickness) { this.level = level; this.innerRadius = innerRadius; this.thickness = thickness; }
     }
+
 
     public class ButtonColor
     {
@@ -33,43 +61,66 @@ namespace customControls
     {
         public ButtonColor normal = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
         public ButtonColor hover = new ButtonColor(Colors.LightGreen, Colors.Khaki);
+        public ButtonColor disabled = new ButtonColor(Colors.LightGrey, Colors.DarkGray);
         public ButtonColor drag = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
+    }
+    public struct ButtonStateImages
+    {
+        public Image normalStateImage;
+        public Image overStateImage;
+        public Image disabledStateImage;
+        public Image dragStateImage;
+        // Mask image to detect if a point is hover a sector image
+        public Bitmap sectorMask;
     }
     public class SectorData
     {
-        public string buttonID;
-        // Size of the sector image
+        /// <summary>
+        /// Size of the sector image
+        /// </summary>
         public Size size;
 
-        // Sector arc bounds in real coordinates, i.e Parent coordinates and/or in real enclosing circle (based on inner Radius)
-        // Usefull to set icon location in enclosing control (form for example)
+        /// <summary>
+        /// Sector arc bounds in real coordinates, i.e Parent coordinates and/or in real enclosing circle (based on inner Radius)
+        /// Usefull to set icon location in enclosing control (form for example)
+        /// </summary>
         public RectangleF bounds;
 
         // Center of the arc in "real" coordinates
         public Point arcCenter;
         public int startAngle;
         public int sweepAngle;
-        public RadialMenuLevel levelRef;
+
+        /// <summary>
+        /// State images
+        /// </summary>
+        public ButtonStateImages images;
+
+        #region Arc radius and thickness
+        protected int innerRadius = 50;
+        protected int thickness = 30;
+        #endregion
 
         /// <summary>
         /// Center of the sector in world coordinates (usefull to place icon in sector button) 
         /// </summary>
         public PointF sectorCenter()
         {
-            var centerRadius = levelRef.innerRadius + (levelRef.thickness / 2);
+            var centerRadius = innerRadius + (thickness / 2);
             var bisectorAngle = startAngle + (sweepAngle / 2);
             float X = (float)(arcCenter.X + centerRadius * Math.Cos(bisectorAngle * (Math.PI / 180)));
             float Y = (float)(arcCenter.Y + centerRadius * Math.Sin(bisectorAngle * (Math.PI / 180)));
             return new PointF(X, Y);
         }
-        public Image normalStateImage;
-        public Image overStateImage;
-        public Image dragStateImage;
-        // Mask image to detect if a point is hover a sector image
-        public Bitmap sectorMask;
 
         public int endAngle { get { return startAngle + sweepAngle; } }
+
         public SectorData() { }
+        public SectorData(RadialMenuLevel level)
+        {
+            innerRadius = level.innerRadius;
+            thickness = level.thickness;
+        }
 
         /// <summary>
         /// Convert a local location (i.e. control coordinates) to world arc coordinates (because a control only displays the arc and not the whole circle)
@@ -102,7 +153,7 @@ namespace customControls
         /// <returns></returns>
         public bool isPointInShape(PointF location)
         {
-            var bmData = sectorMask.Lock();
+            var bmData = images.sectorMask.Lock();
             var p = Point.Round(location);
             try
             {

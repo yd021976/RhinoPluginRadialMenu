@@ -189,7 +189,7 @@ namespace customControls
             }
 
             var dSource = dragSourceType(e.Source);
-            if ((dSource == sourceTypes.self && e.Source.ID == ID) || dSource == sourceTypes.rhinoItem)
+            if ((dSource == DragSourceTypes.self && e.Source.ID == ID) || dSource == DragSourceTypes.rhinoItem)
             {
                 properties.isActive = false;
                 Invalidate();
@@ -211,13 +211,13 @@ namespace customControls
         {
             switch (dragSourceType(e.Source))
             {
-                case sourceTypes.self:
+                case DragSourceTypes.self:
                     if (e.Source.ID == ID)
                     {
                         // properties.icon != null ? properties.isActive = true : properties.isActive = false;
                     }
                     break;
-                case sourceTypes.rhinoItem:
+                case DragSourceTypes.rhinoItem:
                     break;
                 default:
                     break;
@@ -228,19 +228,19 @@ namespace customControls
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        private sourceTypes dragSourceType(Control source)
+        private DragSourceTypes dragSourceType(Control source)
         {
             if (source.GetType() == typeof(SectorButtonControl))
             {
-                return sourceTypes.self;
+                return DragSourceTypes.self;
             }
             else if (source.GetType().ToString() == "Rhino.UI.Internal.TabPanels.Controls.ToolBarControlItem")
             {
-                return sourceTypes.rhinoItem;
+                return DragSourceTypes.rhinoItem;
             }
             else
             {
-                return sourceTypes.unknown;
+                return DragSourceTypes.unknown;
             }
         }
     }

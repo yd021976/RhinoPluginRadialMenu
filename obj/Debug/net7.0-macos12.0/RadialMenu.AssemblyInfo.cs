@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Radial Menu description")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+a871b7de84864621915a8ef02968fa52fd4601b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0")]
 [assembly: System.Reflection.AssemblyProductAttribute("RadialMenu")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RadialMenu")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

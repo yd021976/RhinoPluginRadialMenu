@@ -1,15 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "PYsy8hS3jyc=",
+  "dgSpecHash": "9MRAk0nGEqAQtIkcmK++h9pMpk7lJrKztO/udYJX2dHpK8roq0nju0cG+Mcc4cycNYQRk0DIeSw0Hkz7sy+MSA==",
   "success": true,
-  "projectFilePath": "/Volumes/Travail/Programming/macos/C#/RhinoPluginRadialMenu/RadialMenu.csproj",
+  "projectFilePath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj",
   "expectedPackageFiles": [
     "/Users/tigrou/.nuget/packages/grasshopper/8.0.23304.9001/grasshopper.8.0.23304.9001.nupkg.sha512",
-    "/Users/tigrou/.nuget/packages/microsoft.net.illink.analyzers/7.0.100-1.23401.1/microsoft.net.illink.analyzers.7.0.100-1.23401.1.nupkg.sha512",
-    "/Users/tigrou/.nuget/packages/microsoft.net.illink.tasks/7.0.100-1.23401.1/microsoft.net.illink.tasks.7.0.100-1.23401.1.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/rhinocommon/8.0.23304.9001/rhinocommon.8.0.23304.9001.nupkg.sha512",
-    "/Users/tigrou/.nuget/packages/microsoft.netcore.app.ref/7.0.20/microsoft.netcore.app.ref.7.0.20.nupkg.sha512",
-    "/Users/tigrou/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.20/microsoft.aspnetcore.app.ref.7.0.20.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/microsoft.macos.ref/13.3.7142/microsoft.macos.ref.13.3.7142.nupkg.sha512"
   ],
   "logs": []

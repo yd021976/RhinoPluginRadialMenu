@@ -1,4 +1,6 @@
-﻿using customControls;
+﻿using System.Drawing;
+using customControls;
+using Rhino.Display;
 
 namespace RadialMenu
 {
@@ -17,7 +19,7 @@ namespace RadialMenu
         {
             Instance = this;
             settingsHelper = new SettingsHelper(this);
-            settingsHelper.load();
+            settingsHelper.load(); // load settings into C# object
         }
 
         ///<summary>Gets the only instance of the FirstRhinopluginPlugin plug-in.</summary>
