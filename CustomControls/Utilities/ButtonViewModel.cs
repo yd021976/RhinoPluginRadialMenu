@@ -1,12 +1,11 @@
 using System.ComponentModel;
+using Rhino;
 
 namespace customControls
 {
-    /// <summary>
-    /// Model class for "arc buttons"
-    /// </summary>
-    public class ButtonModel : INotifyPropertyChanged
+    public class ButtonModelData : INotifyPropertyChanged
     {
+        #region Notify interface implementation
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
@@ -16,12 +15,22 @@ namespace customControls
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        #endregion
 
 
         /// <summary>
         /// ID of the button associated to this sector data
         /// </summary>
-        public string buttonID = "";
+        string _buttonID = "";
+        public string buttonID
+        {
+            get => _buttonID;
+            set
+            {
+                _buttonID = value;
+                OnPropertyChanged(nameof(buttonID));
+            }
+        }
 
         SectorData _sectorData = new SectorData();
         public SectorData sectorData
@@ -55,11 +64,53 @@ namespace customControls
             set
             {
                 _properties = value; // Update property object
-                _properties.PropertyChanged += onButtonPropertyChangedHandler; // Add property changed handler
-                updateRhinoSettings(); // Update button properties in rhino plugin settings
                 OnPropertyChanged(nameof(properties)); // Notify property changed
             }
         }
+    }
+    /// <summary>
+    /// Model class for "arc buttons"
+    /// </summary>
+    public class Model : INotifyPropertyChanged
+    {
+        public Model Parent;
+        ButtonModelData _data = new ButtonModelData();
+        public ButtonModelData data
+        {
+            get => _data;
+            set
+            {
+                _data.PropertyChanged -= onButtonPropertyChangedHandler;
+                _data = value;
+                _data.PropertyChanged += onButtonPropertyChangedHandler;
+                OnPropertyChanged(nameof(data)); // Notify property changed
+            }
+        }
+        protected PersistentSettings rhinoPersistentSettingsNode
+        {
+            get
+            {
+                if (_data.buttonID != "")
+                {
+                    return SettingsHelper.Instance.getChildNode(_data.buttonID, Parent?.rhinoPersistentSettingsNode ?? null);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
         /// <summary>
         /// Property changed event handler for object type "ButtonProperties"
         /// </summary>
@@ -67,7 +118,13 @@ namespace customControls
         /// <param name="e"></param>
         private void onButtonPropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-            updateRhinoSettings();
+            switch (e.PropertyName)
+            {
+                case nameof(ButtonModelData.sectorData): break;
+                case nameof(ButtonModelData.properties): break;
+                default: break;
+            }
+            // updateRhinoSettings();
         }
 
         /// <summary>
@@ -76,10 +133,19 @@ namespace customControls
         private void updateRhinoSettings()
         {
             // Save button properties into Rhino plugin properties
-            if (buttonID != "")
+            if (data.buttonID != "")
             {
-                SettingsHelper.Instance.saveButtonProperties(buttonID, _properties);
+                SettingsHelper.Instance.saveButtonProperties(data.buttonID, data.properties);
             }
         }
+        public Model() : base()
+        {
+            Parent = null;
+        }
+        public Model(Model parent = null) : this()
+        {
+            Parent = parent;
+        }
     }
+
 }

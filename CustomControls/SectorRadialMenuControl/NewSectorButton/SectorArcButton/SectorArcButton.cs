@@ -2,29 +2,236 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
 using Rhino;
 
 namespace customControls
 {
-    public partial class SectorArcButton : PixelLayout
+    public class SectorArcButton : PixelLayout
     {
+        #region Events declaration
+        /// <summary>
+        /// Button click event
+        /// </summary>
+        public event buttonClickEvent onButtonClickEvent;
+        public delegate void buttonClickEvent(SectorArcButton sender);
+
+        /// <summary>
+        /// Event for requesting radial menu to get focus
+        /// </summary>
+        public event buttonRequestFocus onButtonRequestFocusEvent;
+        public delegate void buttonRequestFocus(SectorArcButton sender);
+
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event buttonNewIconAdded onButtonNewIconAdded;
+        public delegate void buttonNewIconAdded(SectorArcButton sender);
+
+        /// <summary>
+        /// Event to notify mouse is over button
+        /// </summary>
+        public event buttonMouseOver onButtonMouseOverButton;
+        public delegate void buttonMouseOver(SectorArcButton sender);
+        /// <summary>
+        /// Event to notify mouse leaves a button
+        /// </summary>
+        public event buttonMouseLeaveButton onbuttonMouseLeaveButton;
+        public delegate void buttonMouseLeaveButton(SectorArcButton sender);
+
+        /// <summary>
+        /// Event to notify mouse enters a button
+        /// </summary>
+        public event buttonMouseEnterButton onbuttonMouseEnterButton;
+        public delegate void buttonMouseEnterButton(SectorArcButton sender);
+        #endregion
+
+        #region Button States
+        public struct ButtonStates : INotifyPropertyChanged
+        {
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            private void OnPropertyChanged(string info)
+            {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if (handler != null)
+                {
+                    handler(this, new PropertyChangedEventArgs(info));
+                }
+            }
+
+            /// <summary>
+            /// custom "isVisible" property. We use this because using ETO "Visible" property prevents control to correctly update the NSTrackingArea
+            /// @see https://github.com/picoe/Eto/issues/2704
+            /// </summary>
+            public bool isVisible = true;
+
+            private bool _isDraggingIcon = false;
+            private bool _isHovering = false;
+            private bool _isSelected = false;
+
+            public bool isHovering
+            {
+                get { return _isHovering; }
+                set
+                {
+                    // Change class property value and notify change 
+                    _isHovering = value;
+                    OnPropertyChanged(nameof(isHovering));
+                }
+            }
+
+
+            public bool isSelected
+            {
+                get { return _isSelected; }
+                set
+                {
+                    // Change class property value and notify change 
+                    _isSelected = value;
+                    OnPropertyChanged(nameof(isSelected));
+                }
+            }
+
+            public bool isDraggingIcon
+            {
+                get => _isDraggingIcon;
+                set
+                {
+                    _isDraggingIcon = value;
+                    OnPropertyChanged(nameof(isDraggingIcon));
+                }
+            }
+            public ButtonStates() { }
+        }
+        #endregion
+
+        #region Button animations
+        /// <summary>
+        /// Duration of animations
+        /// </summary>
+        private double animationDuration = 0.5;
+
+        /// <summary>
+        /// Transparency for button disable state
+        /// </summary>
+        private float disabledAlpha = (float)0.1;
+
+        /// <summary>
+        /// Transparency of buttons
+        /// </summary>
+        private float buttonAlpha = (float)0.4;
+
+        private void animateHoverEffect()
+        {
+            Console.SetOut(RhinoApp.CommandLineOut);
+            Console.WriteLine($"Animate hover btn ${ID} -- mouse hover ${states.isHovering} -- selected ${states.isSelected}");
+            NSAnimationContext.RunAnimation(
+                (context) =>
+                {
+                    context.Duration = animationDuration;
+                    context.AllowsImplicitAnimation = true;
+                    if (!states.isHovering)
+                    {
+                        buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = Enabled ? (states.isSelected ? 0 : buttonAlpha) : 0;
+                        buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = Enabled ? (states.isSelected ? buttonAlpha : 0) : 0;
+                        buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = Enabled ? 0 : disabledAlpha;
+                    }
+                    else
+                    {
+                        buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = buttonAlpha;
+                        buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                    }
+                });
+        }
+        private void animateSelectedEffect()
+        {
+            NSAnimationContext.RunAnimation(
+                (context) =>
+                {
+                    context.Duration = animationDuration;
+                    context.AllowsImplicitAnimation = true;
+                    buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = states.isSelected ? 0 : buttonAlpha;
+                    buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = states.isSelected ? buttonAlpha : 0;
+                    buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                });
+        }
+        private void animateDisableEffect()
+        {
+            NSAnimationContext.RunAnimation(
+                (context) =>
+                {
+                    Console.SetOut(RhinoApp.CommandLineOut);
+                    Console.WriteLine($"Animate disable btn ${ID}");
+                    context.Duration = animationDuration;
+                    context.AllowsImplicitAnimation = true;
+                    buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = disabledAlpha;
+                });
+        }
+        private void animateEnableEffect()
+        {
+            NSAnimationContext.RunAnimation(
+                (context) =>
+                {
+                    Console.SetOut(RhinoApp.CommandLineOut);
+                    Console.WriteLine($"Animate enable btn ${ID}");
+                    context.Duration = animationDuration;
+                    context.AllowsImplicitAnimation = true;
+                    if (states.isHovering)
+                    {
+                        buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = buttonAlpha;
+                        buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                    }
+                    else
+                    {
+                        buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = states.isSelected ? 0 : buttonAlpha;
+                        buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = states.isSelected ? buttonAlpha : 0;
+                        buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                    }
+                });
+        }
+        #endregion
+
+        #region Button Properties
+        public new string ID
+        {
+            get { return base.ID; }
+            set
+            {
+                base.ID = value;
+                model.buttonID = value;// We need to sets model buttonID to retrieve Plugin settings
+            }
+        }
+
         public override bool Enabled
         {
             get => Handler.Enabled;
             set
             {
-                if (value == false) animateDisableEffect(); else animateEnableEffect();
                 Handler.Enabled = value;
+                if (value == false) animateDisableEffect(); else animateEnableEffect();
             }
         }
         protected enum buttonsTypeName
         {
             normal = 0,
             over = 1,
-            disabled = 2,
-            icon = 3
+            selected = 2,
+            disabled = 3,
+            icon = 4
         }
         /// <summary>
         /// Drawables used for animating button UI state changes
@@ -34,22 +241,27 @@ namespace customControls
         /// <summary>
         /// Data Model Binding
         /// </summary>
-        ButtonModel model = new ButtonModel();
-        public BindableBinding<SectorArcButton, ButtonModel> ButtonModelBinding => new BindableBinding<SectorArcButton, ButtonModel>(
+        ButtonModelData model = new ButtonModelData();
+        public ButtonStates states = new ButtonStates();
+
+        public BindableBinding<SectorArcButton, ButtonModelData> ButtonModelBinding => new BindableBinding<SectorArcButton, ButtonModelData>(
             this,
             (SectorArcButton obj) => obj.model,
             // Update "model" property with new value and register a property changed event handler of the "model" object
-            delegate (SectorArcButton obj, ButtonModel value)
+            delegate (SectorArcButton obj, ButtonModelData value)
             {
                 model.PropertyChanged -= modelChangedHandler; // Remove property changed event handler on current "model" object
                 obj.model = value; // update property
                 model.PropertyChanged += modelChangedHandler; // Add property changed handler on "model"
             });
 
+        #endregion
+
+
         /// <summary>
         /// Custom and override of ID to generate button ID
         /// </summary>
-        public new string ID { get { return model.buttonID; } set { base.ID = value; } }
+        // public new string ID { get { return model.buttonID; } set { base.ID = value; } }
 
         public SectorArcButton() : base()
         {
@@ -60,24 +272,28 @@ namespace customControls
             buttons[buttonsTypeName.over] = new ArcDrawableButton();
             buttons[buttonsTypeName.disabled] = new ArcDrawableButton();
             buttons[buttonsTypeName.icon] = new ArcDrawableButton();
+            buttons[buttonsTypeName.selected] = new ArcDrawableButton();
 
-            base.Size = this.model.sectorData.size;
+            Size = model.sectorData.size;
 
             // Add button to layout
             Add(buttons[buttonsTypeName.normal], 0, 0);
             Add(buttons[buttonsTypeName.over], 0, 0);
             Add(buttons[buttonsTypeName.disabled], 0, 0);
+            Add(buttons[buttonsTypeName.selected], 0, 0);
             Add(buttons[buttonsTypeName.icon], 0, 0);
 
 
 
             buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
             buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+            buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
+            buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = buttonAlpha;
+
 
             // Mouse events
             MouseMove += mouseMoveHandler;
             MouseLeave += mouseLeaveHandler;
-            MouseEnter += mouseEnterHandler;
             MouseDown += mouseDownHandler;
 
             // DragDrop events
@@ -86,40 +302,55 @@ namespace customControls
             DragOver += dragOverHandler;
             DragLeave += dragLeaveHandler;
             DragDrop += dragDropHandler;
-            
+
+            // States property change handler
+            states.PropertyChanged += (obj, prop) =>
+            {
+                switch (prop.PropertyName)
+                {
+                    case nameof(states.isSelected): // Animate <selected> property changed
+                        animateSelectedEffect();
+                        break;
+                    default: break;
+                }
+            };
+
             w.Stop();
             Console.SetOut(RhinoApp.CommandLineOut);
             Console.WriteLine("SectorArcButton takes:" + w.ElapsedMilliseconds);
         }
 
-
         /// <summary>
         /// Update button display as soon as a new Model is binded to this class. When occurs, the "model" property has already been updated, so we can use it
+        /// <para>
+        /// REMARK: Don't think we need to optimize props update by checking wich model property is updated. So we systematically update all
+        /// </para>
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void modelChangedHandler(object sender, PropertyChangedEventArgs e)
         {
+            // Update self data
+            Size = model.sectorData.size;
             // Update buttons image
             buttons[buttonsTypeName.normal].setImage(model.sectorData.images.normalStateImage, model.sectorData.size);
             buttons[buttonsTypeName.over].setImage(model.sectorData.images.overStateImage, model.sectorData.size);
             buttons[buttonsTypeName.disabled].setImage(model.sectorData.images.disabledStateImage, model.sectorData.size);
+            buttons[buttonsTypeName.selected].setImage(model.sectorData.images.selectedStateImage, model.sectorData.size);
             buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
-
-            // Update self data
-            Size = model.sectorData.size;
-
 
             // Update Rhino icon
             updateIcon();
         }
-       
-        ~SectorArcButton()
-        {
-        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void mouseDownHandler(object sender, MouseEventArgs e)
         {
-            if (!_isDraggingIcon)
+            if (!states.isDraggingIcon)
             {
                 if (e.Modifiers == Keys.Application && model.properties.isActive)
                 {
@@ -142,53 +373,54 @@ namespace customControls
         }
 
         /// <summary>
-        /// Handler for mouse move in control. Note that we check and fire custom mouse "leave" and "over" here because
-        /// the shape is not a rectangle. So the mouse can already "enter" in rectangle but not in the control shape
+        /// Handler for mouse move in control. Note that we check and fire custom mouse "leave", "over" and "enter" events here because
+        /// the shape is not a rectangle. So we want to raise events only for the custom (arc) shape
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void mouseMoveHandler(object sender, MouseEventArgs e)
         {
-            // Ensure main plugin windo has focus -> workaround for click event that doesn't work if main window has no focus
-            // If main window has no focus, the click event gives focus to main window and no click event on button occurs
-            onButtonRequestFocusEvent?.Invoke(this);
-
-            var new_isHovering = model.sectorData.isPointInShape(e.Location);
-            if (new_isHovering != isHovering)
+            if (states.isVisible == true)
             {
-                isHovering = new_isHovering;
-                if (isHovering)
-                {
-                    onButtonMouseOverButton?.Invoke(this); // Notify mouse is over the button
-                    animateHoverEffect();
-                }
-                else
-                {
-                    onbuttonMouseLeaveButton?.Invoke(this);
-                    animateHoverEffect();
-                }
+                var etoCtrlpos = PointToScreen(Location);
+                // Ensure main plugin window has focus -> workaround for click event that doesn't work if main window has no focus
+                // If main window has no focus, the click event gives focus to main window and no click event on button occurs
+                onButtonRequestFocusEvent?.Invoke(this);
 
-                // update button
-                // Invalidate();
+                var new_isHovering = model.sectorData.isPointInShape(e.Location);
+
+                if (new_isHovering)
+                { // Mouse is over the button
+                    if (states.isHovering) // Mouse was already over the button -> Invoke event mouse over
+                    {
+                        onButtonMouseOverButton?.Invoke(this); // Notify mouse is over the button
+                    }
+                    else // Mouse enters the button
+                    {
+                        states.isHovering = true;
+                        animateHoverEffect();
+                        onbuttonMouseEnterButton?.Invoke(this);
+                    }
+                }
+                else // Mouse is not over the button
+                {
+                    if (states.isHovering) // mouse was over the button -> Invoke leave event
+                    {
+                        states.isHovering = false;
+                        animateHoverEffect();
+                        onbuttonMouseLeaveButton?.Invoke(this);
+                    }
+                }
             }
         }
 
 
-        private void mouseEnterHandler(object sender, MouseEventArgs e)
-        {
-            // var new_isHovering = _sectorData.isPointInShape(e.Location);
-            // if (new_isHovering != isHovering)
-            // {
-            //     isHovering = new_isHovering;
-            //     Invalidate();
-            // }
-
-        }
+        // TODO: Check if it is relevant as leave event is handled in "onMouseMove" event
         private void mouseLeaveHandler(object sender, MouseEventArgs e)
         {
-            if (isHovering) // Avoid sending "leave" event twice
+            if (states.isHovering) // Avoid sending "leave" event twice
             {
-                isHovering = false;
+                states.isHovering = false;
                 onbuttonMouseLeaveButton?.Invoke(this);
                 animateHoverEffect();
             }
@@ -198,9 +430,9 @@ namespace customControls
         {
             // Ensure mouse cursor if hovering arc sector
             OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            if (isHovering)
+            if (states.isHovering)
             {
-                _isDraggingIcon = true;
+                states.isDraggingIcon = true;
                 if (dragSourceType(e.Source) == DragSourceTypes.self)
                 {
                     if (((SectorArcButton)e.Source).ID == ID)
@@ -216,9 +448,9 @@ namespace customControls
             // Ensure mouse cursor if leaving arc sector
             OnMouseLeave(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
             e.Effects = DragEffects.All;
-            if (!isHovering)
+            if (!states.isHovering)
             {
-                _isDraggingIcon = false;
+                states.isDraggingIcon = false;
                 e.Effects = DragEffects.All;
             }
 
@@ -235,9 +467,9 @@ namespace customControls
         {
             // Ensure mouse cursor if hovering arc sector
             OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            if (!isHovering)
+            if (!states.isHovering)
             {
-                _isDraggingIcon = false;
+                states.isDraggingIcon = false;
             }
             else
             {
@@ -249,7 +481,7 @@ namespace customControls
             // Ensure mouse cursor if hovering arc sector
             OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
 
-            if (isHovering)
+            if (states.isHovering)
             {
                 switch (dragSourceType(e.Source))
                 {

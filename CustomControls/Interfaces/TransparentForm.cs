@@ -2,6 +2,7 @@ using Rhino.PlugIns;
 using Eto.Forms;
 using Eto.Drawing;
 using System.Collections.Generic;
+using AppKit;
 
 namespace customControls
 {
@@ -20,17 +21,23 @@ namespace customControls
             this.ShowActivated = true;
             this.Padding = new Padding(0);
             this.MovableByWindowBackground = false;
-            this.Styles.Add<TransparentForm>("Transparent", this.transparentStyle);
+            this.Styles.Add<TransparentForm>("Transparent", transparentStyle);
             this.Style = "Transparent";
             this.mainPlugin = plugin;
         }
         protected void transparentStyle(TransparentForm form)
         {
-            BackgroundColor = Colors.Transparent;
+            BackgroundColor = Colors.Transparent; // Set ETO window background transparent
+            
             var win = form.ControlObject;
-            // var transparentNSColor = AppKit.NSColor.Clear;
-            var transparentNSColor = AppKit.NSColor.FromRgba(0, 0, 0, 1);
+            var transparentNSColor = NSColor.Clear;
+            // var transparentNSColor = AppKit.NSColor.FromRgba(0, 0, 0, 3);
             win.GetType().GetProperty("BackgroundColor").SetValue(win, transparentNSColor);
+            
+            // Remove window shadow to avoid animation artefacts
+            var ctrlProp = form.Handler.GetType().GetProperty("Control");
+            var nswindow= (NSWindow)ctrlProp.GetValue(Handler, null);
+            nswindow.HasShadow = false;
         }
         protected void onMouseMove(object sender, MouseEventArgs e)
         {

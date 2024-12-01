@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Eto.Drawing;
@@ -18,6 +17,91 @@ namespace customControls
             this.plugin = plugin;
             Instance = this;
         }
+
+        /// <summary>
+        /// Get the persistent settings node for a button. If node doesn't exist, it'll be created.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="parent">Parent node of the button. If none provided, node will be retrieved or created at the root of settings</param>
+        /// <returns></returns>
+        public PersistentSettings getChildNode(string id, PersistentSettings parent = null)
+        {
+            if (parent == null)
+            {
+                getChild(plugin.Settings, "buttons", out parent);
+            }
+            // Find the node in settings children
+            getChild(parent, id, out var node);
+            return node;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public ButtonProperties getProperties(PersistentSettings node)
+        {
+            ButtonProperties properties = null;
+            foreach (var k in node.Keys)
+            {
+                if (node.TryGetStringDictionary(k, out var props))
+                {
+                    var propsDic = new Dictionary<string, string>(props);
+                    properties = new ButtonProperties();
+                    properties.icon = new Icon(1, new Bitmap(propsDic["iconPath"]));
+                    properties.rhinoScript = propsDic["rhinoScript"];
+                    properties.isActive = propsDic["isActive"] == "true" ? true : false;
+                    properties.isActive = propsDic["isFolder"] == "true" ? true : false;
+                }
+            }
+            return properties;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="model"></param>
+        public void setProperties(PersistentSettings node, Model model)
+        {
+            // Build icon file name
+            var filename = model.data.buttonID;
+            var parentModel = model.Parent;
+            while (parentModel != null)
+            {
+                filename = parentModel.data.buttonID + "_" + filename;
+            }
+            // Compute icon path for button
+            var iconPath = plugin.SettingsDirectoryAllUsers + "/icons/";
+            System.IO.Directory.CreateDirectory(iconPath); // Create directory if does not exist
+            iconPath += filename + ".png";
+            var settingsProps = new List<KeyValuePair<string, string>>() {
+                new KeyValuePair<string, string>("iconPath",iconPath),
+                new KeyValuePair<string, string>("rhinoScript",model.data.properties.rhinoScript),
+                new KeyValuePair<string, string>("isActive",model.data.properties.isActive==true?"true":"false"),
+                new KeyValuePair<string, string>("isFolder",model.data.properties.isFolder==true?"true":"false"),
+            };
+            // upate settings dictionnary
+            // remove dictionnary if already created
+            if (node.TryGetStringDictionary("properties", out var fake))
+            {
+                node.DeleteItem("properties");
+            }
+            // set new dictionary values
+            node.SetStringDictionary("properties", settingsProps.ToArray());
+        }
+
+
+
+
+
+
+
+
+
+
+
         public void load()
         {
             // Theme
@@ -25,6 +109,7 @@ namespace customControls
             getThemeSettings(theme, "normal", ref settings.buttonColors.normal.pen, ref settings.buttonColors.normal.fill);
             getThemeSettings(theme, "hover", ref settings.buttonColors.hover.pen, ref settings.buttonColors.hover.fill);
             getThemeSettings(theme, "drag", ref settings.buttonColors.drag.pen, ref settings.buttonColors.drag.fill);
+            getThemeSettings(theme, "disable", ref settings.buttonColors.disabled.pen, ref settings.buttonColors.disabled.fill);
 
             // Button icons path
             getChild(plugin.Settings, "buttons", out var btns);
@@ -52,6 +137,7 @@ namespace customControls
             setThemeSettings(theme, "normal", settings.buttonColors.normal.pen, settings.buttonColors.normal.fill);
             setThemeSettings(theme, "hover", settings.buttonColors.hover.pen, settings.buttonColors.hover.fill);
             setThemeSettings(theme, "drag", settings.buttonColors.drag.pen, settings.buttonColors.drag.fill);
+            setThemeSettings(theme, "disable", settings.buttonColors.disabled.pen, settings.buttonColors.disabled.fill);
         }
         /// <summary>
         /// Save a button icon to plugin folder, update plugin settings, update settings object
@@ -115,6 +201,19 @@ namespace customControls
                 }
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
         /// <summary>
         /// Try to get a settings child node. If child doesn't exist, it will be create
         /// </summary>

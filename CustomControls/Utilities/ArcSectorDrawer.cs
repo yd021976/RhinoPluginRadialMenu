@@ -35,11 +35,11 @@ namespace customControls
 
         protected SectorData buildSectorImages(GraphicsPath gp, int x, int y, RadialMenuLevel level, int startAngle, int sweepAngle)
         {
-            // var pen = new Pen(theme.normal.pen, 1);
             var pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.pen, 1);
             var fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.fill;
 
             var pathSize = new Size((int)gp.Bounds.Size.Width + 3, (int)gp.Bounds.Size.Height + 3);
+            
             // Create button image for normal state
             var normalStateImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             var _graphics = new Graphics(normalStateImage);
@@ -60,11 +60,22 @@ namespace customControls
             _graphics.Dispose();
             pen.Dispose();
 
-            // Create button image for over state
+            // Create button image for disable state
             pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.disabled.pen, 1);
             fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.disabled.fill;
             var disabledImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             _graphics = new Graphics(disabledImage);
+            _graphics.TranslateTransform(new PointF(-gp.Bounds.Left, -gp.Bounds.Top));
+            _graphics.FillPath(fillColor, gp);
+            _graphics.DrawPath(pen, gp);
+            _graphics.Dispose();
+            pen.Dispose();
+            
+            // Create button image for selected state
+            pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.selected.pen, 1);
+            fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.selected.fill;
+            var selectedImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
+            _graphics = new Graphics(selectedImage);
             _graphics.TranslateTransform(new PointF(-gp.Bounds.Left, -gp.Bounds.Top));
             _graphics.FillPath(fillColor, gp);
             _graphics.DrawPath(pen, gp);
@@ -97,6 +108,7 @@ namespace customControls
                     overStateImage = overStateImage,
                     disabledStateImage = disabledImage,
                     dragStateImage = normalStateImage,
+                    selectedStateImage = selectedImage,
                     sectorMask = maskImage,
                 },
 

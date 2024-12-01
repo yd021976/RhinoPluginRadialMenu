@@ -59,9 +59,10 @@ namespace customControls
     }
     public class RadialButtonStateColors
     {
-        public ButtonColor normal = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
-        public ButtonColor hover = new ButtonColor(Colors.LightGreen, Colors.Khaki);
-        public ButtonColor disabled = new ButtonColor(Colors.LightGrey, Colors.DarkGray);
+        public ButtonColor normal = new ButtonColor(Colors.Beige, Colors.DarkGray);
+        public ButtonColor hover = new ButtonColor(Colors.Beige, Colors.LightGrey);
+        public ButtonColor selected = new ButtonColor(Colors.Beige, Colors.WhiteSmoke);
+        public ButtonColor disabled = new ButtonColor(Colors.LightGrey, Colors.SlateGray);
         public ButtonColor drag = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
     }
     public struct ButtonStateImages
@@ -69,6 +70,7 @@ namespace customControls
         public Image normalStateImage;
         public Image overStateImage;
         public Image disabledStateImage;
+        public Image selectedStateImage;
         public Image dragStateImage;
         // Mask image to detect if a point is hover a sector image
         public Bitmap sectorMask;
@@ -153,17 +155,23 @@ namespace customControls
         /// <returns></returns>
         public bool isPointInShape(PointF location)
         {
-            var bmData = images.sectorMask.Lock();
+            //FIXME: Workaround because somtimes mouse over doesn't work
+            // the cursor is completely outside a control, but it select a "sector"
+            // This workaround seems to improve the "bug", but doesn't fix it anyway
+            if (location.X > size.Width || location.Y > size.Height) return false;
+            // var bmData = images.sectorMask.Lock();
             var p = Point.Round(location);
             try
             {
-                var color = bmData.GetPixel(p);
-                bmData.Dispose();
+                var color = images.sectorMask.GetPixel(p);
                 return color.B == 1 ? true : false;
             }
             catch
             {
                 return false;
+            }
+            finally
+            {
             }
         }
     }

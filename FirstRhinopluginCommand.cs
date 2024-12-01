@@ -5,6 +5,8 @@ using AppKit;
 using CoreGraphics;
 using Foundation;
 using Eto;
+using Testing;
+using System;
 
 namespace RadialMenu
 {
@@ -39,6 +41,15 @@ namespace RadialMenu
             var formSize = _form.Size;
             _form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
             _form.Show();
+            
+            
+            //
+            // Testing
+            //
+            // var form = new TestForm2();
+            // form.Show();
+
+
             return Result.Nothing;
         }
     }

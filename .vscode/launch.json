@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Rhino 8 - netcore",
+      "name": "Rhino 8 - netcore (debug build)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -19,7 +19,8 @@
         ]
       },
       "env": {
-        "RHINO_PACKAGE_DIRS": "${workspaceFolder}/bin/Debug"
+        "RHINO_PACKAGE_DIRS": "${workspaceFolder}/bin/Debug",
+        "DEBUG_PLUGIN": "1"
       },
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

@@ -7,24 +7,7 @@ namespace customControls
 {
     public class ArcDrawableButton : Drawable
     {
-        /// <summary>
-        /// Bindable to set mouse hover (isHovering) property with binding
-        /// TODO: To be removed as it is unused
-        /// </summary>
-        public BindableBinding<ArcDrawableButton, bool> isHovering => new BindableBinding<ArcDrawableButton, bool>
-        (
-            this,
-            (ArcDrawableButton b) => b._isHovering,
-            delegate (ArcDrawableButton b, bool v)
-            {
-                b._isHovering = v;
-            }
-        );
-
         public NSView _nsViewObject { get => getNSView(); }
-
-        private bool _isHovering;
-
 
 #nullable enable
         private Image? _currentImage;
@@ -41,7 +24,7 @@ namespace customControls
         public ArcDrawableButton(Image image, Size size) : this()
         {
             _currentImage = image;
-            base.Size = size;
+            Size = size;
         }
         public void setImage(Image image, Size? size = null)
         {
@@ -54,7 +37,8 @@ namespace customControls
         }
         protected override void OnPaint(PaintEventArgs e)
         {
-            // base.OnPaint(e);
+            base.OnPaint(e);
+            // e.Graphics.DrawRectangle(Colors.Black,0,0,Parent.Size.Width-1,Parent.Size.Height-1);
             if (_currentImage != null) // Could be null, so draw nothing
             {
                 e.Graphics.DrawImage(_currentImage, 0, 0);
