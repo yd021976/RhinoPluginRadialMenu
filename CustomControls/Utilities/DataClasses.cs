@@ -158,7 +158,8 @@ namespace customControls
             //FIXME: Workaround because somtimes mouse over doesn't work
             // the cursor is completely outside a control, but it select a "sector"
             // This workaround seems to improve the "bug", but doesn't fix it anyway
-            if (location.X > size.Width || location.Y > size.Height) return false;
+            // if (location.X > size.Width || location.Y > size.Height) return false;
+            
             // var bmData = images.sectorMask.Lock();
             var p = Point.Round(location);
             try

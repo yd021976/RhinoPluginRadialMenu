@@ -127,8 +127,8 @@ namespace customControls
 
         private void animateHoverEffect()
         {
-            Console.SetOut(RhinoApp.CommandLineOut);
-            Console.WriteLine($"Animate hover btn ${ID} -- mouse hover ${states.isHovering} -- selected ${states.isSelected}");
+            // Console.SetOut(RhinoApp.CommandLineOut);
+            // Console.WriteLine($"Animate hover btn ${ID} -- mouse hover ${states.isHovering} -- selected ${states.isSelected}");
             NSAnimationContext.RunAnimation(
                 (context) =>
                 {
@@ -168,8 +168,6 @@ namespace customControls
             NSAnimationContext.RunAnimation(
                 (context) =>
                 {
-                    Console.SetOut(RhinoApp.CommandLineOut);
-                    Console.WriteLine($"Animate disable btn ${ID}");
                     context.Duration = animationDuration;
                     context.AllowsImplicitAnimation = true;
                     buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = 0;
@@ -183,8 +181,6 @@ namespace customControls
             NSAnimationContext.RunAnimation(
                 (context) =>
                 {
-                    Console.SetOut(RhinoApp.CommandLineOut);
-                    Console.WriteLine($"Animate enable btn ${ID}");
                     context.Duration = animationDuration;
                     context.AllowsImplicitAnimation = true;
                     if (states.isHovering)
@@ -330,17 +326,24 @@ namespace customControls
         /// <param name="e"></param>
         private void modelChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-            // Update self data
-            Size = model.sectorData.size;
-            // Update buttons image
-            buttons[buttonsTypeName.normal].setImage(model.sectorData.images.normalStateImage, model.sectorData.size);
-            buttons[buttonsTypeName.over].setImage(model.sectorData.images.overStateImage, model.sectorData.size);
-            buttons[buttonsTypeName.disabled].setImage(model.sectorData.images.disabledStateImage, model.sectorData.size);
-            buttons[buttonsTypeName.selected].setImage(model.sectorData.images.selectedStateImage, model.sectorData.size);
-            buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
+            switch (e.PropertyName)
+            {
+                case nameof(ButtonModelData.sectorData):
+                    // Update self data
+                    Size = model.sectorData.size;
+                    // Update buttons image
+                    buttons[buttonsTypeName.normal].setImage(model.sectorData.images.normalStateImage, model.sectorData.size);
+                    buttons[buttonsTypeName.over].setImage(model.sectorData.images.overStateImage, model.sectorData.size);
+                    buttons[buttonsTypeName.disabled].setImage(model.sectorData.images.disabledStateImage, model.sectorData.size);
+                    buttons[buttonsTypeName.selected].setImage(model.sectorData.images.selectedStateImage, model.sectorData.size);
+                    buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
 
-            // Update Rhino icon
-            updateIcon();
+                    // Update Rhino icon
+                    updateIcon();
+                    break;
+
+                default: break;
+            }
         }
 
         /// <summary>
@@ -382,7 +385,6 @@ namespace customControls
         {
             if (states.isVisible == true)
             {
-                var etoCtrlpos = PointToScreen(Location);
                 // Ensure main plugin window has focus -> workaround for click event that doesn't work if main window has no focus
                 // If main window has no focus, the click event gives focus to main window and no click event on button occurs
                 onButtonRequestFocusEvent?.Invoke(this);
@@ -394,12 +396,17 @@ namespace customControls
                     if (states.isHovering) // Mouse was already over the button -> Invoke event mouse over
                     {
                         onButtonMouseOverButton?.Invoke(this); // Notify mouse is over the button
+
+                        // Console.SetOut(RhinoApp.CommandLineOut);
+                        // Console.WriteLine($"Mouse overs button");
                     }
                     else // Mouse enters the button
                     {
                         states.isHovering = true;
                         animateHoverEffect();
                         onbuttonMouseEnterButton?.Invoke(this);
+                        // Console.SetOut(RhinoApp.CommandLineOut);
+                        // Console.WriteLine($"Mouse enters button");
                     }
                 }
                 else // Mouse is not over the button
@@ -409,6 +416,8 @@ namespace customControls
                         states.isHovering = false;
                         animateHoverEffect();
                         onbuttonMouseLeaveButton?.Invoke(this);
+                        // Console.SetOut(RhinoApp.CommandLineOut);
+                        // Console.WriteLine($"Mouse leaves button");
                     }
                 }
             }
@@ -428,11 +437,11 @@ namespace customControls
 
         private void dragEnterHandler(object sender, DragEventArgs e)
         {
+            states.isDraggingIcon = true;
             // Ensure mouse cursor if hovering arc sector
             OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
             if (states.isHovering)
             {
-                states.isDraggingIcon = true;
                 if (dragSourceType(e.Source) == DragSourceTypes.self)
                 {
                     if (((SectorArcButton)e.Source).ID == ID)
@@ -441,17 +450,25 @@ namespace customControls
                     }
                 }
             }
+            else
+            {
+                states.isDraggingIcon = false;
+            }
         }
 
         private void dragLeaveHandler(object sender, DragEventArgs e)
         {
+            states.isDraggingIcon = false;
             // Ensure mouse cursor if leaving arc sector
             OnMouseLeave(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
             e.Effects = DragEffects.All;
             if (!states.isHovering)
             {
-                states.isDraggingIcon = false;
                 e.Effects = DragEffects.All;
+            }
+            else
+            {
+                states.isDraggingIcon = true;
             }
 
             var dSource = dragSourceType(e.Source);
@@ -465,6 +482,11 @@ namespace customControls
         }
         private void dragOverHandler(object sender, DragEventArgs e)
         {
+            var screenLocation = PointToScreen(e.Location);
+            // Console.SetOut(RhinoApp.CommandLineOut);
+            // Console.WriteLine($"Mouse DRAG overs button ${ID}, AT ${screenLocation.X},${screenLocation.Y}");
+            
+            states.isDraggingIcon = true;
             // Ensure mouse cursor if hovering arc sector
             OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
             if (!states.isHovering)

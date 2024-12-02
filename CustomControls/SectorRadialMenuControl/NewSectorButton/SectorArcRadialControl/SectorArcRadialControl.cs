@@ -96,8 +96,11 @@ namespace customControls
 
         private static int sectorsNumber = 8;
         public RadialMenuLevel level;
-
-        protected NSView nsView { get => getNSView(); }
+        public bool isVisible
+        {
+            get => nsView.AlphaValue == 0 ? false : true;
+        }
+        public NSView nsView { get => getNSView(); }
 
         protected Dictionary<SectorArcButton, Model> buttons = new Dictionary<SectorArcButton, Model>();
         /// <summary>
@@ -179,7 +182,6 @@ namespace customControls
                 btn.onbuttonMouseEnterButton += onButtonMouseEnter;
                 btn.onButtonMouseOverButton += onButtonMouseOver;
                 btn.onbuttonMouseLeaveButton += onButtonMouseLeave;
-
                 buttons.Add(btn, model); // Update button dictionary
                 btn.ButtonModelBinding.Bind(buttons, r => r[btn].data); // Bind button model
                 Add(btn, 0, 0); // Add button to layout
@@ -190,7 +192,28 @@ namespace customControls
             Console.SetOut(RhinoApp.CommandLineOut);
             Console.WriteLine("SectorArcRadialControl constructor:" + w.ElapsedMilliseconds);
         }
+        public SectorArcButton getBtnAtLocation(PointF location, SectorArcButton excludeBtn)
+        {
+            SectorArcButton foundBtn = null;
+            foreach (var btn in buttons)
+            {
+                if (btn.Key.ID != excludeBtn.ID)
+                {
+                    var topLeft = btn.Key.PointToScreen(new PointF(btn.Key.Location.X, btn.Key.Location.Y));
+                    var bottomRight = btn.Key.PointToScreen(new PointF(btn.Key.Bounds.Right, btn.Key.Bounds.Bottom));
+                    Console.SetOut(RhinoApp.CommandLineOut);
+                    Console.WriteLine($"Testing button ${btn.Key.ID}, AT {topLeft.X},{topLeft.Y} - {bottomRight.X},{bottomRight.Y} Against location {location.X}, {location.Y}");
 
+                    if (location.X >= topLeft.X && location.Y >= topLeft.Y && location.X <= bottomRight.X && location.Y <= bottomRight.Y)
+                    {
+                        Console.WriteLine($"-------->Hit found : button ${btn.Key.ID}");
+                        foundBtn = btn.Key;
+                        break;
+                    }
+                }
+            }
+            return foundBtn;
+        }
         /// <summary>
         /// Activate or deactivate all buttons except the one selected
         /// If no button is selected, enable all buttons
@@ -217,7 +240,7 @@ namespace customControls
         {
             var w = Stopwatch.StartNew();//DEBUG Method measure
 
-            level.sectorData = buildSectors(sectorsNumber, startAngle);
+            // level.sectorData = buildSectors(sectorsNumber, startAngle);
             setupLayout(parent, startAngle); // Update layout with buttons
 
             //DEBUG Method measure
@@ -279,10 +302,10 @@ namespace customControls
             var i = 0; var swwep_angle = 360 / sectorsNumber;
             foreach (SectorArcButton button in buttons.Keys)
             {
+                //TODO: Should be removed -> Get sector data from level, already computed in method setMenuForButtonID
                 var sectordata = updateSectorData(startAngle); // Compute sector informations
 
                 button.ID = "L:" + level.level + "-A:" + startAngle + "-Number:" + i.ToString(); // Update button ID
-                // buttons[button].data.buttonID = "L:" + level.level + "-A:" + startAngle + "-Number:" + i.ToString(); // Update button ID
                 buttons[button].Parent = parent; // Update parent model
 
                 Move(button, (int)sectordata.bounds.Left, (int)sectordata.bounds.Top); // Update control position
@@ -290,7 +313,6 @@ namespace customControls
 
                 startAngle += swwep_angle; i++;
                 if (startAngle >= 360) startAngle -= 360;
-
             }
         }
 

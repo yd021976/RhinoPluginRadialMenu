@@ -1,5 +1,6 @@
 using System;
 using AppKit;
+using CoreGraphics;
 using Eto.Drawing;
 using Eto.Forms;
 

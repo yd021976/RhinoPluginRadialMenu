@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
 using Rhino;
@@ -41,7 +42,7 @@ namespace customControls
             {
                 foreach (var ctrl in radialMenuCtrl.Values)
                 {
-                    if (ctrl.level.level != 1) ctrl.show(false);
+                    ctrl.show(false); // Hide and reset radial control enable and selection
                 }
                 var radialControl = radialMenuCtrl.First(obj => obj.Key.level == 1).Value;
                 radialControl.show(true);
@@ -66,6 +67,9 @@ namespace customControls
             Content = layout;
         }
 
+        /// <summary>
+        /// Init menu level controls
+        /// </summary>
         private void initLevels()
         {
             RadialMenuLevel mLevel = null;
@@ -82,12 +86,16 @@ namespace customControls
                 ctrl.onSelectionChanged += onRadialControlSelectionChanged;
                 ctrl.onFocusRequested += onRadialControlFocusRequested;
                 ctrl.onNewIconAdded += onRadialControlNewIconAdded;
-
                 radialMenuCtrl.Add(mLevel, ctrl);
-                layout.Add(ctrl, (Size.Width / 2) - (ctrl.Size.Width / 2), Size.Height / 2 - (ctrl.Size.Height / 2));
             }
+            //
+            //REMARK Order is VERY important because arc button are rectangles. So if submenu level 2 is not "top most" (i.e. last position), drag over doesn't work and sometimes
+            // drag over don't detect level "2" buttons
+            //
+            layout.Add(radialMenuCtrl.ElementAt(0).Value, (Size.Width / 2) - (radialMenuCtrl.ElementAt(0).Value.Size.Width / 2), Size.Height / 2 - (radialMenuCtrl.ElementAt(0).Value.Size.Height / 2));
+            layout.Add(radialMenuCtrl.ElementAt(2).Value, (Size.Width / 2) - (radialMenuCtrl.ElementAt(2).Value.Size.Width / 2), Size.Height / 2 - (radialMenuCtrl.ElementAt(2).Value.Size.Height / 2));
+            layout.Add(radialMenuCtrl.ElementAt(1).Value, (Size.Width / 2) - (radialMenuCtrl.ElementAt(1).Value.Size.Width / 2), Size.Height / 2 - (radialMenuCtrl.ElementAt(1).Value.Size.Height / 2));
         }
-
 
         #region Custom mouse over and leave behaviors
         //
@@ -106,26 +114,53 @@ namespace customControls
             args.shouldUpdateSelection = false; // Don't apply radial control default behavior for mouse enter event
             if (args.buttonProps != null) // Ensure we have a selected button (should never happens)
             {
-                var isOpenableButton = args.buttonProps?.model.data.properties.isActive & args.buttonProps?.model.data.properties.isFolder ?? false; // Ensure button contains submenu items
-
-                isOpenableButton = true; // DEBUG & TEST
-
-                if (radialControl.level.level < maxLevels && isOpenableButton) // Nothing to do for last sub menu level (no show/hide submenus)
+                if (args.buttonProps?.buttonState.isDraggingIcon == false) // We are not in dragging mode -> show submenu if button has submenu to display
                 {
-                    // Do we have to show or hide submenu ?
-                    var doHide = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID;
+                    var isOpenableButton = args.buttonProps?.model.data.properties.isActive & args.buttonProps?.model.data.properties.isFolder ?? false; // Ensure button contains submenu items
 
-                    // Update radial control selected button
-                    radialControl.selectedButtonID = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID ? "" : args.buttonProps?.model.data.buttonID; // Will trigger event <selectionchanged>
+                    // isOpenableButton = true; // DEBUG & TEST
 
-                    // Open or hide submenu
-                    if (doHide)
+                    if (radialControl.level.level < maxLevels && isOpenableButton) // Nothing to do for last sub menu level (no show/hide submenus)
                     {
-                        hideSubmenu(radialControl, args.buttonProps?.model);
+                        // Do we have to show or hide submenu ?
+                        var doHide = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID;
+
+                        // Update radial control selected button
+                        radialControl.selectedButtonID = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID ? "" : args.buttonProps?.model.data.buttonID; // Will trigger event <selectionchanged>
+
+                        // Open or hide submenu
+                        if (doHide)
+                        {
+                            hideSubmenu(radialControl);
+                            radialControl.disableButtonsExceptSelection(); // Enable all buttons (because no ButtonID is selected)
+                        }
+                        else
+                        {
+                            showSubmenu(radialControl, args.buttonProps?.model);
+                            radialControl.disableButtonsExceptSelection(); // Disable all buttons but the one selected
+                        }
                     }
-                    else
+                }
+                else // Dragging mode -> Show submenu 
+                {
+                    if (radialControl.level.level < maxLevels)
                     {
+                        // Check next level is not already visible
+                        var nextLevel = radialControl.level.level + 1;
+                        // Update radial control selected button
+                        radialControl.selectedButtonID = args.buttonProps?.model.data.buttonID; // Update control selection + Will trigger event <selectionchanged>
                         showSubmenu(radialControl, args.buttonProps?.model);
+
+                        Console.SetOut(RhinoApp.CommandLineOut);
+                        Console.WriteLine($"show drag next level ${nextLevel}");
+                        // Ensure no upper level is shown
+                        for (var i = maxLevels ; i > nextLevel ; i--)
+                        {
+                            SectorArcRadialControl ctrl = radialMenuCtrl.First(control => control.Value.level.level == i).Value;
+                            ctrl.selectedButtonID = ""; // clear selection
+                            ctrl.show(false);
+                            // hideSubmenu(ctrl);
+                        }
                     }
                 }
             }
@@ -138,7 +173,6 @@ namespace customControls
         /// <param name="args"></param>
         private void onRadialControlMouseOverButton(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
-            // Do nothing as we have nothing to do for mouse overs a button
         }
 
         /// <summary>
@@ -149,10 +183,10 @@ namespace customControls
         private void onRadialControlMouseLeaveButton(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
             args.shouldUpdateSelection = false;
-            // We only want default behavior if mouse leave a button at last submenu level
-            // if (radialControl.level.level != maxLevels)
+            // Dragging mode : Close sub menu when mouse leaves button
+            // if (args != null && (!args.buttonProps?.buttonState.isDraggingIcon ?? false))
             // {
-            //     args.shouldUpdateSelection = false; // Prevent to close current opened sub-menu when mouse leave button
+            //     hideSubmenu(radialControl);
             // }
         }
         #endregion
@@ -170,7 +204,7 @@ namespace customControls
         private void onRadialControlFocusRequested(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args) { }
         private void onRadialControlNewIconAdded(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args) { }
 
-        private void hideSubmenu(SectorArcRadialControl radialControl, Model model)
+        private void hideSubmenu(SectorArcRadialControl radialControl)
         {
             for (var i = maxLevels - 1; i > radialControl.level.level - 1; i--) // Hide each higher opened sub menu
             {
@@ -178,11 +212,9 @@ namespace customControls
                 control.disableButtonsExceptSelection(); // Enable all buttons
                 control.show(false); // hide sub menu
             }
-            radialControl.disableButtonsExceptSelection();
         }
         private void showSubmenu(SectorArcRadialControl radialControl, Model model)
         {
-            radialControl.disableButtonsExceptSelection(); // Disable all buttons but the one selected
             var nextLevel = radialControl.level.level + 1; // Compute next level number
             var ctrl = radialMenuCtrl.First(obj => obj.Key.level == nextLevel).Value; //TODO: Do we need to check Radial control exists for the next level ?
             ctrl.setMenuForButtonID(model, model.data.sectorData.startAngle + ((model.data.sectorData.endAngle - model.data.sectorData.startAngle) / 2)); // Update radial control buttons
