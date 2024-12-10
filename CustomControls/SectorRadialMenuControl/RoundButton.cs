@@ -18,7 +18,7 @@ namespace customControls
         /// Event for button click
         /// </summary>
         /// <param name="sender"></param>
-        public delegate void buttonClickEvent(RoundButton sender);
+        public delegate void buttonClickEvent(RoundButton sender,MouseEventArgs e);
 
         public RoundButton() : base()
         {
@@ -56,7 +56,7 @@ namespace customControls
 
         protected void onMouseDown(object sender, MouseEventArgs e)
         {
-            onclickEvent?.Invoke(this); // Raise onclick event to be handled by delegate
+            onclickEvent?.Invoke(this,e); // Raise onclick event to be handled by delegate
         }
         protected void onMouseEnter(object sender, MouseEventArgs e)
         {

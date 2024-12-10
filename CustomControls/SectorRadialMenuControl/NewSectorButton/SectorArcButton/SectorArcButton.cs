@@ -100,9 +100,9 @@ namespace customControls
             /// </summary>
             public bool isVisible = true;
 
-            private bool _isDraggingIcon = false;
             private bool _isHovering = false;
             private bool _isSelected = false;
+            private bool _isEditMode = false;
 
             public bool isHovering
             {
@@ -115,7 +115,15 @@ namespace customControls
                 }
             }
 
-
+            public bool isEditMode
+            {
+                get => _isEditMode;
+                set
+                {
+                    _isEditMode = value;
+                    OnPropertyChanged(nameof(isEditMode));
+                }
+            }
             public bool isSelected
             {
                 get { return _isSelected; }
@@ -127,15 +135,6 @@ namespace customControls
                 }
             }
 
-            public bool isDraggingIcon
-            {
-                get => _isDraggingIcon;
-                set
-                {
-                    _isDraggingIcon = value;
-                    OnPropertyChanged(nameof(isDraggingIcon));
-                }
-            }
             public ButtonStates() { }
         }
         #endregion
@@ -179,6 +178,7 @@ namespace customControls
                         buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
                         buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
                     }
+                    buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = states.isEditMode ? buttonAlpha : 0;
                 });
         }
         private void animateSelectedEffect()
@@ -192,6 +192,7 @@ namespace customControls
                     buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = states.isSelected ? 0 : buttonAlpha;
                     buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = states.isSelected ? buttonAlpha : 0;
                     buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = states.isEditMode ? buttonAlpha : 0;
                 });
         }
         private void animateDisableEffect()
@@ -205,6 +206,7 @@ namespace customControls
                     buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
                     buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
                     buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = disabledAlpha;
+                    buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = states.isEditMode ? buttonAlpha : 0;
                 });
         }
         private void animateEnableEffect()
@@ -220,6 +222,7 @@ namespace customControls
                         buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = buttonAlpha;
                         buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
                         buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = states.isEditMode ? buttonAlpha : 0;
                     }
                     else
                     {
@@ -227,7 +230,23 @@ namespace customControls
                         buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
                         buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = states.isSelected ? buttonAlpha : 0;
                         buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                        buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = states.isEditMode ? buttonAlpha : 0;
                     }
+                });
+        }
+        private void animateEditmode()
+        {
+            NSAnimationContext.RunAnimation(
+                (context) =>
+                {
+                    context.Duration = animationDuration;
+                    context.AllowsImplicitAnimation = true;
+                    buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = buttonAlpha;
+                    buttons[buttonsTypeName.over]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
+                    buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = states.isEditMode ? buttonAlpha : 0;
+
                 });
         }
         #endregion
@@ -259,6 +278,7 @@ namespace customControls
             selected = 2,
             disabled = 3,
             icon = 4,
+            editmode = 5,
         }
         /// <summary>
         /// Drawables used for animating button UI state changes
@@ -316,6 +336,7 @@ namespace customControls
             buttons[buttonsTypeName.disabled] = new ImageButton();
             buttons[buttonsTypeName.icon] = new ImageButton();
             buttons[buttonsTypeName.selected] = new ImageButton();
+            buttons[buttonsTypeName.editmode] = new ImageButton(Bitmap.FromResource("RadialMenu.Bitmaps.circle-dashed-8-64.png").WithSize(48, 48), new Size(48, 48));
 
             Size = model.sectorData.size;
 
@@ -325,6 +346,7 @@ namespace customControls
             Add(buttons[buttonsTypeName.disabled], 0, 0);
             Add(buttons[buttonsTypeName.selected], 0, 0);
             Add(buttons[buttonsTypeName.icon], 0, 0);
+            Add(buttons[buttonsTypeName.editmode], 0, 0);
 
 
 
@@ -332,6 +354,7 @@ namespace customControls
             buttons[buttonsTypeName.disabled]._nsViewObject.AlphaValue = 0;
             buttons[buttonsTypeName.selected]._nsViewObject.AlphaValue = 0;
             buttons[buttonsTypeName.normal]._nsViewObject.AlphaValue = buttonAlpha;
+            buttons[buttonsTypeName.editmode]._nsViewObject.AlphaValue = 0;
 
 
             // Mouse events
@@ -340,11 +363,18 @@ namespace customControls
             MouseDown += mouseDownHandler;
 
             // DragDrop events
-            AllowDrop = true;
-            DragEnter += dragEnterHandler;
-            DragOver += dragOverHandler;
-            DragLeave += dragLeaveHandler;
-            DragDrop += dragDropHandler;
+            AllowDrop = false;
+            // DragEnter += dragEnterHandler;
+            // DragOver += dragOverHandler;
+            // DragLeave += dragLeaveHandler;
+            // DragDrop += dragDropHandler;
+            buttons[buttonsTypeName.editmode].AllowDrop = true;
+            buttons[buttonsTypeName.editmode].DragEnter += dragEnterHandler;
+            buttons[buttonsTypeName.editmode].DragOver += dragOverHandler;
+            buttons[buttonsTypeName.editmode].DragLeave += dragLeaveHandler;
+            buttons[buttonsTypeName.editmode].DragDrop += dragDropHandler;
+
+
 
             // States property change handler
             states.PropertyChanged += (obj, prop) =>
@@ -353,6 +383,10 @@ namespace customControls
                 {
                     case nameof(states.isSelected): // Animate <selected> property changed
                         animateSelectedEffect();
+                        break;
+                    case nameof(states.isEditMode):
+                        updateIconEditmode();
+                        animateEditmode();
                         break;
                     default: break;
                 }
@@ -384,15 +418,14 @@ namespace customControls
                     buttons[buttonsTypeName.disabled].setImage(model.sectorData.images.disabledStateImage, model.sectorData.size);
                     buttons[buttonsTypeName.selected].setImage(model.sectorData.images.selectedStateImage, model.sectorData.size);
                     buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
-                    // Update Rhino icon
-                    updateIcon();
+                    updateIcon(); // Update Rhino icon
+                    updateIconEditmode(); // Update edit mode icon
                     break;
                 case nameof(ButtonModelData.properties):
                 case nameof(ButtonProperties.icon):
                 case nameof(ButtonProperties.isActive):
                     buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
-                    // Update Rhino icon
-                    updateIcon();
+                    updateIcon(); // Update Rhino icon
                     break;
                 default: break;
             }
@@ -405,7 +438,7 @@ namespace customControls
         /// <param name="e"></param>
         private void mouseDownHandler(object sender, MouseEventArgs e)
         {
-            if (!states.isDraggingIcon)
+            if (!states.isEditMode)
             {
                 // We can drag icons with "command" modifier + LMB => Drag is forbidden if button is a "folder"
                 if (e.Modifiers == Keys.Application)
@@ -438,8 +471,6 @@ namespace customControls
         /// <param name="e"></param>
         private void mouseMoveHandler(object sender, MouseEventArgs e)
         {
-            // Console.SetOut(RhinoApp.CommandLineOut);
-            // Console.WriteLine($"Button mouse move {ID}");
             if (states.isVisible == true)
             {
                 // Ensure main plugin window has focus -> workaround for click event that doesn't work if main window has no focus
@@ -484,9 +515,20 @@ namespace customControls
 
         private void dragEnterHandler(object sender, DragEventArgs e)
         {
-            // Console.SetOut(RhinoApp.CommandLineOut);
-            // Console.WriteLine($"Button drag enter {ID} -- original event");
-            // states.isDraggingIcon = true;
+            if (!states.isEditMode) return;
+            states.isHovering = true;
+            animateHoverEffect();
+
+            if (!model.properties.isFolder)
+            {
+                // Allow move only if button is not a folder
+                e.Effects = DragEffects.All;
+                // Fire event
+                onButtonDragEnter?.Invoke(this, new DropTargetArgs(dragSourceType(e.Source), e));
+            }
+
+
+
             // Ensure mouse cursor if hovering arc sector
             // OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
 
@@ -519,16 +561,14 @@ namespace customControls
         /// <param name="e"></param>
         private void dragLeaveHandler(object sender, DragEventArgs e)
         {
-            states.isHovering = false;
+            if (!states.isEditMode) return; // Don't fire event if not in edit mode
 
-            // If not already "leaved" from "dragOverHandler" method, fires event "leave"
-            if (states.isDraggingIcon)
-            {
-                var args = new DropTargetArgs(dragSourceType(e.Source), e);
-                onButtonDragLeave?.Invoke(this, args);
-                states.isDraggingIcon = false;
-            }
-            states.isDraggingIcon = false;
+            states.isHovering = false;
+            animateHoverEffect();
+            var args = new DropTargetArgs(dragSourceType(e.Source), e);
+            onButtonDragLeave?.Invoke(this, args);
+
+
             // Console.SetOut(RhinoApp.CommandLineOut);
             // Console.WriteLine($"Button drag leave {ID} -- real event");
             // states.isDraggingIcon = false;
@@ -558,77 +598,42 @@ namespace customControls
         }
         private void dragOverHandler(object sender, DragEventArgs e)
         {
-            // Ensure mouse cursor if hovering arc sector
-            var oldHovering = states.isHovering ? true : false;
-            mouseMoveUpdate(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            if (!states.isHovering) // Mouse is not over the button
+            if (!states.isEditMode) return; // Don't fire event if not in edit mode
+            if (!model.properties.isFolder)
             {
-                states.isDraggingIcon = false;
-                if (oldHovering == true)
-                {
-                    // Console.SetOut(RhinoApp.CommandLineOut);
-                    // Console.WriteLine($"Button drag leave {ID}");
-                    var args = new DropTargetArgs(dragSourceType(e.Source), e);
-                    onButtonDragLeave?.Invoke(this, args);
-                    states.isDraggingIcon = false;
-                }
-            }
-            else // Mouse is over the button -> Fires drop accept target & drag move event
-            {
-                states.isDraggingIcon = true;
-                if (oldHovering == false) // Drag enter as mouse was not over the button
-                {
-                    // Console.SetOut(RhinoApp.CommandLineOut);
-                    // Console.WriteLine($"Button drag Enter {ID}");
-                    states.isDraggingIcon = true;
-                    onButtonDragEnter?.Invoke(this, new DropTargetArgs(dragSourceType(e.Source), e));
-                }
-                else
-                {
-                    // Console.SetOut(RhinoApp.CommandLineOut);
-                    // Console.WriteLine($"Button drag over {ID}");
-                    var args = new DropTargetArgs(dragSourceType(e.Source), e);
-                    onButtonAcceptTarget?.Invoke(this, args);
-                    onButtonDragOver?.Invoke(this, new DropTargetArgs(dragSourceType(e.Source), e));
-                    e.Effects = args.acceptTarget ? DragEffects.Copy : DragEffects.None;
-                }
+                e.Effects = DragEffects.All;
+                onButtonDragOver?.Invoke(this, new DropTargetArgs(dragSourceType(e.Source), e));
             }
         }
         private void dragDropHandler(object sender, DragEventArgs e)
         {
-            // Ensure mouse cursor if hovering arc sector
-            // OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            var oldHovereing = mouseMoveUpdate(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-
-            if (states.isHovering)
+            if (!states.isEditMode) return; // Don't fire event if not in edit mode
+            var sourcetype = dragSourceType(e.Source);
+            switch (sourcetype)
             {
-                var sourcetype = dragSourceType(e.Source);
-                switch (sourcetype)
-                {
-                    case DragSourceTypes.self:
-                        if (((SectorArcButton)e.Source).ID == ID)
-                        {
-                            // If drag drop and button had previously an icon/script, restore it
-                            model.properties.isActive = model.properties.icon != null ? true : false;
-                        }
-                        else
-                        {
-                            model.properties.icon = ((SectorArcButton)e.Source).model.properties.icon; //TODO: Ensure icon data are copied to new properties
-                            model.properties.rhinoScript = ((SectorArcButton)e.Source).model.properties.rhinoScript;
-                            model.properties.isActive = true;
-                        }
-                        break;
-                    case DragSourceTypes.rhinoItem:
-                        var rhinoToolbarItem = getDroppedToolbarItem(e);
-                        model.properties.icon = rhinoToolbarItem.icon;
-                        model.properties.rhinoScript = rhinoToolbarItem.script;
+                case DragSourceTypes.self:
+                    if (((SectorArcButton)e.Source).ID == ID)
+                    {
+                        // If drag drop and button had previously an icon/script, restore it
+                        model.properties.isActive = model.properties.icon != null ? true : false;
+                    }
+                    else
+                    {
+                        model.properties.icon = ((SectorArcButton)e.Source).model.properties.icon; //TODO: Ensure icon data are copied to new properties
+                        model.properties.rhinoScript = ((SectorArcButton)e.Source).model.properties.rhinoScript;
                         model.properties.isActive = true;
-                        break;
-                    default:
-                        break;
-                }
-                onButtonDragDrop?.Invoke(this, new DropTargetArgs(sourcetype, e));
+                    }
+                    break;
+                case DragSourceTypes.rhinoItem:
+                    var rhinoToolbarItem = getDroppedToolbarItem(e);
+                    model.properties.icon = rhinoToolbarItem.icon;
+                    model.properties.rhinoScript = rhinoToolbarItem.script;
+                    model.properties.isActive = true;
+                    break;
+                default:
+                    break;
             }
+            onButtonDragDrop?.Invoke(this, new DropTargetArgs(sourcetype, e));
             updateIcon(); // Update icon image and position
         }
 
@@ -708,6 +713,19 @@ namespace customControls
                 var posX = arcCenterLocal.X - (model.properties.icon.Size.Width / 2);
                 var posY = arcCenterLocal.Y - (model.properties.icon.Size.Height / 2);
                 Move(buttons[buttonsTypeName.icon], (int)posX, (int)posY); // update icon location
+            }
+        }
+        private void updateIconEditmode()
+        {
+            // When in edit mode update edit icon position
+            if (states.isEditMode)
+            {
+                // Compute icon position in layout
+                var arcCenterWorld = model.sectorData.sectorCenter();
+                var arcCenterLocal = model.sectorData.convertWorldToLocal(arcCenterWorld);
+                var posX = arcCenterLocal.X - (buttons[buttonsTypeName.editmode].Width / 2);
+                var posY = arcCenterLocal.Y - (buttons[buttonsTypeName.editmode].Height / 2);
+                Move(buttons[buttonsTypeName.editmode], (int)posX, (int)posY); // update icon location
             }
         }
         /// <summary>

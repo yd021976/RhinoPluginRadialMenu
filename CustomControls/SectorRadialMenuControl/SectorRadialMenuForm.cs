@@ -14,10 +14,11 @@ namespace customControls
     public class SectorRadialMenuForm : TransparentForm
     {
         protected static int defaultInnerRadius = 70;
-        protected static int defaultThickness = 40;
+        protected static int defaultThickness = 60;
         protected static int maxLevels = 3;
         private PixelLayout layout = new PixelLayout();
-        protected bool dragMode = false;
+        protected Control dragsource;
+        protected bool editMode = false;
         /// <summary>
         /// Associate a menu level to a Control of type <SectorArcRadialControl>
         /// </summary>
@@ -28,27 +29,7 @@ namespace customControls
             initLevels(); // Create "blank" radial menu controls (i.e. no button IDs, blank models)
 
             // Allow drop just to remove drop animation when icon is dragged outside button
-            AllowDrop = true;
-            DragEnter += (o, e) =>
-            {
-                Console.SetOut(RhinoApp.CommandLineOut);
-                Console.WriteLine($"Drag item in form");
-                dragMode = true;
-                e.Effects = DragEffects.Move;
-                var prop = e.Source.GetType().GetProperty("DeleteDraggedItem");
-                var value = prop.GetValue(e.Source, null);
-            };
-            DragDrop += (o, e) =>
-            {
-                // We not really drop something on the form. But used to set dragmode to false and handle drop item outside of buttons
-                dragMode = false;
-                Console.SetOut(RhinoApp.CommandLineOut);
-                Console.WriteLine($"Drop item in form");
-            };
-            DragLeave += (o, e) =>
-            {
-                // Do nothing as form can "loose" drag as soon as a button get drag events
-            };
+            AllowDrop = false;
 
             // Ensure when form is shown that we display only first menu level
             Shown += (o, e) =>
@@ -69,7 +50,22 @@ namespace customControls
             var closeBtn = new RoundButton();
             closeBtn.Size = new Size(32, 32);
             closeBtn.setButtonIcon(icon);
-            closeBtn.onclickEvent += onCloseClickEvent;
+            closeBtn.onclickEvent += (sender, args) =>
+            {
+                // Right click on close button toggles edit mode
+                if (args.Buttons == MouseButtons.Alternate)
+                {
+                    editMode = !editMode;
+                    foreach (var control in radialMenuCtrl.Values)
+                    {
+                        control.switchEditMode(editMode);
+                    }
+                }
+                else if (args.Buttons == MouseButtons.Primary)
+                {
+                    onCloseClickEvent(sender);
+                }
+            };
             layout.Add(closeBtn, (Size.Width / 2) - closeBtn.Size.Width / 2, (Size.Height / 2) - (closeBtn.Size.Height / 2));
 
             // Create and add RadialMenu Control for 1st level
@@ -129,9 +125,9 @@ namespace customControls
         /// <param name="args"></param>
         private void radialControlMouseEnterButtonHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
-            Console.SetOut(RhinoApp.CommandLineOut);
-            Console.WriteLine($"Mouse over button (form handler)");
             args.shouldUpdateSelection = false; // Don't apply radial control default behavior for mouse enter event
+
+            if (editMode) return; // Exit if in edit mode
             if (args.buttonProps != null) // Ensure we have a selected button (should never happens)
             {
 
@@ -256,10 +252,24 @@ namespace customControls
             hideSubmenu(radialMenuCtrl.First(ctrl => ctrl.Key.level == 1).Value);
             sender.selectedButtonID = ""; // Unselect button
             sender.disableButtonsExceptSelection(); // Enable all buttons
-            dragMode = false; // Ensure dragMode is reset
         }
-        private void radialControlDragEnterHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
+        private void radialControlDragEnterHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.DragDropArgs args)
         {
+            // Register event handler to know when source drag ended
+            if (dragsource != null)
+            {
+                if (dragsource != args.dragEvent.dragEventArgs.Source)
+                {
+                    dragsource.DragEnd -= sourceDragEndHandler; // Remove handler as the drag source changed
+                    args.dragEvent.dragEventArgs.Source.DragEnd += sourceDragEndHandler;
+                }
+            }
+            else
+            {
+                args.dragEvent.dragEventArgs.Source.DragEnd += sourceDragEndHandler;
+            }
+
+
             // Update control selection + Will trigger event <selectionchanged>
             radialControl.selectedButtonID = args.buttonProps?.model.data.buttonID;
 
@@ -323,6 +333,27 @@ namespace customControls
                 control.disableButtonsExceptSelection();
             }
             base.onCloseClickEvent(sender);
+        }
+        /// <summary>
+        /// Drag source notify that dragging ended. NOTE that DragEventArgs.Effects contains the final drop operation done in drop target
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void sourceDragEndHandler(object sender, DragEventArgs e)
+        {
+            foreach (var control in radialMenuCtrl.Values.TakeWhile(x=>x.nsView.AlphaValue!=0))
+            {
+                if (control.level.level == 1) continue; // Don't hide menu level 1
+                control.selectedButtonID = "";
+                control.show(false);
+            }
+
+            // Clear current drag source reference and remove dragEnd Handler
+            if (dragsource != null)
+            {
+                dragsource.DragEnd -= sourceDragEndHandler;
+                dragsource = null;
+            }
         }
     }
 }

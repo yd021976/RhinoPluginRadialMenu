@@ -246,7 +246,16 @@ namespace customControls
             setChildrenVisibleState(show); // Update children sector button visible state to prevent unwanted "onMouseOver" events
             animateShowHideEffect(show); // Animate effects
         }
-
+        public void switchEditMode(bool editmode)
+        {
+            clearSelection();
+            enableButtons();
+            foreach (var button in buttons.Keys)
+            {
+                button.states.isSelected = false;
+                button.states.isEditMode = editmode;
+            }
+        }
         /// <summary>
         /// Activate or deactivate all buttons except the one selected
         /// If no button is selected, enable all buttons
