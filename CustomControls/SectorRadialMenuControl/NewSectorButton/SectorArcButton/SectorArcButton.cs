@@ -12,6 +12,17 @@ namespace customControls
     public class SectorArcButton : PixelLayout
     {
         #region Events declaration
+        public class DropTargetArgs
+        {
+            public DragSourceTypes sourceType;
+            public DragEventArgs dragEventArgs;
+            public bool acceptTarget = true;
+            public DropTargetArgs(DragSourceTypes sourceType, DragEventArgs d) : base()
+            {
+                this.sourceType = sourceType;
+                dragEventArgs = d;
+            }
+        }
         /// <summary>
         /// Button click event
         /// </summary>
@@ -27,8 +38,28 @@ namespace customControls
         /// <summary>
         /// Event to notify an icon has been added to button
         /// </summary>
-        public event buttonNewIconAdded onButtonNewIconAdded;
-        public delegate void buttonNewIconAdded(SectorArcButton sender);
+        public event onDragDrop onButtonDragDrop;
+        public delegate void onDragDrop(SectorArcButton sender, DropTargetArgs args);
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event onDragEnter onButtonDragEnter;
+        public delegate void onDragEnter(SectorArcButton sender, DropTargetArgs args);
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event onDragOver onButtonDragOver;
+        public delegate void onDragOver(SectorArcButton sender, DropTargetArgs args);
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event onDragLeave onButtonDragLeave;
+        public delegate void onDragLeave(SectorArcButton sender, DropTargetArgs args);
+        /// <summary>
+        /// Event to accept/reject drop target
+        /// </summary>
+        public event buttonAcceptTarget onButtonAcceptTarget;
+        public delegate void buttonAcceptTarget(SectorArcButton sender, DropTargetArgs args);
 
         /// <summary>
         /// Event to notify mouse is over button
@@ -227,12 +258,12 @@ namespace customControls
             over = 1,
             selected = 2,
             disabled = 3,
-            icon = 4
+            icon = 4,
         }
         /// <summary>
         /// Drawables used for animating button UI state changes
         /// </summary>
-        protected Dictionary<buttonsTypeName, ArcDrawableButton> buttons = new Dictionary<buttonsTypeName, ArcDrawableButton>();
+        protected Dictionary<buttonsTypeName, ImageButton> buttons = new Dictionary<buttonsTypeName, ImageButton>();
 
         /// <summary>
         /// Data Model Binding
@@ -246,9 +277,25 @@ namespace customControls
             // Update "model" property with new value and register a property changed event handler of the "model" object
             delegate (SectorArcButton obj, ButtonModelData value)
             {
-                model.PropertyChanged -= modelChangedHandler; // Remove property changed event handler on current "model" object
-                obj.model = value; // update property
-                model.PropertyChanged += modelChangedHandler; // Add property changed handler on "model"
+                // Remove property changed event handler on current "model" object
+                model.PropertyChanged -= modelChangedHandler;
+                model.properties.PropertyChanged -= modelChangedHandler;
+                // update property
+                obj.model = value;
+                // Add property changed handler on "model"
+                model.PropertyChanged += modelChangedHandler;
+                model.properties.PropertyChanged += modelChangedHandler;
+            },
+            // Add change event handler
+            delegate (SectorArcButton btn, EventHandler<EventArgs> changeEventHandler)
+            {
+                var a = 0;
+            },
+            // remove change event handler
+            delegate (SectorArcButton btn, EventHandler<EventArgs> changeEventHandler)
+            {
+                var a = 0;
+
             });
 
         #endregion
@@ -264,11 +311,11 @@ namespace customControls
             var w = Stopwatch.StartNew();
 
             // Create buttons
-            buttons[buttonsTypeName.normal] = new ArcDrawableButton();
-            buttons[buttonsTypeName.over] = new ArcDrawableButton();
-            buttons[buttonsTypeName.disabled] = new ArcDrawableButton();
-            buttons[buttonsTypeName.icon] = new ArcDrawableButton();
-            buttons[buttonsTypeName.selected] = new ArcDrawableButton();
+            buttons[buttonsTypeName.normal] = new ImageButton();
+            buttons[buttonsTypeName.over] = new ImageButton();
+            buttons[buttonsTypeName.disabled] = new ImageButton();
+            buttons[buttonsTypeName.icon] = new ImageButton();
+            buttons[buttonsTypeName.selected] = new ImageButton();
 
             Size = model.sectorData.size;
 
@@ -337,11 +384,16 @@ namespace customControls
                     buttons[buttonsTypeName.disabled].setImage(model.sectorData.images.disabledStateImage, model.sectorData.size);
                     buttons[buttonsTypeName.selected].setImage(model.sectorData.images.selectedStateImage, model.sectorData.size);
                     buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
-
                     // Update Rhino icon
                     updateIcon();
                     break;
-
+                case nameof(ButtonModelData.properties):
+                case nameof(ButtonProperties.icon):
+                case nameof(ButtonProperties.isActive):
+                    buttons[buttonsTypeName.icon].setImage(model.properties.icon, model.sectorData.size);
+                    // Update Rhino icon
+                    updateIcon();
+                    break;
                 default: break;
             }
         }
@@ -355,11 +407,14 @@ namespace customControls
         {
             if (!states.isDraggingIcon)
             {
-                if (e.Modifiers == Keys.Application && model.properties.isActive)
+                // We can drag icons with "command" modifier + LMB => Drag is forbidden if button is a "folder"
+                if (e.Modifiers == Keys.Application)
                 {
-                    DataObject eventObj = new DataObject();
-                    DoDragDrop(eventObj, DragEffects.All, model.properties.icon, new PointF(10, 10));
-
+                    if (model.properties.isActive && model.properties.isFolder == false)
+                    {
+                        DataObject eventObj = new DataObject();
+                        DoDragDrop(eventObj, DragEffects.All, model.properties.icon, new PointF(10, 10));
+                    }
                 }
                 else
                 {
@@ -383,41 +438,33 @@ namespace customControls
         /// <param name="e"></param>
         private void mouseMoveHandler(object sender, MouseEventArgs e)
         {
+            // Console.SetOut(RhinoApp.CommandLineOut);
+            // Console.WriteLine($"Button mouse move {ID}");
             if (states.isVisible == true)
             {
                 // Ensure main plugin window has focus -> workaround for click event that doesn't work if main window has no focus
                 // If main window has no focus, the click event gives focus to main window and no click event on button occurs
                 onButtonRequestFocusEvent?.Invoke(this);
+                var oldHovering = mouseMoveUpdate(e);
 
-                var new_isHovering = model.sectorData.isPointInShape(e.Location);
-
-                if (new_isHovering)
+                if (states.isHovering)
                 { // Mouse is over the button
-                    if (states.isHovering) // Mouse was already over the button -> Invoke event mouse over
+                    if (oldHovering) // Mouse was already over the button -> Invoke event mouse over
                     {
                         onButtonMouseOverButton?.Invoke(this); // Notify mouse is over the button
-
-                        // Console.SetOut(RhinoApp.CommandLineOut);
-                        // Console.WriteLine($"Mouse overs button");
                     }
                     else // Mouse enters the button
                     {
-                        states.isHovering = true;
                         animateHoverEffect();
                         onbuttonMouseEnterButton?.Invoke(this);
-                        // Console.SetOut(RhinoApp.CommandLineOut);
-                        // Console.WriteLine($"Mouse enters button");
                     }
                 }
                 else // Mouse is not over the button
                 {
-                    if (states.isHovering) // mouse was over the button -> Invoke leave event
+                    if (oldHovering) // mouse was over the button -> Invoke leave event
                     {
-                        states.isHovering = false;
                         animateHoverEffect();
                         onbuttonMouseLeaveButton?.Invoke(this);
-                        // Console.SetOut(RhinoApp.CommandLineOut);
-                        // Console.WriteLine($"Mouse leaves button");
                     }
                 }
             }
@@ -437,89 +484,138 @@ namespace customControls
 
         private void dragEnterHandler(object sender, DragEventArgs e)
         {
-            states.isDraggingIcon = true;
+            // Console.SetOut(RhinoApp.CommandLineOut);
+            // Console.WriteLine($"Button drag enter {ID} -- original event");
+            // states.isDraggingIcon = true;
             // Ensure mouse cursor if hovering arc sector
-            OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            if (states.isHovering)
-            {
-                if (dragSourceType(e.Source) == DragSourceTypes.self)
-                {
-                    if (((SectorArcButton)e.Source).ID == ID)
-                    {
-                        e.Effects = DragEffects.Link;
-                    }
-                }
-            }
-            else
-            {
-                states.isDraggingIcon = false;
-            }
-        }
+            // OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
 
+            // var oldHovering = mouseMoveUpdate(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location, null));
+            // if (oldHovering == false) // Mouse was not over the button
+            // {
+            //     if (states.isHovering == true)
+            //     {
+            //         var sourcetype = dragSourceType(e.Source);
+            //         if (sourcetype == DragSourceTypes.self)
+            //         {
+            //             if (((SectorArcButton)e.Source).ID == ID)
+            //             {
+            //                 e.Effects = DragEffects.Link;
+            //             }
+            //         }
+            //         onButtonDragEnter?.Invoke(this, new DropTargetArgs(sourcetype, e));
+            //     }
+            //     else
+            //     {
+            //         states.isDraggingIcon = false;
+            //     }
+            // }
+        }
+        /// <summary>
+        /// Drag leave handler. As soon drag leaves frame rectangle, we are sure drag exit button.
+        /// NOTE that we have to check the "leave" state is not already fired by @dragOverHandler method
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dragLeaveHandler(object sender, DragEventArgs e)
         {
-            states.isDraggingIcon = false;
-            // Ensure mouse cursor if leaving arc sector
-            OnMouseLeave(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            e.Effects = DragEffects.All;
-            if (!states.isHovering)
-            {
-                e.Effects = DragEffects.All;
-            }
-            else
-            {
-                states.isDraggingIcon = true;
-            }
+            states.isHovering = false;
 
-            var dSource = dragSourceType(e.Source);
-            if (dSource == DragSourceTypes.self && ((SectorArcButton)e.Source).ID == ID)
+            // If not already "leaved" from "dragOverHandler" method, fires event "leave"
+            if (states.isDraggingIcon)
             {
-                model.properties.isActive = false;
-                onButtonNewIconAdded?.Invoke(this); // update settings
-                updateIcon();
-                Invalidate();
+                var args = new DropTargetArgs(dragSourceType(e.Source), e);
+                onButtonDragLeave?.Invoke(this, args);
+                states.isDraggingIcon = false;
             }
+            states.isDraggingIcon = false;
+            // Console.SetOut(RhinoApp.CommandLineOut);
+            // Console.WriteLine($"Button drag leave {ID} -- real event");
+            // states.isDraggingIcon = false;
+            // // Ensure mouse cursor if leaving arc sector
+            // // OnMouseLeave(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
+            // var oldHovering = mouseMoveUpdate(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
+            // e.Effects = DragEffects.All;
+            // var dSource = dragSourceType(e.Source);
+            // if (oldHovering) // Mouse was over the button
+            // {
+            //     if (!states.isHovering) // Mouse is now not over the button -> Fires drag leave
+            //     {
+            //         e.Effects = DragEffects.All;
+            //         onButtonDragLeave?.Invoke(this, new DropTargetArgs(dSource, e));
+            //     }
+            //     else // Mouse is over the button
+            //     {
+            //         states.isDraggingIcon = true;
+            //     }
+            // }
+
+            // if (dSource == DragSourceTypes.self && ((SectorArcButton)e.Source).ID == ID)
+            // {
+            //     model.properties.isActive = false;
+            //     updateIcon();
+            // }
         }
         private void dragOverHandler(object sender, DragEventArgs e)
         {
-            var screenLocation = PointToScreen(e.Location);
-            // Console.SetOut(RhinoApp.CommandLineOut);
-            // Console.WriteLine($"Mouse DRAG overs button ${ID}, AT ${screenLocation.X},${screenLocation.Y}");
-            
-            states.isDraggingIcon = true;
             // Ensure mouse cursor if hovering arc sector
-            OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
-            if (!states.isHovering)
+            var oldHovering = states.isHovering ? true : false;
+            mouseMoveUpdate(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
+            if (!states.isHovering) // Mouse is not over the button
             {
                 states.isDraggingIcon = false;
+                if (oldHovering == true)
+                {
+                    // Console.SetOut(RhinoApp.CommandLineOut);
+                    // Console.WriteLine($"Button drag leave {ID}");
+                    var args = new DropTargetArgs(dragSourceType(e.Source), e);
+                    onButtonDragLeave?.Invoke(this, args);
+                    states.isDraggingIcon = false;
+                }
             }
-            else
+            else // Mouse is over the button -> Fires drop accept target & drag move event
             {
-                e.Effects = DragEffects.Copy;
+                states.isDraggingIcon = true;
+                if (oldHovering == false) // Drag enter as mouse was not over the button
+                {
+                    // Console.SetOut(RhinoApp.CommandLineOut);
+                    // Console.WriteLine($"Button drag Enter {ID}");
+                    states.isDraggingIcon = true;
+                    onButtonDragEnter?.Invoke(this, new DropTargetArgs(dragSourceType(e.Source), e));
+                }
+                else
+                {
+                    // Console.SetOut(RhinoApp.CommandLineOut);
+                    // Console.WriteLine($"Button drag over {ID}");
+                    var args = new DropTargetArgs(dragSourceType(e.Source), e);
+                    onButtonAcceptTarget?.Invoke(this, args);
+                    onButtonDragOver?.Invoke(this, new DropTargetArgs(dragSourceType(e.Source), e));
+                    e.Effects = args.acceptTarget ? DragEffects.Copy : DragEffects.None;
+                }
             }
         }
         private void dragDropHandler(object sender, DragEventArgs e)
         {
             // Ensure mouse cursor if hovering arc sector
-            OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
+            // OnMouseMove(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
+            var oldHovereing = mouseMoveUpdate(new MouseEventArgs(e.Buttons, e.Modifiers, e.Location));
 
             if (states.isHovering)
             {
-                switch (dragSourceType(e.Source))
+                var sourcetype = dragSourceType(e.Source);
+                switch (sourcetype)
                 {
                     case DragSourceTypes.self:
                         if (((SectorArcButton)e.Source).ID == ID)
                         {
                             // If drag drop and button had previously an icon/script, restore it
                             model.properties.isActive = model.properties.icon != null ? true : false;
-                            Invalidate();
                         }
                         else
                         {
                             model.properties.icon = ((SectorArcButton)e.Source).model.properties.icon; //TODO: Ensure icon data are copied to new properties
                             model.properties.rhinoScript = ((SectorArcButton)e.Source).model.properties.rhinoScript;
                             model.properties.isActive = true;
-                            Invalidate();
                         }
                         break;
                     case DragSourceTypes.rhinoItem:
@@ -527,12 +623,11 @@ namespace customControls
                         model.properties.icon = rhinoToolbarItem.icon;
                         model.properties.rhinoScript = rhinoToolbarItem.script;
                         model.properties.isActive = true;
-                        Invalidate();
                         break;
                     default:
                         break;
                 }
-                onButtonNewIconAdded?.Invoke(this);
+                onButtonDragDrop?.Invoke(this, new DropTargetArgs(sourcetype, e));
             }
             updateIcon(); // Update icon image and position
         }
@@ -614,6 +709,42 @@ namespace customControls
                 var posY = arcCenterLocal.Y - (model.properties.icon.Size.Height / 2);
                 Move(buttons[buttonsTypeName.icon], (int)posX, (int)posY); // update icon location
             }
+        }
+        /// <summary>
+        /// Update button Hovering state when mouse move over a button.
+        /// Return the old "hovering" state to compare with new state
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        private bool mouseMoveUpdate(MouseEventArgs e)
+        {
+            var oldHovering = states.isHovering ? true : false;
+
+            if (states.isVisible == true)
+            {
+                var new_isHovering = model.sectorData.isPointInShape(e.Location);
+
+                if (new_isHovering)  // Mouse is over the button
+                {
+                    if (states.isHovering) // Mouse was already over the button
+                    {
+                    }
+                    else // Mouse enters the button
+                    {
+                        states.isHovering = true;
+                        animateHoverEffect();
+                    }
+                }
+                else // Mouse is not over the button
+                {
+                    if (states.isHovering) // mouse was over the button
+                    {
+                        states.isHovering = false;
+                        animateHoverEffect();
+                    }
+                }
+            }
+            return oldHovering;
         }
     }
 }

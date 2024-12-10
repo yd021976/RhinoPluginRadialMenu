@@ -48,6 +48,14 @@ namespace customControls
             }
             public SelectionArgs() { }
         }
+        public class DragDropArgs : SelectionArgs
+        {
+            public SectorArcButton.DropTargetArgs dragEvent;
+            public DragDropArgs(SectorArcButton.ButtonStates buttonState, Model model, SectorArcButton.DropTargetArgs e) : base(buttonState, model)
+            {
+                dragEvent = e;
+            }
+        }
         #endregion
 
         #region  Events declaration
@@ -66,8 +74,28 @@ namespace customControls
         /// <summary>
         /// Event to notify an icon has been added to button
         /// </summary>
-        public event newIconAdded onNewIconAdded;
-        public delegate void newIconAdded(SectorArcRadialControl sender, SelectionArgs args);
+        public event onDragDropButton onButtonDragDrop;
+        public delegate void onDragDropButton(SectorArcRadialControl sender, DragDropArgs args);
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event onDragEnterButton onButtonDragEnter;
+        public delegate void onDragEnterButton(SectorArcRadialControl sender, DragDropArgs args);
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event onDragOverButton onButtonDragOver;
+        public delegate void onDragOverButton(SectorArcRadialControl sender, DragDropArgs args);
+        /// <summary>
+        /// Event to notify an icon has been added to button
+        /// </summary>
+        public event onDragLeaveButton onButtonDragLeave;
+        public delegate void onDragLeaveButton(SectorArcRadialControl sender, DragDropArgs args);
+        /// <summary>
+        /// Event to request drop target could be accepted
+        /// </summary>
+        public event dropTargetAccepted onDropTargetAccepted;
+        public delegate void dropTargetAccepted(SectorArcRadialControl sender, SectorArcButton.DropTargetArgs args);
 
         /// <summary>
         /// Event to notify a button selection has changed
@@ -92,7 +120,6 @@ namespace customControls
         public event mouseLeaveButton onMouseLeaveButton;
         public delegate void mouseLeaveButton(SectorArcRadialControl sender, SelectionArgs args);
         #endregion
-
 
         private static int sectorsNumber = 8;
         public RadialMenuLevel level;
@@ -139,7 +166,7 @@ namespace customControls
                     // Raise "selectionChanged" if selection changed
                     if (raiseEvent)
                     {
-                        SelectionArgs args = buildEventArgs(btn);
+                        SelectionArgs args = buildSelectionEventArgs(btn);
                         onSelectionChanged?.Invoke(this, args);
                     }
                 }
@@ -147,24 +174,9 @@ namespace customControls
         }
         private double animationDuration = 0.3;
 
-        public void show(bool show = true)
+        private ButtonModelData bindData(Dictionary<SectorArcButton, Model> data)
         {
-            if (!show) // When hidding, reset button state (selected and enabled)
-            {
-                clearSelection(); // when control shows, reset all button selected to false
-                enableButtons(); // When control is hidden, reset selection and enable children
-            }
-            setChildrenVisibleState(show); // Update children sector button visible state to prevent unwanted "onMouseOver" events
-            animateShowHideEffect(show); // Animate effects
-        }
-
-        public SectorArcRadialControl(RadialMenuLevel level, int startAngle = 0, Model parent = null) : this(level, startAngle)
-        {
-            // Update "model" parent node
-            foreach (var btn in buttons)
-            {
-                btn.Value.Parent = parent;
-            }
+            return data.First(d => d.Key.ID == "").Value.data;
         }
         public SectorArcRadialControl(RadialMenuLevel level, int startAngle = 0) : base()
         {
@@ -177,13 +189,18 @@ namespace customControls
             {
                 // Create button and model objects
                 var btn = new SectorArcButton();
-                var model = new Model();
-                btn.onButtonClickEvent += onButtonClicked;
-                btn.onbuttonMouseEnterButton += onButtonMouseEnter;
-                btn.onButtonMouseOverButton += onButtonMouseOver;
-                btn.onbuttonMouseLeaveButton += onButtonMouseLeave;
+                var model = new Model(generateButtonID(startAngle, i), null);
+                btn.onButtonClickEvent += buttonClickedHandler;
+                btn.onbuttonMouseEnterButton += buttonMouseEnterHandler;
+                btn.onButtonMouseOverButton += buttonMouseOverHandler;
+                btn.onbuttonMouseLeaveButton += buttonMouseLeaveHandler;
+                btn.onButtonDragDrop += buttonDragDropHandler;
+                btn.onButtonDragEnter += buttonDragEnterHandler;
+                btn.onButtonDragLeave += buttonDragLeaveHandler;
+                btn.onButtonDragOver += buttonDragOverHandler;
+                btn.onButtonAcceptTarget += buttonDropAcceptTargetHandler;
                 buttons.Add(btn, model); // Update button dictionary
-                btn.ButtonModelBinding.Bind(buttons, r => r[btn].data); // Bind button model
+                btn.ButtonModelBinding.Bind(buttons, btnCollection => btnCollection[btn].data); // Bind button model
                 Add(btn, 0, 0); // Add button to layout
             }
             Visible = true;
@@ -192,28 +209,44 @@ namespace customControls
             Console.SetOut(RhinoApp.CommandLineOut);
             Console.WriteLine("SectorArcRadialControl constructor:" + w.ElapsedMilliseconds);
         }
-        public SectorArcButton getBtnAtLocation(PointF location, SectorArcButton excludeBtn)
-        {
-            SectorArcButton foundBtn = null;
-            foreach (var btn in buttons)
-            {
-                if (btn.Key.ID != excludeBtn.ID)
-                {
-                    var topLeft = btn.Key.PointToScreen(new PointF(btn.Key.Location.X, btn.Key.Location.Y));
-                    var bottomRight = btn.Key.PointToScreen(new PointF(btn.Key.Bounds.Right, btn.Key.Bounds.Bottom));
-                    Console.SetOut(RhinoApp.CommandLineOut);
-                    Console.WriteLine($"Testing button ${btn.Key.ID}, AT {topLeft.X},{topLeft.Y} - {bottomRight.X},{bottomRight.Y} Against location {location.X}, {location.Y}");
 
-                    if (location.X >= topLeft.X && location.Y >= topLeft.Y && location.X <= bottomRight.X && location.Y <= bottomRight.Y)
-                    {
-                        Console.WriteLine($"-------->Hit found : button ${btn.Key.ID}");
-                        foundBtn = btn.Key;
-                        break;
-                    }
-                }
+        public ButtonProperties getButtonProperties(string buttonID)
+        {
+            try
+            {
+                return buttons.First(entry => entry.Key.ID == buttonID).Value.data.properties;
             }
-            return foundBtn;
+            catch
+            {
+                Console.SetOut(RhinoApp.CommandLineOut);
+                Console.WriteLine($"SectorArcRadialControl get button {buttonID} properties error");
+                return null;
+            }
         }
+        public void setButtonProperties(string buttonID, ButtonProperties properties)
+        {
+            try
+            {
+                buttons.First(entry => entry.Key.ID == buttonID).Value.data.properties = properties;
+            }
+            catch
+            {
+                Console.SetOut(RhinoApp.CommandLineOut);
+                Console.WriteLine($"SectorArcRadialControl set button {buttonID} properties error");
+            }
+            finally { }
+        }
+        public void show(bool show = true)
+        {
+            if (!show) // When hidding, reset button state (selected and enabled)
+            {
+                clearSelection(); // when control shows, reset all button selected to false
+                enableButtons(); // When control is hidden, reset selection and enable children
+            }
+            setChildrenVisibleState(show); // Update children sector button visible state to prevent unwanted "onMouseOver" events
+            animateShowHideEffect(show); // Animate effects
+        }
+
         /// <summary>
         /// Activate or deactivate all buttons except the one selected
         /// If no button is selected, enable all buttons
@@ -231,6 +264,15 @@ namespace customControls
             }
         }
 
+        /// <summary>
+        /// Do the control contains the provided button
+        /// </summary>
+        /// <param name="btn"></param>
+        /// <returns></returns>
+        public bool hasButton(SectorArcButton btn)
+        {
+            return buttons.ContainsKey(btn);
+        }
 
         /// <summary>
         /// Display list of buttons for the specified ID (i.e. ID is the ID of the previous level button that trigger opening the menu)
@@ -298,19 +340,20 @@ namespace customControls
         /// <param name="startAngle"></param>
         private void setupLayout(Model parent, int startAngle = 0)
         {
+            selectedButtonID = ""; // As we build new layout, unselect any button
             // Iterate on each sector data to update button
             var i = 0; var swwep_angle = 360 / sectorsNumber;
             foreach (SectorArcButton button in buttons.Keys)
             {
-                //TODO: Should be removed -> Get sector data from level, already computed in method setMenuForButtonID
-                var sectordata = updateSectorData(startAngle); // Compute sector informations
+                button.Unbind(); // Unbind any bindings
+                var model = new Model(generateButtonID(startAngle, i), parent);
+                buttons[button] = model; // update model
+                button.ButtonModelBinding.Bind(buttons, bntCollection => bntCollection[button].data); // Bind button model
+                button.ID = model.data.buttonID; // Update button ID
 
-                button.ID = "L:" + level.level + "-A:" + startAngle + "-Number:" + i.ToString(); // Update button ID
-                buttons[button].Parent = parent; // Update parent model
-
+                var sectordata = updateSectorData(startAngle); // Compute new sector data from level and angle to setup button visual images
                 Move(button, (int)sectordata.bounds.Left, (int)sectordata.bounds.Top); // Update control position
-                buttons[button].data.sectorData = sectordata; // Update button model to update control size and images
-
+                buttons[button].data.sectorData = sectordata; // Update button model sectordata to update control size and images
                 startAngle += swwep_angle; i++;
                 if (startAngle >= 360) startAngle -= 360;
             }
@@ -385,15 +428,15 @@ namespace customControls
             return (NSView)ctrlProp.GetValue(Handler, null);
         }
         #region Button event handlers
-        private void onButtonClicked(SectorArcButton button)
+        private void buttonClickedHandler(SectorArcButton button)
         {
-            onClickEvent?.Invoke(this, buildEventArgs(button));
+            onClickEvent?.Invoke(this, buildSelectionEventArgs(button));
         }
 
 
-        private void onButtonMouseEnter(SectorArcButton button)
+        private void buttonMouseEnterHandler(SectorArcButton button)
         {
-            SelectionArgs args = buildEventArgs(button);
+            SelectionArgs args = buildSelectionEventArgs(button);
             onMouseEnterButton?.Invoke(this, args); // Raise event before apply default behavior below.
             if (args.shouldUpdateSelection) // Does subscriber want default behavior ?
             {
@@ -404,19 +447,19 @@ namespace customControls
             }
 
             // Raise event selectionChanged
-            args = buildEventArgs(button);
+            args = buildSelectionEventArgs(button);
             onSelectionChanged?.Invoke(this, args);
         }
 
-        private void onButtonMouseOver(SectorArcButton button)
+        private void buttonMouseOverHandler(SectorArcButton button)
         {
-            SelectionArgs args = buildEventArgs(button);
+            SelectionArgs args = buildSelectionEventArgs(button);
             onMouseOverButton?.Invoke(this, args);
         }
 
-        private void onButtonMouseLeave(SectorArcButton button)
+        private void buttonMouseLeaveHandler(SectorArcButton button)
         {
-            SelectionArgs args = buildEventArgs(button);
+            SelectionArgs args = buildSelectionEventArgs(button);
             onMouseLeaveButton?.Invoke(this, args);
             if (args.shouldUpdateSelection) // Does subscriber want default behavior ?
             {
@@ -429,16 +472,36 @@ namespace customControls
         }
         private void onButtonFocusRequested(SectorArcButton button)
         {
-            onFocusRequested?.Invoke(this, buildEventArgs(button));
+            onFocusRequested?.Invoke(this, buildSelectionEventArgs(button));
         }
-        private void onButtonNewIconAdded(SectorArcButton button)
+        private void buttonDragDropHandler(SectorArcButton button, SectorArcButton.DropTargetArgs args)
         {
-            onNewIconAdded?.Invoke(this, buildEventArgs(button));
+            onButtonDragDrop?.Invoke(this, buildDragdropEventArgs(button, args));
+        }
+        private void buttonDragEnterHandler(SectorArcButton button, SectorArcButton.DropTargetArgs args)
+        {
+            // button.states.isSelected = true;
+            // _selectedButtonID = button.ID;
+            onButtonDragEnter?.Invoke(this, buildDragdropEventArgs(button, args));
+        }
+        private void buttonDragOverHandler(SectorArcButton button, SectorArcButton.DropTargetArgs args)
+        {
+            onButtonDragOver?.Invoke(this, buildDragdropEventArgs(button, args));
+        }
+        private void buttonDragLeaveHandler(SectorArcButton button, SectorArcButton.DropTargetArgs args)
+        {
+            // button.states.isSelected = false; // Change selection state
+            // _selectedButtonID = "";
+            onButtonDragLeave?.Invoke(this, buildDragdropEventArgs(button, args));
+        }
+
+        private void buttonDropAcceptTargetHandler(SectorArcButton button, SectorArcButton.DropTargetArgs args)
+        {
+            onDropTargetAccepted?.Invoke(this, args);
         }
         #endregion
 
-
-        private SelectionArgs buildEventArgs(SectorArcButton button)
+        private SelectionArgs buildSelectionEventArgs(SectorArcButton button)
         {
             if (button != null)
             {
@@ -446,8 +509,29 @@ namespace customControls
             }
             else
             {
-                return new SelectionArgs(); // Args without selection infos
+                return new SelectionArgs();
             }
+        }
+        private DragDropArgs buildDragdropEventArgs(SectorArcButton button, SectorArcButton.DropTargetArgs evnt)
+        {
+            if (button != null)
+            {
+                return new DragDropArgs(button.states, buttons[button], evnt);
+            }
+            else
+            {
+                throw new Exception("Button can not be null for DragDrop event args");
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startAngle"></param>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        private string generateButtonID(int startAngle, int i)
+        {
+            return "L:" + level.level + "-A:" + startAngle + "-Number:" + i.ToString();
         }
     }
 }

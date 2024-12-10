@@ -30,8 +30,8 @@ namespace customControls
             BackgroundColor = Colors.Transparent; // Set ETO window background transparent
             
             var win = form.ControlObject;
-            var transparentNSColor = NSColor.Clear;
-            // var transparentNSColor = AppKit.NSColor.FromRgba(0, 0, 0, 3);
+            // var transparentNSColor = NSColor.Clear;
+            var transparentNSColor = AppKit.NSColor.FromRgba(0, 0, 0, 1);
             win.GetType().GetProperty("BackgroundColor").SetValue(win, transparentNSColor);
             
             // Remove window shadow to avoid animation artefacts
@@ -41,9 +41,9 @@ namespace customControls
         }
         protected void onMouseMove(object sender, MouseEventArgs e)
         {
-            if (!this.HasFocus)
+            if (!HasFocus)
             {
-                this.Focus();
+                Focus();
             }
         }
         protected void saveSettings()

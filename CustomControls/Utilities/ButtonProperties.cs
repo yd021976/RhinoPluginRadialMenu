@@ -12,10 +12,15 @@ namespace customControls
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
-
         private string _rhinoScript;
-        public string rhinoScript { get => _rhinoScript; set { _rhinoScript = value; OnPropertyChanged(nameof(rhinoScript)); } }
+        public string rhinoScript
+        {
+            get => _rhinoScript; set
+            {
+                _rhinoScript = value; 
+                OnPropertyChanged(nameof(rhinoScript));
+            }
+        }
 
 
         Eto.Drawing.Icon _icon;

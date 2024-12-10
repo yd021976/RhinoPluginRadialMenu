@@ -317,7 +317,7 @@ namespace Testing
         /// <param name="sender"></param>
         public delegate void buttonMouseLeaveButton(CustomControl sender);
 
-        public ArcDrawableButton btn = new ArcDrawableButton();
+        public ImageButton btn = new ImageButton();
         public SectorData data;
         public bool isHovering = false;
         protected bool _isSelected = false;

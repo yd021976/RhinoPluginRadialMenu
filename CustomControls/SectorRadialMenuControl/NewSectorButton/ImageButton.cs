@@ -1,12 +1,10 @@
-using System;
 using AppKit;
-using CoreGraphics;
 using Eto.Drawing;
 using Eto.Forms;
 
 namespace customControls
 {
-    public class ArcDrawableButton : Drawable
+    public class ImageButton : Drawable
     {
         public NSView _nsViewObject { get => getNSView(); }
 
@@ -15,14 +13,14 @@ namespace customControls
 #nullable disable
 
 
-        public ArcDrawableButton() : base() { }
+        public ImageButton() : base() { }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="image"></param>
         /// <param name="size"></param>
-        public ArcDrawableButton(Image image, Size size) : this()
+        public ImageButton(Image image, Size size) : this()
         {
             _currentImage = image;
             Size = size;

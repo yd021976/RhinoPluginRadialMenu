@@ -1,14 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using Eto.Drawing;
-using Eto.Forms;
-using Rhino;
 
 namespace customControls
 {
-    enum DragSourceTypes
+    public enum DragSourceTypes
     {
         self = 0,
         rhinoItem = 1,
@@ -34,11 +29,6 @@ namespace customControls
         /// Sector thickness fro drawing this level
         /// </summary>
         public int thickness;
-
-        /// <summary>
-        /// List of sector data
-        /// </summary>
-        public List<SectorData> sectorData = new List<SectorData>();
 
         /// <summary>
         /// Constructor
@@ -155,16 +145,12 @@ namespace customControls
         /// <returns></returns>
         public bool isPointInShape(PointF location)
         {
-            //FIXME: Workaround because somtimes mouse over doesn't work
-            // the cursor is completely outside a control, but it select a "sector"
-            // This workaround seems to improve the "bug", but doesn't fix it anyway
-            // if (location.X > size.Width || location.Y > size.Height) return false;
-            
-            // var bmData = images.sectorMask.Lock();
+            var bmData = images.sectorMask.Lock();
             var p = Point.Round(location);
             try
             {
-                var color = images.sectorMask.GetPixel(p);
+                // var color = images.sectorMask.GetPixel(p);
+                var color = bmData.GetPixel(p);
                 return color.B == 1 ? true : false;
             }
             catch
@@ -173,6 +159,7 @@ namespace customControls
             }
             finally
             {
+                bmData.Dispose();
             }
         }
     }

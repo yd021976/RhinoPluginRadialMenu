@@ -28,7 +28,6 @@ namespace customControls
             set
             {
                 _buttonID = value;
-                OnPropertyChanged(nameof(buttonID));
             }
         }
 
@@ -49,18 +48,7 @@ namespace customControls
         ButtonProperties _properties = new ButtonProperties();
         public ButtonProperties properties
         {
-            get
-            {
-                // If a ButtonID is set, try to get button properties from Rhino settings and sets internal class property
-                if (buttonID != "")
-                {
-                    if (SettingsHelper.Instance.settings.buttonProperties.TryGetValue(buttonID, out var rhinoSettingsProperties))
-                    {
-                        _properties = rhinoSettingsProperties;
-                    }
-                }
-                return _properties;
-            }
+            get => _properties;
             set
             {
                 _properties = value; // Update property object
@@ -77,13 +65,18 @@ namespace customControls
         ButtonModelData _data = new ButtonModelData();
         public ButtonModelData data
         {
-            get => _data;
+            get
+            {
+                return _data;
+            }
             set
             {
-                _data.PropertyChanged -= onButtonPropertyChangedHandler;
+                _data.PropertyChanged -= onDataChanged;
+                _data.properties.PropertyChanged -= onPropertiesChanged;
                 _data = value;
-                _data.PropertyChanged += onButtonPropertyChangedHandler;
-                OnPropertyChanged(nameof(data)); // Notify property changed
+                _data.PropertyChanged += onDataChanged;
+                _data.properties.PropertyChanged += onPropertiesChanged;
+                onDataPropertiesChanged(nameof(data)); // Notify property changed
             }
         }
         protected PersistentSettings rhinoPersistentSettingsNode
@@ -103,7 +96,7 @@ namespace customControls
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string propertyName)
+        protected void onDataPropertiesChanged(string propertyName)
         {
             if (PropertyChanged != null)
             {
@@ -112,39 +105,46 @@ namespace customControls
         }
 
         /// <summary>
-        /// Property changed event handler for object type "ButtonProperties"
+        /// Property changed event handler for properties in object "data"
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void onButtonPropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        private void onDataChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
                 case nameof(ButtonModelData.sectorData): break;
-                case nameof(ButtonModelData.properties): break;
+                case nameof(ButtonModelData.properties): // Update properties in persisent settings
+                    SettingsHelper.Instance.setProperties(rhinoPersistentSettingsNode, this);
+                    break;
                 default: break;
             }
-            // updateRhinoSettings();
         }
 
         /// <summary>
-        /// Update button properties into Rhino plugin settings
+        /// Property event handler for properties changed in object "data.properties"
         /// </summary>
-        private void updateRhinoSettings()
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void onPropertiesChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Save button properties into Rhino plugin properties
-            if (data.buttonID != "")
+            SettingsHelper.Instance.setProperties(rhinoPersistentSettingsNode, this);
+        }
+
+        public Model(string buttonID, Model parent = null) : base()
+        {
+            if (buttonID == "" || buttonID == null)
             {
-                SettingsHelper.Instance.saveButtonProperties(data.buttonID, data.properties);
+                throw new System.Exception("Button ID cannot by empty or null");
             }
-        }
-        public Model() : base()
-        {
-            Parent = null;
-        }
-        public Model(Model parent = null) : this()
-        {
+            // Init main object data
             Parent = parent;
+            _data.buttonID = buttonID;
+            // Load properties from rhino settings
+            _data.properties = SettingsHelper.Instance.getProperties(rhinoPersistentSettingsNode);
+            // Property changed event handler
+            _data.PropertyChanged += onDataChanged;
+            _data.properties.PropertyChanged += onPropertiesChanged;
         }
     }
 }

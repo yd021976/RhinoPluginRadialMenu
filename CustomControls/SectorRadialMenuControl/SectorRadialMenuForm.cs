@@ -5,6 +5,7 @@ using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
 using Rhino;
+using Rhino.Display;
 using Rhino.PlugIns;
 
 namespace customControls
@@ -16,7 +17,7 @@ namespace customControls
         protected static int defaultThickness = 40;
         protected static int maxLevels = 3;
         private PixelLayout layout = new PixelLayout();
-
+        protected bool dragMode = false;
         /// <summary>
         /// Associate a menu level to a Control of type <SectorArcRadialControl>
         /// </summary>
@@ -24,17 +25,29 @@ namespace customControls
         public SectorRadialMenuForm(PlugIn plugin) : base(plugin)
         {
             Size = new Size(500, 500);
-            initLevels();
+            initLevels(); // Create "blank" radial menu controls (i.e. no button IDs, blank models)
 
             // Allow drop just to remove drop animation when icon is dragged outside button
             AllowDrop = true;
             DragEnter += (o, e) =>
             {
+                Console.SetOut(RhinoApp.CommandLineOut);
+                Console.WriteLine($"Drag item in form");
+                dragMode = true;
                 e.Effects = DragEffects.Move;
+                var prop = e.Source.GetType().GetProperty("DeleteDraggedItem");
+                var value = prop.GetValue(e.Source, null);
             };
-            // Fake drop to remove animation
             DragDrop += (o, e) =>
             {
+                // We not really drop something on the form. But used to set dragmode to false and handle drop item outside of buttons
+                dragMode = false;
+                Console.SetOut(RhinoApp.CommandLineOut);
+                Console.WriteLine($"Drop item in form");
+            };
+            DragLeave += (o, e) =>
+            {
+                // Do nothing as form can "loose" drag as soon as a button get drag events
             };
 
             // Ensure when form is shown that we display only first menu level
@@ -61,7 +74,7 @@ namespace customControls
 
             // Create and add RadialMenu Control for 1st level
             var ctrl = radialMenuCtrl.First(level => level.Key.level == 1).Value;
-            ctrl.setMenuForButtonID(null, 0);
+            ctrl.setMenuForButtonID(null, 0); // Init buttons and model for 1st menu level
 
             // Add layout to content of form
             Content = layout;
@@ -79,13 +92,18 @@ namespace customControls
                 mLevel = new RadialMenuLevel(i + 1, (int)innerRadius, defaultThickness);
                 var ctrl = new SectorArcRadialControl(mLevel, 0);
 
-                // Event handlers
-                ctrl.onMouseEnterButton += onRadialControlMouseEnterButton;
-                ctrl.onMouseOverButton += onRadialControlMouseOverButton;
-                ctrl.onMouseLeaveButton += onRadialControlMouseLeaveButton;
-                ctrl.onSelectionChanged += onRadialControlSelectionChanged;
-                ctrl.onFocusRequested += onRadialControlFocusRequested;
-                ctrl.onNewIconAdded += onRadialControlNewIconAdded;
+                // Mouse events
+                ctrl.onMouseEnterButton += radialControlMouseEnterButtonHandler;
+                ctrl.onMouseOverButton += radialControlMouseOverButtonHandler;
+                ctrl.onMouseLeaveButton += radialControlMouseLeaveButtonHandler;
+                ctrl.onSelectionChanged += radialControlSelectionChangedHandler;
+                ctrl.onFocusRequested += radialControlFocusRequestedHandler;
+                // Drag Drop events
+                ctrl.onButtonDragDrop += radialControlDragDropHandler;
+                ctrl.onButtonDragEnter += radialControlDragEnterHandler;
+                ctrl.onButtonDragOver += radialControlDragOverHandler;
+                ctrl.onButtonDragLeave += radialControlDragLeaveHandler;
+                ctrl.onDropTargetAccepted += radialControlAcceptDropHandler;
                 radialMenuCtrl.Add(mLevel, ctrl);
             }
             //
@@ -109,58 +127,36 @@ namespace customControls
         /// </summary>
         /// <param name="radialControl"></param>
         /// <param name="args"></param>
-        private void onRadialControlMouseEnterButton(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
+        private void radialControlMouseEnterButtonHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
+            Console.SetOut(RhinoApp.CommandLineOut);
+            Console.WriteLine($"Mouse over button (form handler)");
             args.shouldUpdateSelection = false; // Don't apply radial control default behavior for mouse enter event
             if (args.buttonProps != null) // Ensure we have a selected button (should never happens)
             {
-                if (args.buttonProps?.buttonState.isDraggingIcon == false) // We are not in dragging mode -> show submenu if button has submenu to display
+
+                var isOpenableButton = args.buttonProps?.model.data.properties.isActive & args.buttonProps?.model.data.properties.isFolder ?? false; // Ensure button contains submenu items
+
+                // isOpenableButton = true; // DEBUG & TEST
+
+                if (radialControl.level.level < maxLevels && isOpenableButton) // Nothing to do for last sub menu level (no show/hide submenus)
                 {
-                    var isOpenableButton = args.buttonProps?.model.data.properties.isActive & args.buttonProps?.model.data.properties.isFolder ?? false; // Ensure button contains submenu items
+                    // Do we have to show or hide submenu ?
+                    var doHide = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID;
 
-                    // isOpenableButton = true; // DEBUG & TEST
+                    // Update radial control selected button
+                    radialControl.selectedButtonID = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID ? "" : args.buttonProps?.model.data.buttonID; // Will trigger event <selectionchanged>
 
-                    if (radialControl.level.level < maxLevels && isOpenableButton) // Nothing to do for last sub menu level (no show/hide submenus)
+                    // Open or hide submenu
+                    if (doHide)
                     {
-                        // Do we have to show or hide submenu ?
-                        var doHide = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID;
-
-                        // Update radial control selected button
-                        radialControl.selectedButtonID = radialControl.selectedButtonID == args.buttonProps?.model.data.buttonID ? "" : args.buttonProps?.model.data.buttonID; // Will trigger event <selectionchanged>
-
-                        // Open or hide submenu
-                        if (doHide)
-                        {
-                            hideSubmenu(radialControl);
-                            radialControl.disableButtonsExceptSelection(); // Enable all buttons (because no ButtonID is selected)
-                        }
-                        else
-                        {
-                            showSubmenu(radialControl, args.buttonProps?.model);
-                            radialControl.disableButtonsExceptSelection(); // Disable all buttons but the one selected
-                        }
+                        hideSubmenu(radialControl);
+                        radialControl.disableButtonsExceptSelection(); // Enable all buttons (because no ButtonID is selected)
                     }
-                }
-                else // Dragging mode -> Show submenu 
-                {
-                    if (radialControl.level.level < maxLevels)
+                    else
                     {
-                        // Check next level is not already visible
-                        var nextLevel = radialControl.level.level + 1;
-                        // Update radial control selected button
-                        radialControl.selectedButtonID = args.buttonProps?.model.data.buttonID; // Update control selection + Will trigger event <selectionchanged>
                         showSubmenu(radialControl, args.buttonProps?.model);
-
-                        Console.SetOut(RhinoApp.CommandLineOut);
-                        Console.WriteLine($"show drag next level ${nextLevel}");
-                        // Ensure no upper level is shown
-                        for (var i = maxLevels ; i > nextLevel ; i--)
-                        {
-                            SectorArcRadialControl ctrl = radialMenuCtrl.First(control => control.Value.level.level == i).Value;
-                            ctrl.selectedButtonID = ""; // clear selection
-                            ctrl.show(false);
-                            // hideSubmenu(ctrl);
-                        }
+                        radialControl.disableButtonsExceptSelection(); // Disable all buttons but the one selected
                     }
                 }
             }
@@ -171,7 +167,7 @@ namespace customControls
         /// </summary>
         /// <param name="radialControl"></param>
         /// <param name="args"></param>
-        private void onRadialControlMouseOverButton(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
+        private void radialControlMouseOverButtonHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
         }
 
@@ -180,7 +176,7 @@ namespace customControls
         /// </summary>
         /// <param name="radialControl"></param>
         /// <param name="args"></param>
-        private void onRadialControlMouseLeaveButton(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
+        private void radialControlMouseLeaveButtonHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
             args.shouldUpdateSelection = false;
             // Dragging mode : Close sub menu when mouse leaves button
@@ -196,13 +192,107 @@ namespace customControls
         /// </summary>
         /// <param name="radialControl"></param>
         /// <param name="args"></param>
-        private void onRadialControlSelectionChanged(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
+        private void radialControlSelectionChangedHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
         {
             // Console.SetOut(RhinoApp.CommandLineOut);
             // Console.WriteLine("Radial control selection changed");
         }
-        private void onRadialControlFocusRequested(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args) { }
-        private void onRadialControlNewIconAdded(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args) { }
+        private void radialControlFocusRequestedHandler(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args) { }
+        /// <summary>
+        /// Event when button request accept drop target. If drop target menu level is != from level of drag source AND it was a "self" drag, don't accept
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void radialControlAcceptDropHandler(SectorArcRadialControl sender, SectorArcButton.DropTargetArgs args)
+        {
+            if (args.sourceType == DragSourceTypes.self)
+            {
+                // if the level of the button source != target, don't accept drop
+                var btn = (SectorArcButton)args.dragEventArgs.Source;
+                try
+                {
+                    var keyValuePair = radialMenuCtrl.First((control) =>
+                    {
+                        if (control.Value.hasButton(btn))
+                        {
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (keyValuePair.Value.level.level != sender.level.level)
+                    {
+                        args.acceptTarget = false;
+                    }
+                }
+                catch { }
+            }
+        }
+        /// <summary>
+        /// Button properties were updated, dragging mode ended
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void radialControlDragDropHandler(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args)
+        {
+            // If icon is added to a menu higher than 1, update lower submenus so that they becomes "folder" and add an icon
+            if (sender.level.level > 1)
+            {
+                for (var i = sender.level.level - 1; i >= 1; i--)
+                {
+                    var ctrl = radialMenuCtrl.First(entry => entry.Value.level.level == i).Value;
+                    if (ctrl.selectedButtonID != "")// As we drag dropped in a submenu level, we should have a selected button ID
+                    {
+                        var btnProps = ctrl.getButtonProperties(ctrl.selectedButtonID);
+                        btnProps.icon = new Icon(args.buttonProps?.model.data.properties.icon.Frames); // Duplicate dropped icon
+                        btnProps.isFolder = true;
+                        btnProps.isActive = true;
+                        btnProps.rhinoScript = args.buttonProps?.model.data.properties.rhinoScript; // Keep rhino command in case this button is moved
+                        ctrl.setButtonProperties(ctrl.selectedButtonID, btnProps);
+                        ctrl.selectedButtonID = ""; // Unselect button
+                    }
+                }
+            }
+            // Hide all sub menus
+            hideSubmenu(radialMenuCtrl.First(ctrl => ctrl.Key.level == 1).Value);
+            sender.selectedButtonID = ""; // Unselect button
+            sender.disableButtonsExceptSelection(); // Enable all buttons
+            dragMode = false; // Ensure dragMode is reset
+        }
+        private void radialControlDragEnterHandler(SectorArcRadialControl radialControl, SectorArcRadialControl.SelectionArgs args)
+        {
+            // Update control selection + Will trigger event <selectionchanged>
+            radialControl.selectedButtonID = args.buttonProps?.model.data.buttonID;
+
+            // If entered a button menu level that can show higher level -> Show next level
+            if (radialControl.level.level < maxLevels)
+            {
+                // Check next level is not already visible
+                var nextLevel = radialControl.level.level + 1;
+                // Update radial control selected button
+                radialControl.selectedButtonID = args.buttonProps?.model.data.buttonID; // Update control selection + Will trigger event <selectionchanged>
+                showSubmenu(radialControl, args.buttonProps?.model);
+
+                //
+                // Console.SetOut(RhinoApp.CommandLineOut);
+                // Console.WriteLine($"show drag next level ${nextLevel}");
+                //
+                // Ensure no upper level is shown
+                for (var i = maxLevels; i > nextLevel; i--)
+                {
+                    SectorArcRadialControl ctrl = radialMenuCtrl.First(control => control.Value.level.level == i).Value;
+                    ctrl.selectedButtonID = ""; // clear selection
+                    ctrl.show(false);
+                }
+            }
+        }
+        private void radialControlDragOverHandler(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args)
+        {
+
+        }
+        private void radialControlDragLeaveHandler(SectorArcRadialControl sender, SectorArcRadialControl.SelectionArgs args)
+        {
+
+        }
 
         private void hideSubmenu(SectorArcRadialControl radialControl)
         {

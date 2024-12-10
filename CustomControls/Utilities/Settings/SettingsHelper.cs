@@ -36,7 +36,7 @@ namespace customControls
         }
 
         /// <summary>
-        /// 
+        /// Return properties from Rhino Settings file. If no properties exists, return a new and empty properties object
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
@@ -49,13 +49,13 @@ namespace customControls
                 {
                     var propsDic = new Dictionary<string, string>(props);
                     properties = new ButtonProperties();
-                    properties.icon = new Icon(1, new Bitmap(propsDic["iconPath"]));
+                    properties.icon = propsDic["iconPath"] != "" ? new Icon(1, new Bitmap(propsDic["iconPath"])) : null;
                     properties.rhinoScript = propsDic["rhinoScript"];
                     properties.isActive = propsDic["isActive"] == "true" ? true : false;
-                    properties.isActive = propsDic["isFolder"] == "true" ? true : false;
+                    properties.isFolder = propsDic["isFolder"] == "true" ? true : false;
                 }
             }
-            return properties;
+            return properties == null ? new ButtonProperties() : properties;
         }
 
         /// <summary>
@@ -71,11 +71,20 @@ namespace customControls
             while (parentModel != null)
             {
                 filename = parentModel.data.buttonID + "_" + filename;
+                parentModel = parentModel.Parent;
             }
-            // Compute icon path for button
-            var iconPath = plugin.SettingsDirectoryAllUsers + "/icons/";
-            System.IO.Directory.CreateDirectory(iconPath); // Create directory if does not exist
-            iconPath += filename + ".png";
+
+            // Compute icon path and save file to disk
+            var iconPath = "";
+            if (model.data.properties.icon != null)
+            {
+                iconPath = plugin.SettingsDirectoryAllUsers + "/icons/";
+                System.IO.Directory.CreateDirectory(iconPath); // Create directory if does not exist
+                iconPath += filename + ".png";
+                model.data.properties.icon.GetFrame(1).Bitmap.Save(iconPath, ImageFormat.Png);
+            }
+
+            // Update Rhino settings
             var settingsProps = new List<KeyValuePair<string, string>>() {
                 new KeyValuePair<string, string>("iconPath",iconPath),
                 new KeyValuePair<string, string>("rhinoScript",model.data.properties.rhinoScript),
