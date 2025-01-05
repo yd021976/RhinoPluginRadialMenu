@@ -24,7 +24,7 @@
    * Click a button to run the command (WIP)
 
 3. TODO (not priority ordered)
-   * [ ] Hide menu and give rhino window focus when a button is clicked (Run a command)
+   * [x] Hide menu and give rhino window focus when a button is clicked (Run a command)
    * [ ] Make settings persistent to keep menu configuration between Rhino launches
    * [ ] Context menu to configure manually a button : Choose other icons, type in the Rhino command
      * This one will take long time and should be splitted in several sub tasks
