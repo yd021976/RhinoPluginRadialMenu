@@ -1,11 +1,12 @@
 using System;
 using Eto.Drawing;
+using Eto.Forms;
 
-namespace customControls
+namespace RadialMenuPlugin.Data
 {
-    public enum DragSourceTypes
+    public enum DragSourceType
     {
-        self = 0,
+        radialMenuItem = 0,
         rhinoItem = 1,
         unknown = 3
     }
@@ -18,17 +19,28 @@ namespace customControls
         /// <summary>
         /// Level number
         /// </summary>
-        public int level;
+        public int Level;
 
         /// <summary>
         /// Inner radius of level
         /// </summary>
-        public int innerRadius;
+        public int InnerRadius;
 
         /// <summary>
         /// Sector thickness fro drawing this level
         /// </summary>
-        public int thickness;
+        public int Thickness;
+
+        /// <summary>
+        /// Start angle for this level
+        /// </summary>
+        public int StartAngle;
+
+        /// <summary>
+        /// # of sectors for this level
+        /// </summary>
+        public int SectorsNumber;
+
 
         /// <summary>
         /// Constructor
@@ -36,82 +48,89 @@ namespace customControls
         /// <param name="level"></param>
         /// <param name="innerRadius"></param>
         /// <param name="thickness"></param>
-        public RadialMenuLevel(int level, int innerRadius, int thickness) { this.level = level; this.innerRadius = innerRadius; this.thickness = thickness; }
+        /// <param name="startAngle"></param>
+        /// <param name="sectorsNumber"></param>
+        public RadialMenuLevel(int level, int innerRadius, int thickness = 30, int startAngle = 0, int sectorsNumber = 8)
+        {
+            Level = level; InnerRadius = innerRadius;
+            Thickness = thickness; StartAngle = startAngle;
+            SectorsNumber = sectorsNumber;
+        }
     }
 
 
     public class ButtonColor
     {
-        public Color pen;
-        public Color fill;
+        public Color Pen;
+        public Color Fill;
 
-        public ButtonColor(Color pen, Color fill) { this.pen = pen; this.fill = fill; }
+        public ButtonColor(Color pen, Color fill) { Pen = pen; Fill = fill; }
     }
     public class RadialButtonStateColors
     {
-        public ButtonColor normal = new ButtonColor(Colors.Beige, Colors.DarkGray);
-        public ButtonColor hover = new ButtonColor(Colors.Beige, Colors.LightGrey);
-        public ButtonColor selected = new ButtonColor(Colors.Beige, Colors.WhiteSmoke);
-        public ButtonColor disabled = new ButtonColor(Colors.LightGrey, Colors.SlateGray);
-        public ButtonColor drag = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
+        public ButtonColor Normal = new ButtonColor(Colors.Beige, Colors.DarkGray);
+        public ButtonColor Hover = new ButtonColor(Colors.Beige, Colors.LightGrey);
+        public ButtonColor Selected = new ButtonColor(Colors.Beige, Colors.WhiteSmoke);
+        public ButtonColor Disabled = new ButtonColor(Colors.LightGrey, Colors.SlateGray);
+        public ButtonColor Drag = new ButtonColor(Colors.Beige, Colors.DarkKhaki);
     }
     public struct ButtonStateImages
     {
-        public Image normalStateImage;
-        public Image overStateImage;
-        public Image disabledStateImage;
-        public Image selectedStateImage;
+        public Image NormalStateImage;
+        public Image OverStateImage;
+        public Image DisabledStateImage;
+        public Image SelectedStateImage;
         public Image dragStateImage;
         // Mask image to detect if a point is hover a sector image
-        public Bitmap sectorMask;
+        public Bitmap SectorMask;
     }
     public class SectorData
     {
         /// <summary>
         /// Size of the sector image
         /// </summary>
-        public Size size;
+        public Size Size;
 
         /// <summary>
         /// Sector arc bounds in real coordinates, i.e Parent coordinates and/or in real enclosing circle (based on inner Radius)
         /// Usefull to set icon location in enclosing control (form for example)
         /// </summary>
-        public RectangleF bounds;
+        public RectangleF Bounds;
 
         // Center of the arc in "real" coordinates
-        public Point arcCenter;
-        public int startAngle;
-        public int sweepAngle;
+        public Point ArcCenter;
+        public int StartAngle;
+        public int SweepAngle;
 
         /// <summary>
         /// State images
         /// </summary>
-        public ButtonStateImages images;
+        public ButtonStateImages Images;
 
         #region Arc radius and thickness
-        protected int innerRadius = 50;
-        protected int thickness = 30;
+        protected int _InnerRadius = 50;
+        protected int _Thickness = 30;
         #endregion
 
         /// <summary>
         /// Center of the sector in world coordinates (usefull to place icon in sector button) 
         /// </summary>
-        public PointF sectorCenter()
+        public PointF SectorCenter()
         {
-            var centerRadius = innerRadius + (thickness / 2);
-            var bisectorAngle = startAngle + (sweepAngle / 2);
-            float X = (float)(arcCenter.X + centerRadius * Math.Cos(bisectorAngle * (Math.PI / 180)));
-            float Y = (float)(arcCenter.Y + centerRadius * Math.Sin(bisectorAngle * (Math.PI / 180)));
+            var centerRadius = _InnerRadius + (_Thickness / 2);
+            var bisectorAngle = StartAngle + (SweepAngle / 2);
+            float X = (float)(ArcCenter.X + centerRadius * Math.Cos(bisectorAngle * (Math.PI / 180)));
+            float Y = (float)(ArcCenter.Y + centerRadius * Math.Sin(bisectorAngle * (Math.PI / 180)));
             return new PointF(X, Y);
         }
 
-        public int endAngle { get { return startAngle + sweepAngle; } }
+        public int EndAngle { get { return StartAngle + SweepAngle; } }
 
         public SectorData() { }
         public SectorData(RadialMenuLevel level)
         {
-            innerRadius = level.innerRadius;
-            thickness = level.thickness;
+            _InnerRadius = level.InnerRadius;
+            _Thickness = level.Thickness;
         }
 
         /// <summary>
@@ -119,11 +138,11 @@ namespace customControls
         /// </summary>
         /// <param name="localLocation"></param>
         /// <returns></returns>
-        public PointF convertLocalToWorld(PointF localLocation)
+        public PointF ConvertLocalToWorld(PointF localLocation)
         {
             // convert mouse location to real circle size (i.e. Parent form size)
-            var localX = bounds.TopLeft.X + localLocation.X;
-            var localY = bounds.TopLeft.Y + localLocation.Y;
+            var localX = Bounds.TopLeft.X + localLocation.X;
+            var localY = Bounds.TopLeft.Y + localLocation.Y;
             return new PointF(localX, localY);
         }
         /// <summary>
@@ -131,10 +150,10 @@ namespace customControls
         /// </summary>
         /// <param name="worldLocaltion"></param>
         /// <returns></returns>
-        public PointF convertWorldToLocal(PointF worldLocaltion)
+        public PointF ConvertWorldToLocal(PointF worldLocaltion)
         {
-            var worldX = worldLocaltion.X - bounds.TopLeft.X;
-            var worldY = worldLocaltion.Y - bounds.TopLeft.Y;
+            var worldX = worldLocaltion.X - Bounds.TopLeft.X;
+            var worldY = worldLocaltion.Y - Bounds.TopLeft.Y;
             return new PointF(worldX, worldY);
         }
         /// <summary>
@@ -143,9 +162,9 @@ namespace customControls
         /// </summary>
         /// <param name="location">Local control coordinates</param>
         /// <returns></returns>
-        public bool isPointInShape(PointF location)
+        public bool IsPointInShape(PointF location)
         {
-            var bmData = images.sectorMask.Lock();
+            var bmData = Images.SectorMask.Lock();
             var p = Point.Round(location);
             try
             {

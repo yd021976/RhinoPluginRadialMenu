@@ -1,8 +1,7 @@
-﻿using System;
-using customControls;
+﻿using RadialMenuPlugin.Utilities.Settings;
 using Rhino;
 
-namespace RadialMenu
+namespace RadialMenuPlugin
 {
     ///<summary>
     /// <para>Every RhinoCommon .rhp assembly must have one and only one PlugIn-derived
@@ -14,12 +13,12 @@ namespace RadialMenu
     ///</summary>
     public class RadialMenuPlugin : Rhino.PlugIns.PlugIn
     {
-        public SettingsHelper settingsHelper;
+        public SettingsHelper SettingsHelper;
         public RadialMenuPlugin()
         {
             Instance = this;
-            settingsHelper = new SettingsHelper(this);
-            settingsHelper.load(); // load settings into C# object
+            SettingsHelper = new SettingsHelper(this);
+            // settingsHelper.load(); // load settings into C# object
         }
 
         ///<summary>Gets the only instance of the FirstRhinopluginPlugin plug-in.</summary>

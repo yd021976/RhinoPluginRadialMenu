@@ -1,12 +1,16 @@
 using Eto.Drawing;
-using RadialMenu;
 
-namespace customControls
+namespace RadialMenuPlugin.Utilities
 {
 
     public class ArcSectorDrawer
     {
+        Data.RadialButtonStateColors theme = new Data.RadialButtonStateColors();
 
+        public ArcSectorDrawer(Data.RadialButtonStateColors theme = null)
+        {
+            if (theme != null) { this.theme = theme; }
+        }
         /// <summary>
         /// Draw  an arc sector in graphic path object, generate images for button and return a SectorData object
         /// </summary>
@@ -18,14 +22,14 @@ namespace customControls
         /// <param name="startAngle">Start angle</param>
         /// <param name="sweepAngle">Sweep angle</param>
         /// <returns></returns>
-        public SectorData drawSector(GraphicsPath g, int x, int y, RadialMenuLevel level, int startAngle, int sweepAngle)
+        public Data.SectorData DrawSector(GraphicsPath g, int x, int y, Data.RadialMenuLevel level, int startAngle, int sweepAngle)
         {
             var center = new Point(x, y);
-            var outerR = level.innerRadius + level.thickness;
+            var outerR = level.InnerRadius + level.Thickness;
             var outerRect = new Rectangle
                             (center.X - outerR, center.Y - outerR, 2 * outerR, 2 * outerR);
             var innerRect = new Rectangle
-                            (center.X - level.innerRadius, center.Y - level.innerRadius, 2 * level.innerRadius, 2 * level.innerRadius);
+                            (center.X - level.InnerRadius, center.Y - level.InnerRadius, 2 * level.InnerRadius, 2 * level.InnerRadius);
 
             g.AddArc(outerRect, startAngle, sweepAngle);
             g.AddArc(innerRect, startAngle + sweepAngle, -sweepAngle);
@@ -33,13 +37,13 @@ namespace customControls
             return buildSectorImages(g, x, y, level, startAngle, sweepAngle);
         }
 
-        protected SectorData buildSectorImages(GraphicsPath gp, int x, int y, RadialMenuLevel level, int startAngle, int sweepAngle)
+        protected Data.SectorData buildSectorImages(GraphicsPath gp, int x, int y, Data.RadialMenuLevel level, int startAngle, int sweepAngle)
         {
-            var pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.pen, 1);
-            var fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.normal.fill;
+            var pen = new Pen(theme.Normal.Pen, 1);
+            var fillColor = theme.Normal.Fill;
 
             var pathSize = new Size((int)gp.Bounds.Size.Width + 3, (int)gp.Bounds.Size.Height + 3);
-            
+
             // Create button image for normal state
             var normalStateImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             var _graphics = new Graphics(normalStateImage);
@@ -50,8 +54,8 @@ namespace customControls
             pen.Dispose();
 
             // Create button image for over state
-            pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.hover.pen, 1);
-            fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.hover.fill;
+            pen = new Pen(theme.Hover.Pen, 1);
+            fillColor = theme.Hover.Fill;
             var overStateImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             _graphics = new Graphics(overStateImage);
             _graphics.TranslateTransform(new PointF(-gp.Bounds.Left, -gp.Bounds.Top));
@@ -61,8 +65,8 @@ namespace customControls
             pen.Dispose();
 
             // Create button image for disable state
-            pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.disabled.pen, 1);
-            fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.disabled.fill;
+            pen = new Pen(theme.Disabled.Pen, 1);
+            fillColor = theme.Disabled.Fill;
             var disabledImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             _graphics = new Graphics(disabledImage);
             _graphics.TranslateTransform(new PointF(-gp.Bounds.Left, -gp.Bounds.Top));
@@ -70,10 +74,10 @@ namespace customControls
             _graphics.DrawPath(pen, gp);
             _graphics.Dispose();
             pen.Dispose();
-            
+
             // Create button image for selected state
-            pen = new Pen(RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.selected.pen, 1);
-            fillColor = RadialMenuPlugin.Instance.settingsHelper.settings.buttonColors.selected.fill;
+            pen = new Pen(theme.Selected.Pen, 1);
+            fillColor = theme.Selected.Fill;
             var selectedImage = new Bitmap(pathSize, PixelFormat.Format32bppRgba);
             _graphics = new Graphics(selectedImage);
             _graphics.TranslateTransform(new PointF(-gp.Bounds.Left, -gp.Bounds.Top));
@@ -93,23 +97,23 @@ namespace customControls
             pen.Dispose();
 
             // REMARK: no specific "drag" image. It is same as "normal" state
-            return new SectorData(level)
+            return new Data.SectorData(level)
             {
                 // Arc data
-                arcCenter = new Point(x, y),
-                bounds = gp.Bounds,
-                size = pathSize,
-                startAngle = startAngle,
-                sweepAngle = sweepAngle,
+                ArcCenter = new Point(x, y),
+                Bounds = gp.Bounds,
+                Size = pathSize,
+                StartAngle = startAngle,
+                SweepAngle = sweepAngle,
                 // Images
-                images = new ButtonStateImages()
+                Images = new Data.ButtonStateImages()
                 {
-                    normalStateImage = normalStateImage,
-                    overStateImage = overStateImage,
-                    disabledStateImage = disabledImage,
+                    NormalStateImage = normalStateImage,
+                    OverStateImage = overStateImage,
+                    DisabledStateImage = disabledImage,
                     dragStateImage = normalStateImage,
-                    selectedStateImage = selectedImage,
-                    sectorMask = maskImage,
+                    SelectedStateImage = selectedImage,
+                    SectorMask = maskImage,
                 },
 
             };

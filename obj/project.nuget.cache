@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9MRAk0nGEqAQtIkcmK++h9pMpk7lJrKztO/udYJX2dHpK8roq0nju0cG+Mcc4cycNYQRk0DIeSw0Hkz7sy+MSA==",
+  "dgSpecHash": "tWuU6+ck+ftv4F8pXkCCTs620kAtkuYRsoB93/2GX7k1aPzzAeHYMFwkhnhqkjHfgtHcwLaFXMFAnfvh2Y5kYA==",
   "success": true,
-  "projectFilePath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPluginRadialMenu/RadialMenu.csproj",
+  "projectFilePath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/RadialMenu.csproj",
   "expectedPackageFiles": [
     "/Users/tigrou/.nuget/packages/grasshopper/8.0.23304.9001/grasshopper.8.0.23304.9001.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/rhinocommon/8.0.23304.9001/rhinocommon.8.0.23304.9001.nupkg.sha512",
