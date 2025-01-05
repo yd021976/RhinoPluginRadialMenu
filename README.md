@@ -1,4 +1,4 @@
-# Rhino Radial menu
+# Rhino Radial menu (MacOS Only)
 
 ##### Launch menu : Type command "TigrouRadialMenu" to launch the radial menu.
 
