@@ -1,4 +1,4 @@
-Type command "TigrouRadialMenu" to launch the radial menu.
+Launch menu : Type command "TigrouRadialMenu" to launch the radial menu.
 
 1) How to add icons
   a - Enter edit mode
