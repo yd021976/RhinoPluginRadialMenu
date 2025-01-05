@@ -494,7 +494,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     if (_Model.Properties.RhinoScript != "")
                     {
 
-                        RhinoApp.RunScript(_Model.Properties.RhinoScript, false);//FIXME: Should be executed by the Form control, not by button
+                        // RhinoApp.RunScript(_Model.Properties.RhinoScript, false);//FIXME: Should be executed by the Form control, not by button
                         OnButtonClickEvent?.Invoke(this, e); // Raise onclick event to be handled by delegate when rhino command is executed
                     }
                 }

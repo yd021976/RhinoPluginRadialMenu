@@ -69,6 +69,14 @@ namespace RadialMenuPlugin.Controls
             var closeBtn = new RoundButton();
             closeBtn.Size = new Size(32, 32);
             closeBtn.SetButtonIcon(icon);
+            closeBtn.MouseEnter += (o, e) =>
+            {
+                Focus(); // Get menu focus
+            };
+            closeBtn.MouseLeave += (o, e) =>
+            {
+                Rhino.RhinoApp.SetFocusToMainWindow(); // Give Rhino app focus
+            };
             closeBtn.OnclickEvent += (sender, args) =>
             {
                 // Right click on close button toggles edit mode
@@ -112,6 +120,7 @@ namespace RadialMenuPlugin.Controls
                 ctrl.MouseEnterButton += _RadialControlMouseEnterButtonHandler;
                 ctrl.MouseMoveButton += _RadialControlMouseMoveButtonHandler;
                 ctrl.MouseLeaveButton += _RadialControlMouseLeaveButtonHandler;
+                ctrl.MouseClickButton += _RadialControlMouseClickHandler;
                 // ctrl.onSelectionChanged += radialControlSelectionChangedHandler;
                 // ctrl.onFocusRequested += radialControlFocusRequestedHandler;
 
@@ -333,14 +342,26 @@ namespace RadialMenuPlugin.Controls
         /// </summary>
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseMoveButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
-        { }
-
+        {
+            Focus(); // Give radial menu focus when mouse overs a button
+        }
+        protected void _RadialControlMouseClickHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
+        {
+            if (e.Model.Data.Properties.RhinoScript != "")
+            {
+                _OnCloseClickEvent(this); // close radial menu
+                Rhino.RhinoApp.SetFocusToMainWindow();
+                Rhino.RhinoApp.RunScript(e.Model.Data.Properties.RhinoScript, false); // Run Rhino command
+            }
+        }
         /// <summary>
         /// Mouse leave a button
         /// </summary>
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseLeaveButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
-        { }
+        {
+            Rhino.RhinoApp.SetFocusToMainWindow(); // Give Rhino main window focus when no button is over
+        }
 
         /// <summary>
         /// 

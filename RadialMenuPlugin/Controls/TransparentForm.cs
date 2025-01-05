@@ -51,7 +51,7 @@ namespace RadialMenuPlugin.Controls
 
             var win = form.ControlObject;
             // var transparentNSColor = NSColor.Clear;
-            var transparentNSColor = AppKit.NSColor.FromRgba(0, 0, 0, 1);
+            var transparentNSColor = NSColor.FromRgba(0, 0, 0, 0);
             win.GetType().GetProperty("BackgroundColor").SetValue(win, transparentNSColor);
 
             // Remove window shadow to avoid animation artefacts
