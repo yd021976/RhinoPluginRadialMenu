@@ -230,7 +230,17 @@ namespace RadialMenuPlugin.Data
                 _Data = SettingsHelper.Instance.GetData(rhinoPS); // Update properties from Rhino settings
             }
         }
-
+        /// <summary>
+        /// Clear data
+        /// </summary>
+        public void Clear()
+        {
+            _Data.Properties.CommandGUID = Guid.Empty;
+            _Data.Properties.IsActive = false;
+            _Data.Properties.IsFolder = false;
+            _Data.Properties.Icon = null;
+            _Data.Properties.RhinoScript = "";
+        }
 
     }
 
