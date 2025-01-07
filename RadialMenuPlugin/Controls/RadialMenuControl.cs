@@ -82,6 +82,7 @@ namespace RadialMenuPlugin.Controls
         public event DragDropEventHandler DragDropOverButton;
         public event DragDropEventHandler DragDropLeaveButton;
         public event DragDropEventHandler DragDropButton;
+        public event DragDropEventHandler RemoveButton;
         public event MouseEventHandler ButtonContextMenu;
         #endregion
 
@@ -194,6 +195,7 @@ namespace RadialMenuPlugin.Controls
                 btn.OnButtonDragLeave += _onDragLeave;
                 btn.OnButtonDragDrop += _OnDragDrop;
                 btn.OnButtonDragDropStart += _OnDoDragStart;
+                btn.OnButtonDragDropEnd += _OnDoDragEnd;
 
                 btn.OnButtonContextMenu += _OnButtonContextMenu;
 
@@ -410,49 +412,114 @@ namespace RadialMenuPlugin.Controls
         #endregion
 
         #region Button event handlers
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnMouseEnter(MenuButton sender, MouseEventArgs e)
         {
             _RaiseEvent(MouseEnterButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnMouseMove(MenuButton sender, MouseEventArgs e)
         {
             _RaiseEvent(MouseMoveButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnMouseLeave(MenuButton sender, MouseEventArgs e)
         {
             _RaiseEvent(MouseLeaveButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnMouseClick(MenuButton sender, MouseEventArgs e)
         {
             _RaiseEvent(MouseClickButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnDragDropEnter(MenuButton sender, DragEventArgs e)
         {
             _RaiseEvent(DragDropEnterButton, new ButtonDragDropEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnDragOver(MenuButton sender, DragEventArgs e)
         {
             _RaiseEvent(DragDropOverButton, new ButtonDragDropEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _onDragLeave(MenuButton sender, DragEventArgs e)
         {
             _RaiseEvent(DragDropLeaveButton, new ButtonDragDropEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnDragDrop(MenuButton sender, DragEventArgs e)
         {
             _RaiseEvent(DragDropButton, new ButtonDragDropEventArgs(e, _Buttons[sender]));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
         protected void _OnDoDragStart(MenuButton sender)
         {
             var eventObj = new DataObject(); // Empty dataobject
             eventObj.SetString(_Buttons[(MenuButton)sender].GUID.ToString(), "MODEL_GUID");
             sender.DoDragDrop(eventObj, DragEffects.All, _Buttons[(MenuButton)sender].Data.Properties.Icon, new PointF(10, 10));
         }
+        /// <summary>
+        /// Handler when button drag ended and no drop target has accepted icon
+        /// <para>This means dragged icon was drop anywhere an so should be removed</para>
+        /// </summary>
+        /// <param name="sender"></param>
+        protected void _OnDoDragEnd(MenuButton sender, DragEventArgs eventArgs)
+        {
+            _RaiseEvent(RemoveButton, new ButtonDragDropEventArgs(eventArgs, _Buttons[(sender)]));
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _OnButtonContextMenu(MenuButton sender, MouseEventArgs e)
         {
             var model = _Buttons[sender];
             _RaiseEvent(ButtonContextMenu, new ButtonMouseEventArgs(e, model));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="EVENT"></typeparam>
+        /// <param name="action"></param>
+        /// <param name="e"></param>
         protected void _RaiseEvent<T, EVENT>(AppEventHandler<T, EVENT> action, EVENT e) where T : RadialMenuControl
         {
             action?.Invoke(this as T, e);

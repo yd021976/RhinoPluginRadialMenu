@@ -55,6 +55,10 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         public event DragDropStartHandler OnButtonDragDropStart;
         /// <summary>
+        /// Event to notify button icon drag ended
+        /// </summary>
+        public event DragDropHandler OnButtonDragDropEnd;
+        /// <summary>
         /// Event to notify mouse is over button
         /// </summary>
         public event MouseEventHandler OnButtonMouseMove;
@@ -413,6 +417,13 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _Buttons[_ButtonType.editmode].DragOver += _DragOverHandler;
             _Buttons[_ButtonType.editmode].DragLeave += _DragLeaveHandler;
             _Buttons[_ButtonType.editmode].DragDrop += _DragDropHandler;
+            DragEnd += (s, e) =>
+            {
+                if (e.Effects == DragEffects.None) // No drop target accepted the icon : We should remove the icon
+                {
+                    _RaiseEvent(OnButtonDragDropEnd, e);
+                }
+            };
         }
         /// <summary>
         /// Update button display as soon as a new Model is binded to this class. When occurs, the "model" property has already been updated, so we can use it
@@ -482,7 +493,8 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     // We can drag icons with "command" modifier + LMB => Drag is forbidden if button is a "folder"
                     if (e.Modifiers == Keys.Application)
                     {
-                        if (_Model.Properties.IsActive && _Model.Properties.IsFolder == false && States.IsEditMode)
+                        // if (_Model.Properties.IsActive && _Model.Properties.IsFolder == false && States.IsEditMode)
+                        if (_Model.Properties.IsActive && States.IsEditMode)
                         {
                             _RaiseEvent(OnButtonDragDropStart); // Raise event to notify dragging start
                         }

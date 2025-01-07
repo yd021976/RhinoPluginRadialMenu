@@ -126,6 +126,7 @@ namespace RadialMenuPlugin.Controls
                 ctrl.DragDropOverButton += _RadialControlDragOverHandler;
                 ctrl.DragDropLeaveButton += _RadialControlDragLeaveHandler;
                 ctrl.DragDropButton += _RadialControlDragDropHandler;
+                ctrl.RemoveButton += _RadialControlRemoveButton;
                 _Controls.Add(_Levels[i], ctrl);
             }
             //
@@ -147,6 +148,30 @@ namespace RadialMenuPlugin.Controls
             switch (sourceType)
             {
                 case DragSourceType.radialMenuItem:
+                    var guid = eventArgs.DragEventSourceArgs.Data.GetString("MODEL_GUID");
+                    var sourceDragModel = ModelController.Instance.Find(guid);
+                    var ret = false;
+                    if (sourceDragModel != null)
+                    {
+                        if (sourceDragModel.Data.Properties.IsFolder)
+                        {
+                            if (sourceDragModel == eventArgs.TargetModel) // If source is dragged onto initial place, accept drop
+                            {
+                                eventArgs.DragEventSourceArgs.Effects = DragEffects.All;
+                                ret = true;
+                            }
+                            else
+                            {
+                                eventArgs.DragEventSourceArgs.Effects = DragEffects.None;
+                            }
+                        }
+                        else
+                        {
+                            eventArgs.DragEventSourceArgs.Effects = DragEffects.All;
+                            ret = true;
+                        }
+                    }
+                    return ret;
                 case DragSourceType.rhinoItem:
                     eventArgs.DragEventSourceArgs.Effects = DragEffects.All;
                     return true;
@@ -435,58 +460,64 @@ namespace RadialMenuPlugin.Controls
                         var sourceDragModel = ModelController.Instance.Find(guid);
                         if (sourceDragModel != null)
                         {
-                            //REMARK: We MUST have sourceDragModel reference here. If not, there is a bug
-                            if (eventArgs.TargetModel.Parent == sourceDragModel.Parent) // Item is moved on same level sub menu
+                            if (sourceDragModel == eventArgs.TargetModel) // If source and target are the same, do nothing
                             {
-                                // Update target model
-                                eventArgs.TargetModel.Data.Properties.Icon = sourceDragModel.Data.Properties.Icon;
-                                eventArgs.TargetModel.Data.Properties.IsFolder = false;
-                                eventArgs.TargetModel.Data.Properties.IsActive = true;
-                                eventArgs.TargetModel.Data.Properties.RhinoScript = sourceDragModel.Data.Properties.RhinoScript;
-                                eventArgs.TargetModel.Data.Properties.CommandGUID = sourceDragModel.Data.Properties.CommandGUID;
-                                // Clear source model data
-                                sourceDragModel.Data.Properties.Icon = null;
-                                sourceDragModel.Data.Properties.IsActive = false;
-                                sourceDragModel.Data.Properties.IsFolder = false;
-                                sourceDragModel.Data.Properties.RhinoScript = "";
-                                sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
+                                return;
                             }
-                            else // Item is moved on another level sub menu
+                            else
                             {
-                                // Create new model properties from source Model
-                                ButtonProperties data = new ButtonProperties(
-                                    new string(sourceDragModel.Data.Properties.RhinoScript),
-                                    new Icon(sourceDragModel.Data.Properties.Icon.Frames), true, false,
-                                    sourceDragModel.Data.Properties.CommandGUID);
-
-                                // Clear source model data
-                                sourceDragModel.Data.Properties.Icon = null;
-                                sourceDragModel.Data.Properties.IsActive = false;
-                                sourceDragModel.Data.Properties.IsFolder = false;
-                                sourceDragModel.Data.Properties.RhinoScript = "";
-                                sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
-
-                                // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model
-                                var parent = sourceDragModel.Parent;
-                                while (parent != null)
+                                if (eventArgs.TargetModel.Parent == sourceDragModel.Parent) // Item is moved on same level sub menu
                                 {
-                                    var sourceModelChildren = ModelController.Instance.GetChildren(parent); var activeIcon = 0;
-                                    foreach (var model in sourceModelChildren)
-                                    {
-                                        if (model.Data.Properties.Icon != null) activeIcon++;
-                                    }
-                                    if (activeIcon == 0) // Parent model has no children left -> Remove icon and isFolder flag for parent model
-                                    {
-                                        parent.Data.Properties.Icon = null;
-                                        parent.Data.Properties.IsFolder = false;
-                                        parent.Data.Properties.IsActive = false;
-                                        parent.Data.Properties.CommandGUID = Guid.Empty;
-                                    }
-                                    parent = parent.Parent;
-
+                                    // Update target model
+                                    eventArgs.TargetModel.Data.Properties.Icon = sourceDragModel.Data.Properties.Icon;
+                                    eventArgs.TargetModel.Data.Properties.IsFolder = false;
+                                    eventArgs.TargetModel.Data.Properties.IsActive = true;
+                                    eventArgs.TargetModel.Data.Properties.RhinoScript = sourceDragModel.Data.Properties.RhinoScript;
+                                    eventArgs.TargetModel.Data.Properties.CommandGUID = sourceDragModel.Data.Properties.CommandGUID;
+                                    // Clear source model data
+                                    sourceDragModel.Data.Properties.Icon = null;
+                                    sourceDragModel.Data.Properties.IsActive = false;
+                                    sourceDragModel.Data.Properties.IsFolder = false;
+                                    sourceDragModel.Data.Properties.RhinoScript = "";
+                                    sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
                                 }
-                                // Rebuidld/Update sub menu hierarchy for target drop
-                                _UpdateDropItem(data, eventArgs.TargetModel, radialMenuControl.Level.Level);
+                                else // Item is moved on another level sub menu
+                                {
+                                    // Create new model properties from source Model
+                                    ButtonProperties data = new ButtonProperties(
+                                        new string(sourceDragModel.Data.Properties.RhinoScript),
+                                        new Icon(sourceDragModel.Data.Properties.Icon.Frames), true, false,
+                                        sourceDragModel.Data.Properties.CommandGUID);
+
+                                    // Clear source model data
+                                    sourceDragModel.Data.Properties.Icon = null;
+                                    sourceDragModel.Data.Properties.IsActive = false;
+                                    sourceDragModel.Data.Properties.IsFolder = false;
+                                    sourceDragModel.Data.Properties.RhinoScript = "";
+                                    sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
+
+                                    // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model
+                                    var parent = sourceDragModel.Parent;
+                                    while (parent != null)
+                                    {
+                                        var sourceModelChildren = ModelController.Instance.GetChildren(parent); var activeIcon = 0;
+                                        foreach (var model in sourceModelChildren)
+                                        {
+                                            if (model.Data.Properties.Icon != null) activeIcon++;
+                                        }
+                                        if (activeIcon == 0) // Parent model has no children left -> Remove icon and isFolder flag for parent model
+                                        {
+                                            parent.Data.Properties.Icon = null;
+                                            parent.Data.Properties.IsFolder = false;
+                                            parent.Data.Properties.IsActive = false;
+                                            parent.Data.Properties.CommandGUID = Guid.Empty;
+                                        }
+                                        parent = parent.Parent;
+
+                                    }
+                                    // Rebuidld/Update sub menu hierarchy for target drop
+                                    _UpdateDropItem(data, eventArgs.TargetModel, radialMenuControl.Level.Level);
+                                }
                             }
                         }
                         break;
@@ -523,6 +554,39 @@ namespace RadialMenuPlugin.Controls
                 _Dragsource = null;
             }
         }
+        /// <summary>
+        /// Remove button is requested. Clear buttons models and all children if they exists
+        /// <para>
+        /// Don't really remove models objects, only clear values
+        /// </para>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        protected void _RadialControlRemoveButton(object sender, ButtonDragDropEventArgs eventArgs)
+        {
+            _ClearModel(eventArgs.TargetModel);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        protected void _ClearModel(Model model)
+        {
+            var children = ModelController.Instance.GetChildren(model);
+            if (children.Count > 0)
+            {
+                foreach (var child in children)
+                {
+                    _ClearModel(child); // Clear children if any
+                }
+            }
+            model.Clear();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
         protected void _RadialControlContextMenu(object sender, ButtonMouseEventArgs eventArgs)
         {
 
