@@ -1,5 +1,3 @@
-global using test = System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<string, string>>;
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +11,13 @@ namespace RadialMenuPlugin.Data
     /// </summary>
     public struct RhinoPersistentSettingsCtor
     {
+        /// <summary>
+        /// Model GUID string representation
+        /// </summary>
         public string Guid;
+        /// <summary>
+        /// Button ID associated to this model
+        /// </summary>
         public string ButtonID;
         public RhinoPersistentSettingsCtor(string guid, string buttonID)
         {
@@ -278,7 +282,7 @@ namespace RadialMenuPlugin.Data
         /// <param name="parent"></param>
         /// <param name="create"></param>
         /// <returns></returns>
-        public Model FindOrAddModel(string buttonID, Model parent = null, bool create = false)
+        public Model Find(string buttonID, Model parent = null, bool create = false)
         {
             var model = _GetModel(buttonID, parent);
             if (model == null && create) // If model is not found and caller wants to create a new one
@@ -287,6 +291,41 @@ namespace RadialMenuPlugin.Data
                 _Models.Add(model);
             }
             return model;
+        }
+        /// <summary>
+        /// Find a model by its GUID
+        /// </summary>
+        /// <param name="modelGUID"></param>
+        /// <returns></returns>
+        public Model Find(Guid modelGUID)
+        {
+            Model foundModel = null;
+            foreach (var model in _Models)
+            {
+                if (model.GUID == modelGUID)
+                {
+                    foundModel = model;
+                    break;
+                }
+            }
+            return foundModel;
+        }
+        /// <summary>
+        /// Find a model by its GUID string representation
+        /// </summary>
+        /// <param name="modelGuidString"></param>
+        /// <returns></returns>
+        public Model Find(string modelGuidString)
+        {
+            Model foundModel = null;
+            Guid modelGuid = Guid.Empty;
+            try
+            {
+                modelGuid = Guid.Parse(modelGuidString);
+                foundModel = Find(modelGuid);
+            }
+            catch { }
+            return foundModel;
         }
         /// <summary>
         /// Add a model in collection

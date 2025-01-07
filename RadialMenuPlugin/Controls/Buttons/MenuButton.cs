@@ -51,7 +51,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         public event DragDropHandler OnButtonDragLeave;
         /// <summary>
-        /// Event to notify we start to drag item
+        /// Event to notify to start button icon drag
         /// </summary>
         public event DragDropStartHandler OnButtonDragDropStart;
         /// <summary>
@@ -482,8 +482,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             {
                 if (_Model.Properties.IsActive && _Model.Properties.IsFolder == false && States.IsEditMode)
                 {
-                    var eventObj = new DataObject(); // Empty dataobject
-                    DoDragDrop(eventObj, DragEffects.All, _Model.Properties.Icon, new PointF(10, 10));
                     _RaiseEvent(OnButtonDragDropStart); // Raise event to notify dragging start
                 }
             }

@@ -15,7 +15,6 @@ namespace RadialMenuPlugin.Controls
 {
     #region Event Handler and Args classes
     using DragDropEventHandler = AppEventHandler<RadialMenuControl, ButtonDragDropEventArgs>; // Drag/Drop event delegate type
-    using DoDragDropEventHandler = AppEventHandler<RadialMenuControl, Model>; // Drag/Drop event delegate type
     using MouseEventHandler = AppEventHandler<RadialMenuControl, ButtonMouseEventArgs>;
     /// <summary>
     /// 
@@ -77,8 +76,6 @@ namespace RadialMenuPlugin.Controls
         public event DragDropEventHandler DragDropOverButton;
         public event DragDropEventHandler DragDropLeaveButton;
         public event DragDropEventHandler DragDropButton;
-        public event DoDragDropEventHandler DoDragDropStart;
-        public event DoDragDropEventHandler DoDragDropEnd;
         #endregion
 
         #region Public properties
@@ -293,7 +290,7 @@ namespace RadialMenuPlugin.Controls
             foreach (MenuButton button in _Buttons.Keys)
             {
                 button.Unbind(); // Unbind any bindings
-                var model = ModelController.Instance.FindOrAddModel(button.ID, parent, true);
+                var model = ModelController.Instance.Find(button.ID, parent, true);
                 _Buttons[button] = model; // update model
                 button.ButtonModelBinding.Bind(_Buttons, bntCollection => bntCollection[button].Data); // Bind button model
                 button.ID = model.Data.ButtonID; // Update button ID
@@ -437,14 +434,14 @@ namespace RadialMenuPlugin.Controls
         {
             _RaiseEvent(DragDropButton, new ButtonDragDropEventArgs(e, _Buttons[sender]));
         }
-        protected void _OnDoDragStart(object sender)
+        protected void _OnDoDragStart(MenuButton sender)
         {
-            _RaiseEvent(DoDragDropStart, _Buttons[(MenuButton)sender]);
+            var eventObj = new DataObject(); // Empty dataobject
+            eventObj.SetString(_Buttons[(MenuButton)sender].GUID.ToString(), "MODEL_GUID");
+            sender.DoDragDrop(eventObj, DragEffects.All, _Buttons[(MenuButton)sender].Data.Properties.Icon, new PointF(10, 10));
         }
-        protected void _OnDoDragEnd(object sender)
-        {
-            _RaiseEvent(DoDragDropEnd, _Buttons[(MenuButton)sender]);
-        }
+        protected void _OnDoDragEnd(MenuButton sender)
+        { }
         protected void _RaiseEvent<T, EVENT>(AppEventHandler<T, EVENT> action, EVENT e) where T : RadialMenuControl
         {
             action?.Invoke(this as T, e);

@@ -41,7 +41,6 @@ namespace RadialMenuPlugin.Controls
         /// <summary>
         /// Ref to Model object when button is dragged
         /// </summary>
-        protected Model _DoDragModelObject;
         #endregion
 
         #region Public methods
@@ -111,7 +110,6 @@ namespace RadialMenuPlugin.Controls
         /// </summary>
         protected void _InitLevels()
         {
-            RadialMenuLevel menuLevel = null;
             for (int i = 0; i < s_maxLevels; i++)
             {
                 var ctrl = new RadialMenuControl(_Levels[i]);
@@ -121,16 +119,12 @@ namespace RadialMenuPlugin.Controls
                 ctrl.MouseMoveButton += _RadialControlMouseMoveButtonHandler;
                 ctrl.MouseLeaveButton += _RadialControlMouseLeaveButtonHandler;
                 ctrl.MouseClickButton += _RadialControlMouseClickHandler;
-                // ctrl.onSelectionChanged += radialControlSelectionChangedHandler;
-                // ctrl.onFocusRequested += radialControlFocusRequestedHandler;
 
                 // Drag Drop events
                 ctrl.DragDropEnterButton += _RadialControlDragEnterHandler;
                 ctrl.DragDropOverButton += _RadialControlDragOverHandler;
                 ctrl.DragDropLeaveButton += _RadialControlDragLeaveHandler;
                 ctrl.DragDropButton += _RadialControlDragDropHandler;
-                ctrl.DoDragDropStart += _DoDragStart;
-                ctrl.DoDragDropEnd += _DoDragEnded;
                 _Controls.Add(_Levels[i], ctrl);
             }
             //
@@ -436,58 +430,63 @@ namespace RadialMenuPlugin.Controls
                         _UpdateDropItem(toolbaritem, eventArgs.TargetModel, radialMenuControl.Level.Level);
                         break;
                     case DragSourceType.radialMenuItem:
-                        //REMARK: We MUST have _DoDragModelObject reference here. If not, there is a bug
-                        if (eventArgs.TargetModel.Parent == _DoDragModelObject.Parent) // Item is moved on same level sub menu
+                        var guid = eventArgs.DragEventSourceArgs.Data.GetString("MODEL_GUID");
+                        var sourceDragModel = ModelController.Instance.Find(guid);
+                        if (sourceDragModel != null)
                         {
-                            // Update target model
-                            eventArgs.TargetModel.Data.Properties.Icon = _DoDragModelObject.Data.Properties.Icon;
-                            eventArgs.TargetModel.Data.Properties.IsFolder = false;
-                            eventArgs.TargetModel.Data.Properties.IsActive = true;
-                            eventArgs.TargetModel.Data.Properties.RhinoScript = _DoDragModelObject.Data.Properties.RhinoScript;
-                            eventArgs.TargetModel.Data.Properties.CommandGUID = _DoDragModelObject.Data.Properties.CommandGUID;
-                            // Clear source model data
-                            _DoDragModelObject.Data.Properties.Icon = null;
-                            _DoDragModelObject.Data.Properties.IsActive = false;
-                            _DoDragModelObject.Data.Properties.IsFolder = false;
-                            _DoDragModelObject.Data.Properties.RhinoScript = "";
-                            _DoDragModelObject.Data.Properties.CommandGUID = Guid.Empty;
-                        }
-                        else // Item is moved on another level sub menu
-                        {
-                            // Create new model properties from source Model
-                            ButtonProperties data = new ButtonProperties(
-                                new string(_DoDragModelObject.Data.Properties.RhinoScript),
-                                new Icon(_DoDragModelObject.Data.Properties.Icon.Frames), true, false,
-                                _DoDragModelObject.Data.Properties.CommandGUID);
-
-                            // Clear source model data
-                            _DoDragModelObject.Data.Properties.Icon = null;
-                            _DoDragModelObject.Data.Properties.IsActive = false;
-                            _DoDragModelObject.Data.Properties.IsFolder = false;
-                            _DoDragModelObject.Data.Properties.RhinoScript = "";
-                            _DoDragModelObject.Data.Properties.CommandGUID = Guid.Empty;
-
-                            // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model
-                            var parent = _DoDragModelObject.Parent;
-                            while (parent != null)
+                            //REMARK: We MUST have sourceDragModel reference here. If not, there is a bug
+                            if (eventArgs.TargetModel.Parent == sourceDragModel.Parent) // Item is moved on same level sub menu
                             {
-                                var sourceModelChildren = ModelController.Instance.GetChildren(parent); var activeIcon = 0;
-                                foreach (var model in sourceModelChildren)
-                                {
-                                    if (model.Data.Properties.Icon != null) activeIcon++;
-                                }
-                                if (activeIcon == 0) // Parent model has no children left -> Remove icon and isFolder flag for parent model
-                                {
-                                    parent.Data.Properties.Icon = null;
-                                    parent.Data.Properties.IsFolder = false;
-                                    parent.Data.Properties.IsActive = false;
-                                    parent.Data.Properties.CommandGUID = Guid.Empty;
-                                }
-                                parent = parent.Parent;
-
+                                // Update target model
+                                eventArgs.TargetModel.Data.Properties.Icon = sourceDragModel.Data.Properties.Icon;
+                                eventArgs.TargetModel.Data.Properties.IsFolder = false;
+                                eventArgs.TargetModel.Data.Properties.IsActive = true;
+                                eventArgs.TargetModel.Data.Properties.RhinoScript = sourceDragModel.Data.Properties.RhinoScript;
+                                eventArgs.TargetModel.Data.Properties.CommandGUID = sourceDragModel.Data.Properties.CommandGUID;
+                                // Clear source model data
+                                sourceDragModel.Data.Properties.Icon = null;
+                                sourceDragModel.Data.Properties.IsActive = false;
+                                sourceDragModel.Data.Properties.IsFolder = false;
+                                sourceDragModel.Data.Properties.RhinoScript = "";
+                                sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
                             }
-                            // Rebuidld/Update sub menu hierarchy for target drop
-                            _UpdateDropItem(data, eventArgs.TargetModel, radialMenuControl.Level.Level);
+                            else // Item is moved on another level sub menu
+                            {
+                                // Create new model properties from source Model
+                                ButtonProperties data = new ButtonProperties(
+                                    new string(sourceDragModel.Data.Properties.RhinoScript),
+                                    new Icon(sourceDragModel.Data.Properties.Icon.Frames), true, false,
+                                    sourceDragModel.Data.Properties.CommandGUID);
+
+                                // Clear source model data
+                                sourceDragModel.Data.Properties.Icon = null;
+                                sourceDragModel.Data.Properties.IsActive = false;
+                                sourceDragModel.Data.Properties.IsFolder = false;
+                                sourceDragModel.Data.Properties.RhinoScript = "";
+                                sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
+
+                                // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model
+                                var parent = sourceDragModel.Parent;
+                                while (parent != null)
+                                {
+                                    var sourceModelChildren = ModelController.Instance.GetChildren(parent); var activeIcon = 0;
+                                    foreach (var model in sourceModelChildren)
+                                    {
+                                        if (model.Data.Properties.Icon != null) activeIcon++;
+                                    }
+                                    if (activeIcon == 0) // Parent model has no children left -> Remove icon and isFolder flag for parent model
+                                    {
+                                        parent.Data.Properties.Icon = null;
+                                        parent.Data.Properties.IsFolder = false;
+                                        parent.Data.Properties.IsActive = false;
+                                        parent.Data.Properties.CommandGUID = Guid.Empty;
+                                    }
+                                    parent = parent.Parent;
+
+                                }
+                                // Rebuidld/Update sub menu hierarchy for target drop
+                                _UpdateDropItem(data, eventArgs.TargetModel, radialMenuControl.Level.Level);
+                            }
                         }
                         break;
                     default:
@@ -522,25 +521,6 @@ namespace RadialMenuPlugin.Controls
                 _Dragsource.DragEnd -= _RadialControlDragEndHandler;
                 _Dragsource = null;
             }
-        }
-        /// <summary>
-        /// When a menu button drag starts, store its Model reference
-        /// <para>NOTE: The <paramref name="model"/> reference is used in drag/drop event handlers</para>
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="model"></param>
-        protected void _DoDragStart(object sender, Model model)
-        {
-            _DoDragModelObject = model;
-        }
-        /// <summary>
-        /// When a menu button drag ended, clear Model reference
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="model"></param>
-        protected void _DoDragEnded(object sender, Model model)
-        {
-            _DoDragModelObject = null;
         }
         #endregion
     }
