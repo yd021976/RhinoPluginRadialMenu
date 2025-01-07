@@ -55,10 +55,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         public event DragDropStartHandler OnButtonDragDropStart;
         /// <summary>
-        /// 
-        /// </summary>
-        public event DragDropStartHandler OnButtonDragDropEnd;
-        /// <summary>
         /// Event to notify mouse is over button
         /// </summary>
         public event MouseEventHandler OnButtonMouseMove;
@@ -70,6 +66,10 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// Event to notify mouse enters a button
         /// </summary>
         public event MouseEventHandler OnButtonMouseEnter;
+        /// <summary>
+        /// Event to notify button request showing context menu
+        /// </summary>
+        public event MouseEventHandler OnButtonContextMenu;
         #endregion
 
         #region Button States
@@ -413,7 +413,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _Buttons[_ButtonType.editmode].DragOver += _DragOverHandler;
             _Buttons[_ButtonType.editmode].DragLeave += _DragLeaveHandler;
             _Buttons[_ButtonType.editmode].DragDrop += _DragDropHandler;
-            DragEnd += _DoDragDropEnd; //NOTE: Used to clear object reference when dragging an item is done
         }
         /// <summary>
         /// Update button display as soon as a new Model is binded to this class. When occurs, the "model" property has already been updated, so we can use it
@@ -477,28 +476,39 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// <param name="e"></param>
         protected void _MouseDownHandler(object sender, MouseEventArgs e)
         {
-            // We can drag icons with "command" modifier + LMB => Drag is forbidden if button is a "folder"
-            if (e.Modifiers == Keys.Application)
+            switch (e.Buttons)
             {
-                if (_Model.Properties.IsActive && _Model.Properties.IsFolder == false && States.IsEditMode)
-                {
-                    _RaiseEvent(OnButtonDragDropStart); // Raise event to notify dragging start
-                }
-            }
-            else
-            {
-                if (_Model.Properties.IsActive && !States.IsEditMode) // Command can ONLY be executed when not in edit mode
-                {
-                    if (_Model.Properties.RhinoScript != "")
+                case MouseButtons.Primary:
+                    // We can drag icons with "command" modifier + LMB => Drag is forbidden if button is a "folder"
+                    if (e.Modifiers == Keys.Application)
                     {
-
-                        // RhinoApp.RunScript(_Model.Properties.RhinoScript, false);//FIXME: Should be executed by the Form control, not by button
-                        OnButtonClickEvent?.Invoke(this, e); // Raise onclick event to be handled by delegate when rhino command is executed
+                        if (_Model.Properties.IsActive && _Model.Properties.IsFolder == false && States.IsEditMode)
+                        {
+                            _RaiseEvent(OnButtonDragDropStart); // Raise event to notify dragging start
+                        }
                     }
-                }
+                    else
+                    {
+                        if (_Model.Properties.IsActive && !States.IsEditMode) // Command can ONLY be executed when not in edit mode
+                        {
+                            if (_Model.Properties.RhinoScript != "")
+                            {
+
+                                // RhinoApp.RunScript(_Model.Properties.RhinoScript, false);//FIXME: Should be executed by the Form control, not by button
+                                OnButtonClickEvent?.Invoke(this, e); // Raise onclick event to be handled by delegate when rhino command is executed
+                            }
+                        }
+                    }
+                    break;
+                case MouseButtons.Alternate:
+                    // Shows context menu panel in edit mode when right mouse button click
+                    if (States.IsEditMode)
+                    {
+                        _RaiseEvent(OnButtonContextMenu, e);
+                    }
+                    break;
             }
         }
-
         /// <summary>
         /// Handler for mouse move in control. Note that we check and fire custom mouse "leave", "over" and "enter" events here because
         /// the shape is not a rectangle. So we want to raise events only for the custom (arc) shape
@@ -580,15 +590,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         {
             _RaiseEvent(OnButtonDragDrop, e);
             States.IsHovering = false;
-        }
-        /// <summary>
-        ///  Raise event when dragging item ended
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected void _DoDragDropEnd(object sender, DragEventArgs e)
-        {
-            _RaiseEvent(OnButtonDragDropEnd);
         }
         /// <summary>
         /// 

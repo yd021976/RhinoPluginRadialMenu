@@ -119,6 +119,7 @@ namespace RadialMenuPlugin.Controls
                 ctrl.MouseMoveButton += _RadialControlMouseMoveButtonHandler;
                 ctrl.MouseLeaveButton += _RadialControlMouseLeaveButtonHandler;
                 ctrl.MouseClickButton += _RadialControlMouseClickHandler;
+                ctrl.ButtonContextMenu += _RadialControlContextMenu;
 
                 // Drag Drop events
                 ctrl.DragDropEnterButton += _RadialControlDragEnterHandler;
@@ -521,6 +522,10 @@ namespace RadialMenuPlugin.Controls
                 _Dragsource.DragEnd -= _RadialControlDragEndHandler;
                 _Dragsource = null;
             }
+        }
+        protected void _RadialControlContextMenu(object sender, ButtonMouseEventArgs eventArgs)
+        {
+
         }
         #endregion
     }
