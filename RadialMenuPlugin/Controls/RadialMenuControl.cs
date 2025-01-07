@@ -293,7 +293,7 @@ namespace RadialMenuPlugin.Controls
             foreach (MenuButton button in _Buttons.Keys)
             {
                 button.Unbind(); // Unbind any bindings
-                var model = ModelController.Instance.FindModel(button.ID, parent, true);
+                var model = ModelController.Instance.FindOrAddModel(button.ID, parent, true);
                 _Buttons[button] = model; // update model
                 button.ButtonModelBinding.Bind(_Buttons, bntCollection => bntCollection[button].Data); // Bind button model
                 button.ID = model.Data.ButtonID; // Update button ID

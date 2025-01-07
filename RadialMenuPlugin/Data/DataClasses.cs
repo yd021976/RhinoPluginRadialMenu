@@ -1,9 +1,24 @@
 using System;
 using Eto.Drawing;
-using Eto.Forms;
 
 namespace RadialMenuPlugin.Data
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    public class SettingsDomain
+    {
+        public string Name { get; }
+        private SettingsDomain(string key) { Name = key; }
+        public static SettingsDomain RadialButtonsConfig => new SettingsDomain("Buttons");
+        public static SettingsDomain Theme => new SettingsDomain("Theme");
+        public static SettingsDomain GeneralSettings => new SettingsDomain("General");
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
     public enum DragSourceType
     {
         radialMenuItem = 0,

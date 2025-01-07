@@ -2,6 +2,7 @@ using Eto.Drawing;
 using Eto.Forms;
 using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Controls.Buttons.MenuButton;
+using System;
 
 namespace RadialMenuPlugin.Utilities
 {
@@ -42,12 +43,16 @@ namespace RadialMenuPlugin.Utilities
                     {
                         // Get the macro "script" command
                         var macroScript = lMacro.GetType().GetProperty("Script").GetValue(lMacro, null);
-                        return new ButtonProperties((string)macroScript, icon);
+                        // Get macro GUID
+                        var macroGuidProperty = lMacro.GetType().GetProperty("Id");
+                        var GUID = macroGuidProperty.GetValue(lMacro, null);
+                        return new ButtonProperties((string)macroScript, icon, true, false, (Guid)GUID);
                     }
                     else
                     {
                         return null;
                     }
+
                 }
                 else
                 {

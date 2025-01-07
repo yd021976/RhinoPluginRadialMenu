@@ -189,6 +189,8 @@ namespace RadialMenuPlugin.Controls
             targetModel.Data.Properties.IsActive = true;
             targetModel.Data.Properties.IsFolder = false;
             targetModel.Data.Properties.RhinoScript = updatedProperties.RhinoScript;
+            targetModel.Data.Properties.CommandGUID = updatedProperties.CommandGUID;
+
             if (targetLevel > 1) // If icon is drop on a sub menu -> Update parents menu models
             {
                 var parentModel = targetModel.Parent;
@@ -205,6 +207,7 @@ namespace RadialMenuPlugin.Controls
                         parentModel.Data.Properties.IsFolder = true;
                     }
                     parentModel.Data.Properties.IsActive = true; // Ensure icon is active
+                    parentModel.Data.Properties.CommandGUID = updatedProperties.CommandGUID;
                     parentModel = parentModel.Parent;
                 } while (parentModel != null);
             }
@@ -441,22 +444,28 @@ namespace RadialMenuPlugin.Controls
                             eventArgs.TargetModel.Data.Properties.IsFolder = false;
                             eventArgs.TargetModel.Data.Properties.IsActive = true;
                             eventArgs.TargetModel.Data.Properties.RhinoScript = _DoDragModelObject.Data.Properties.RhinoScript;
+                            eventArgs.TargetModel.Data.Properties.CommandGUID = _DoDragModelObject.Data.Properties.CommandGUID;
                             // Clear source model data
                             _DoDragModelObject.Data.Properties.Icon = null;
                             _DoDragModelObject.Data.Properties.IsActive = false;
                             _DoDragModelObject.Data.Properties.IsFolder = false;
                             _DoDragModelObject.Data.Properties.RhinoScript = "";
+                            _DoDragModelObject.Data.Properties.CommandGUID = Guid.Empty;
                         }
                         else // Item is moved on another level sub menu
                         {
                             // Create new model properties from source Model
-                            ButtonProperties data = new ButtonProperties(new string(_DoDragModelObject.Data.Properties.RhinoScript), new Icon(_DoDragModelObject.Data.Properties.Icon.Frames), true, false);
+                            ButtonProperties data = new ButtonProperties(
+                                new string(_DoDragModelObject.Data.Properties.RhinoScript),
+                                new Icon(_DoDragModelObject.Data.Properties.Icon.Frames), true, false,
+                                _DoDragModelObject.Data.Properties.CommandGUID);
 
                             // Clear source model data
                             _DoDragModelObject.Data.Properties.Icon = null;
                             _DoDragModelObject.Data.Properties.IsActive = false;
                             _DoDragModelObject.Data.Properties.IsFolder = false;
                             _DoDragModelObject.Data.Properties.RhinoScript = "";
+                            _DoDragModelObject.Data.Properties.CommandGUID = Guid.Empty;
 
                             // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model
                             var parent = _DoDragModelObject.Parent;
@@ -472,6 +481,7 @@ namespace RadialMenuPlugin.Controls
                                     parent.Data.Properties.Icon = null;
                                     parent.Data.Properties.IsFolder = false;
                                     parent.Data.Properties.IsActive = false;
+                                    parent.Data.Properties.CommandGUID = Guid.Empty;
                                 }
                                 parent = parent.Parent;
 
