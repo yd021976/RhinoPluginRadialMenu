@@ -35,6 +35,9 @@ namespace RadialMenuPlugin.Controls
             TargetModel = target;
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public struct SelectionEventArgs
     {
         public string ButtonID;
@@ -47,6 +50,9 @@ namespace RadialMenuPlugin.Controls
             Properties = properties;
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public struct ButtonMouseEventArgs
     {
         public MouseEventArgs MouseEventArgs;
@@ -76,6 +82,7 @@ namespace RadialMenuPlugin.Controls
         public event DragDropEventHandler DragDropOverButton;
         public event DragDropEventHandler DragDropLeaveButton;
         public event DragDropEventHandler DragDropButton;
+        public event MouseEventHandler ButtonContextMenu;
         #endregion
 
         #region Public properties
@@ -187,7 +194,8 @@ namespace RadialMenuPlugin.Controls
                 btn.OnButtonDragLeave += _onDragLeave;
                 btn.OnButtonDragDrop += _OnDragDrop;
                 btn.OnButtonDragDropStart += _OnDoDragStart;
-                btn.OnButtonDragDropEnd += _OnDoDragEnd;
+
+                btn.OnButtonContextMenu += _OnButtonContextMenu;
 
                 _Buttons.Add(btn, null); // Update button dictionary
                 _ButtonsImages.Add(btn, sector); // Store images for this button
@@ -440,8 +448,11 @@ namespace RadialMenuPlugin.Controls
             eventObj.SetString(_Buttons[(MenuButton)sender].GUID.ToString(), "MODEL_GUID");
             sender.DoDragDrop(eventObj, DragEffects.All, _Buttons[(MenuButton)sender].Data.Properties.Icon, new PointF(10, 10));
         }
-        protected void _OnDoDragEnd(MenuButton sender)
-        { }
+        protected void _OnButtonContextMenu(MenuButton sender, MouseEventArgs e)
+        {
+            var model = _Buttons[sender];
+            _RaiseEvent(ButtonContextMenu, new ButtonMouseEventArgs(e, model));
+        }
         protected void _RaiseEvent<T, EVENT>(AppEventHandler<T, EVENT> action, EVENT e) where T : RadialMenuControl
         {
             action?.Invoke(this as T, e);

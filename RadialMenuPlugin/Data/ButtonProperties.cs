@@ -138,7 +138,9 @@ namespace RadialMenuPlugin.Data
         /// <summary>
         /// Create new object from rhino settings
         /// <para>
-        /// REMARK: The Icon creation is up to the caller of this method
+        /// REMARK: The Icon creation is up to the caller of this method, we only retrieve the icon GUID name.<br/>
+        /// This is because this class shouldn't be aware of the storage location<br/>
+        /// The storage location should be managed by class <see cref="SettingsHelper"/> 
         /// </para>
         /// </summary>
         /// <param name="rhinoSettings"></param>
@@ -146,6 +148,7 @@ namespace RadialMenuPlugin.Data
         {
             IsFolder = rhinoSettings[nameof(IsFolder)] == true.ToString() ? true : false;
             IsActive = rhinoSettings[nameof(IsActive)] == true.ToString() ? true : false;
+            RhinoScript = rhinoSettings[nameof(RhinoScript)];
             CommandGUID = Guid.Parse(rhinoSettings[nameof(CommandGUID)]);
         }
         /// <summary>
@@ -159,6 +162,7 @@ namespace RadialMenuPlugin.Data
             {
                 new KeyValuePair<string, string>(nameof(Icon),commandGUID ), // Sets the name of the icon
                 new KeyValuePair<string, string>(nameof(CommandGUID),commandGUID ), // Sets the guid of the command
+                new KeyValuePair<string, string>(nameof(RhinoScript),RhinoScript ), // Sets the command to execute
                 new KeyValuePair<string, string>(nameof(IsActive), IsActive.ToString()),
                 new KeyValuePair<string, string>(nameof(IsFolder), IsFolder.ToString())
             };
