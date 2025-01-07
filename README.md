@@ -25,7 +25,8 @@
 
 3. TODO (not priority ordered)
    * [x] Hide menu and give rhino window focus when a button is clicked (Run a command)
-   * [ ] Make settings persistent to keep menu configuration between Rhino launches
+   * [x] Make settings persistent to keep menu configuration between Rhino launches
+   * [ ] Improve UI visual changes when changing sub menu (i.e. Add soft fade in/out)
    * [ ] Context menu to configure manually a button : Choose other icons, type in the Rhino command
      * This one will take long time and should be splitted in several sub tasks
    * [ ] Create Setting panel to choose shortcuts to launch radial menu
