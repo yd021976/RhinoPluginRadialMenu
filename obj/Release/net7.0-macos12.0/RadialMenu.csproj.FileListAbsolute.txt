@@ -40,3 +40,5 @@
 /Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/obj/Release/net7.0-macos12.0/RadialMenu.pdb
 /Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/obj/Release/net7.0-macos12.0/RadialMenu.genruntimeconfig.cache
 /Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/obj/Release/net7.0-macos12.0/ref/RadialMenu.rhp
+/Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/bin/Release/net7.0-macos12.0/NLog.dll
+/Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/obj/Release/net7.0-macos12.0/RadialMenu.csproj.CopyComplete

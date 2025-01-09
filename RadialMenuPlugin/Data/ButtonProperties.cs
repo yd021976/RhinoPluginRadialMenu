@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Eto.Drawing;
 
 namespace RadialMenuPlugin.Data
 {
@@ -8,12 +9,23 @@ namespace RadialMenuPlugin.Data
     /// 
     /// </summary>
     public sealed class ButtonPropertiesList : List<KeyValuePair<string, string>> { }
-
+    public struct Macro
+    {
+        public string Script = "";
+        public string Tooltip = "";
+        public Macro(string script, string tooltip)
+        {
+            Script = script;
+            Tooltip = tooltip;
+        }
+    }
     /// <summary>
     /// 
     /// </summary>
     public class ButtonProperties : INotifyPropertyChanged
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// Event to notigy a property has changed
         /// </summary>
@@ -48,26 +60,41 @@ namespace RadialMenuPlugin.Data
         /// <summary>
         /// Rhino script to execute
         /// </summary>
-        private string _RhinoScript;
+        private Macro _LeftMacro;
         /// <summary>
         /// Rhino script to execute
         /// </summary>
-        public string RhinoScript
+        public Macro LeftMacro
         {
-            get => _RhinoScript; set
+            get => _LeftMacro; set
             {
-                _RhinoScript = value;
-                OnPropertyChanged(nameof(RhinoScript));
+                _LeftMacro = value;
+                OnPropertyChanged(nameof(LeftMacro));
+            }
+        }
+        /// <summary>
+        /// Rhino script to execute
+        /// </summary>
+        private Macro _RightMacro;
+        /// <summary>
+        /// Rhino script to execute
+        /// </summary>
+        public Macro RightMacro
+        {
+            get => _RightMacro; set
+            {
+                _RightMacro = value;
+                OnPropertyChanged(nameof(RightMacro));
             }
         }
         /// <summary>
         /// Icon of the command
         /// </summary>
-        protected Eto.Drawing.Icon _Icon;
+        protected Icon _Icon;
         /// <summary>
         /// Icon of the command
         /// </summary>
-        public Eto.Drawing.Icon Icon { get => _Icon; set { _Icon = value; OnPropertyChanged(nameof(Icon)); } }
+        public Icon Icon { get => _Icon; set { _Icon = value; OnPropertyChanged(nameof(Icon)); } }
         /// <summary>
         /// Define if icon/command should be presented as a folder in UI
         /// </summary>
@@ -91,16 +118,17 @@ namespace RadialMenuPlugin.Data
         {
             Icon = null;
             IsActive = false;
-            RhinoScript = "";
+            LeftMacro = new Macro();
         }
         /// <summary>
         /// Ctor
         /// </summary>
-        /// <param name="script"></param>
+        /// <param name="leftMacro"></param>
         /// <param name="icon"></param>
-        public ButtonProperties(string script, Eto.Drawing.Icon icon) : this()
+        public ButtonProperties(Macro leftMacro, Macro rightMacro, Icon icon) : this()
         {
-            RhinoScript = script;
+            LeftMacro = leftMacro;
+            RightMacro = rightMacro;
             Icon = icon;
         }
         /// <summary>
@@ -109,7 +137,7 @@ namespace RadialMenuPlugin.Data
         /// <param name="script"></param>
         /// <param name="icon"></param>
         /// <param name="isActive"></param>
-        public ButtonProperties(string script, Eto.Drawing.Icon icon, bool isActive) : this(script, icon)
+        public ButtonProperties(Macro leftMacro, Macro rightMacro, Icon icon, bool isActive) : this(leftMacro, rightMacro, icon)
         {
             IsActive = isActive;
         }
@@ -120,7 +148,7 @@ namespace RadialMenuPlugin.Data
         /// <param name="icon"></param>
         /// <param name="isActive"></param>
         /// <param name="isFolder"></param>
-        public ButtonProperties(string script, Eto.Drawing.Icon icon, bool isActive, bool isFolder) : this(script, icon, isActive)
+        public ButtonProperties(Macro leftMacro, Macro rightMacro, Eto.Drawing.Icon icon, bool isActive, bool isFolder) : this(leftMacro, rightMacro, icon, isActive)
         {
             IsFolder = isFolder;
         }
@@ -131,7 +159,7 @@ namespace RadialMenuPlugin.Data
         /// <param name="icon"></param>
         /// <param name="isActive"></param>
         /// <param name="isFolder"></param>
-        public ButtonProperties(string script, Eto.Drawing.Icon icon, bool isActive, bool isFolder, Guid macroGuid) : this(script, icon, isActive, isFolder)
+        public ButtonProperties(Macro leftMacro, Macro rightMacro, Icon icon, bool isActive, bool isFolder, Guid macroGuid) : this(leftMacro, rightMacro, icon, isActive, isFolder)
         {
             CommandGUID = macroGuid;
         }
@@ -146,10 +174,18 @@ namespace RadialMenuPlugin.Data
         /// <param name="rhinoSettings"></param>
         public ButtonProperties(Dictionary<string, string> rhinoSettings)
         {
-            IsFolder = rhinoSettings[nameof(IsFolder)] == true.ToString() ? true : false;
-            IsActive = rhinoSettings[nameof(IsActive)] == true.ToString() ? true : false;
-            RhinoScript = rhinoSettings[nameof(RhinoScript)];
-            CommandGUID = Guid.Parse(rhinoSettings[nameof(CommandGUID)]);
+            try
+            {
+                IsFolder = rhinoSettings[nameof(IsFolder)] == true.ToString() ? true : false;
+                IsActive = rhinoSettings[nameof(IsActive)] == true.ToString() ? true : false;
+                LeftMacro = new Macro(rhinoSettings["LeftMacroScript"], rhinoSettings["LeftMacroTooltip"]);
+                RightMacro = new Macro(rhinoSettings["RightMacroScript"], rhinoSettings["RightMacroTooltip"]);
+                CommandGUID = Guid.Parse(rhinoSettings[nameof(CommandGUID)]);
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e);
+            }
         }
         /// <summary>
         /// Convert class instance to list of key/value pair to integrate into Rhino settings
@@ -162,7 +198,10 @@ namespace RadialMenuPlugin.Data
             {
                 new KeyValuePair<string, string>(nameof(Icon),commandGUID ), // Sets the name of the icon
                 new KeyValuePair<string, string>(nameof(CommandGUID),commandGUID ), // Sets the guid of the command
-                new KeyValuePair<string, string>(nameof(RhinoScript),RhinoScript ), // Sets the command to execute
+                new KeyValuePair<string, string>("LeftMacroScript",LeftMacro.Script ),
+                new KeyValuePair<string, string>("LeftMacroTooltip",LeftMacro.Tooltip ), 
+                new KeyValuePair<string, string>("RightMacroScript",RightMacro.Script ), 
+                new KeyValuePair<string, string>("RightMacroTooltip",RightMacro.Tooltip ),
                 new KeyValuePair<string, string>(nameof(IsActive), IsActive.ToString()),
                 new KeyValuePair<string, string>(nameof(IsFolder), IsFolder.ToString())
             };

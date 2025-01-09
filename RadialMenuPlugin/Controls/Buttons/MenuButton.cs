@@ -493,7 +493,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     // We can drag icons with "command" modifier + LMB => Drag is forbidden if button is a "folder"
                     if (e.Modifiers == Keys.Application)
                     {
-                        // if (_Model.Properties.IsActive && _Model.Properties.IsFolder == false && States.IsEditMode)
                         if (_Model.Properties.IsActive && States.IsEditMode)
                         {
                             _RaiseEvent(OnButtonDragDropStart); // Raise event to notify dragging start
@@ -503,12 +502,8 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     {
                         if (_Model.Properties.IsActive && !States.IsEditMode) // Command can ONLY be executed when not in edit mode
                         {
-                            if (_Model.Properties.RhinoScript != "")
-                            {
 
-                                // RhinoApp.RunScript(_Model.Properties.RhinoScript, false);//FIXME: Should be executed by the Form control, not by button
-                                OnButtonClickEvent?.Invoke(this, e); // Raise onclick event to be handled by delegate when rhino command is executed
-                            }
+                            _RaiseEvent(OnButtonClickEvent, e);
                         }
                     }
                     break;
@@ -518,6 +513,11 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     {
                         _RaiseEvent(OnButtonContextMenu, e);
                     }
+                    else
+                    {
+                        _RaiseEvent(OnButtonClickEvent, e);
+                    }
+
                     break;
             }
         }
@@ -538,8 +538,20 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 // OnButtonRequestFocusEvent?.Invoke(this,e);
                 var oldHovering = _MouseMoveUpdate(e);
 
-                if (States.IsHovering)
-                { // Mouse is over the button
+                if (States.IsHovering) // Mouse overs the button
+                {
+                    // Show tooltip
+                    var tooltipText = "";
+                    if (_Model.Properties.LeftMacro.Tooltip != "")
+                    {
+                        tooltipText = "Left click:" + _Model.Properties.LeftMacro.Tooltip;
+                    }
+                    if (_Model.Properties.RightMacro.Tooltip != "")
+                    {
+                        tooltipText += "\nRight click:" + _Model.Properties.RightMacro.Tooltip;
+                    }
+                    if (tooltipText != "") { ToolTip = tooltipText; }
+
                     if (oldHovering) // Mouse was already over the button -> Invoke event mouse over
                     {
                         _RaiseEvent(OnButtonMouseMove, e); // Notify mouse is over the button
@@ -553,6 +565,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 {
                     if (oldHovering) // mouse was over the button -> Invoke leave event
                     {
+                        ToolTip = "";
                         _RaiseEvent(OnButtonMouseLeave, e);
                     }
                 }
