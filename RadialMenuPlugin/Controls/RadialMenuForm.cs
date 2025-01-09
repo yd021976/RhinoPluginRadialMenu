@@ -208,7 +208,8 @@ namespace RadialMenuPlugin.Controls
             targetModel.Data.Properties.Icon = updatedProperties.Icon;
             targetModel.Data.Properties.IsActive = true;
             targetModel.Data.Properties.IsFolder = false;
-            targetModel.Data.Properties.RhinoScript = updatedProperties.RhinoScript;
+            targetModel.Data.Properties.LeftMacro = updatedProperties.LeftMacro;
+            targetModel.Data.Properties.RightMacro = updatedProperties.RightMacro;
             targetModel.Data.Properties.CommandGUID = updatedProperties.CommandGUID;
 
             if (targetLevel > 1) // If icon is drop on a sub menu -> Update parents menu models
@@ -370,11 +371,24 @@ namespace RadialMenuPlugin.Controls
         }
         protected void _RadialControlMouseClickHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
-            if (e.Model.Data.Properties.RhinoScript != "")
+            switch (e.MouseEventArgs.Buttons)
             {
-                _OnCloseClickEvent(this); // close radial menu
-                Rhino.RhinoApp.SetFocusToMainWindow();
-                Rhino.RhinoApp.RunScript(e.Model.Data.Properties.RhinoScript, false); // Run Rhino command
+                case MouseButtons.Primary:
+                    if (e.Model.Data.Properties.LeftMacro.Script != "")
+                    {
+                        _OnCloseClickEvent(this); // close radial menu
+                        Rhino.RhinoApp.SetFocusToMainWindow();
+                        Rhino.RhinoApp.RunScript(e.Model.Data.Properties.LeftMacro.Script, false); // Run Rhino command
+                    }
+                    break;
+                case MouseButtons.Alternate:
+                    if (e.Model.Data.Properties.RightMacro.Script != "")
+                    {
+                        _OnCloseClickEvent(this); // close radial menu
+                        Rhino.RhinoApp.SetFocusToMainWindow();
+                        Rhino.RhinoApp.RunScript(e.Model.Data.Properties.RightMacro.Script, false); // Run Rhino command
+                    }
+                    break;
             }
         }
         /// <summary>
@@ -472,20 +486,23 @@ namespace RadialMenuPlugin.Controls
                                     eventArgs.TargetModel.Data.Properties.Icon = sourceDragModel.Data.Properties.Icon;
                                     eventArgs.TargetModel.Data.Properties.IsFolder = false;
                                     eventArgs.TargetModel.Data.Properties.IsActive = true;
-                                    eventArgs.TargetModel.Data.Properties.RhinoScript = sourceDragModel.Data.Properties.RhinoScript;
+                                    eventArgs.TargetModel.Data.Properties.LeftMacro = sourceDragModel.Data.Properties.LeftMacro;
+                                    eventArgs.TargetModel.Data.Properties.RightMacro = sourceDragModel.Data.Properties.RightMacro;
                                     eventArgs.TargetModel.Data.Properties.CommandGUID = sourceDragModel.Data.Properties.CommandGUID;
                                     // Clear source model data
                                     sourceDragModel.Data.Properties.Icon = null;
                                     sourceDragModel.Data.Properties.IsActive = false;
                                     sourceDragModel.Data.Properties.IsFolder = false;
-                                    sourceDragModel.Data.Properties.RhinoScript = "";
+                                    sourceDragModel.Data.Properties.LeftMacro = new Macro();
+                                    sourceDragModel.Data.Properties.RightMacro = new Macro();
                                     sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
                                 }
                                 else // Item is moved on another level sub menu
                                 {
                                     // Create new model properties from source Model
                                     ButtonProperties data = new ButtonProperties(
-                                        new string(sourceDragModel.Data.Properties.RhinoScript),
+                                        new Macro(sourceDragModel.Data.Properties.LeftMacro.Script, sourceDragModel.Data.Properties.LeftMacro.Tooltip),
+                                        new Macro(sourceDragModel.Data.Properties.RightMacro.Script, sourceDragModel.Data.Properties.RightMacro.Tooltip),
                                         new Icon(sourceDragModel.Data.Properties.Icon.Frames), true, false,
                                         sourceDragModel.Data.Properties.CommandGUID);
 
@@ -493,7 +510,8 @@ namespace RadialMenuPlugin.Controls
                                     sourceDragModel.Data.Properties.Icon = null;
                                     sourceDragModel.Data.Properties.IsActive = false;
                                     sourceDragModel.Data.Properties.IsFolder = false;
-                                    sourceDragModel.Data.Properties.RhinoScript = "";
+                                    sourceDragModel.Data.Properties.LeftMacro = new Macro();
+                                    sourceDragModel.Data.Properties.RightMacro = new Macro();
                                     sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
 
                                     // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model

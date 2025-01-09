@@ -21,6 +21,10 @@ namespace RadialMenuPlugin.Utilities
     public static class DragDropUtilities
     {
         /// <summary>
+        /// Logger
+        /// </summary>
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        /// <summary>
         ///  <para>When a drop event occurs (dragLeave), check if drop item is a Rhino toolbar item</para>
         ///  <para>If so, try to get the script command macro and the associated icon</para>
         /// </summary>
@@ -33,24 +37,50 @@ namespace RadialMenuPlugin.Utilities
             {
                 if (obj.GetType().ToString() == "Rhino.UI.Internal.TabPanels.Controls.ToolBarControlItem")
                 {
-                    // Get the macro of the dropped toolbar item
-                    var lMacro = obj.GetType().GetProperty("LeftMacro").GetValue(obj, null);
+                    try
+                    {
+                        // Get the macro of the dropped toolbar item
+                        var lMacro = obj.GetType().GetProperty("LeftMacro").GetValue(obj, null);
+                        var rMacro = obj.GetType().GetProperty("RightMacro").GetValue(obj, null);
 
-                    // Seems that "CreateIcon" is a good condidate to get the Rhino toolbar item icon
-                    var iconCreateMethod = lMacro.GetType().GetMethod("CreateIcon");
-                    var icon = (Icon)iconCreateMethod?.Invoke(lMacro, new object[] { new Size(28, 28), true });
-                    if (icon != null)
-                    {
-                        // Get the macro "script" command
-                        var macroScript = lMacro.GetType().GetProperty("Script").GetValue(lMacro, null);
-                        // Get macro GUID
-                        var macroGuidProperty = lMacro.GetType().GetProperty("Id");
-                        var GUID = macroGuidProperty.GetValue(lMacro, null);
-                        return new ButtonProperties((string)macroScript, icon, true, false, (Guid)GUID);
+                        // Seems that "CreateIcon" is a good condidate to get the Rhino toolbar item icon
+                        var iconCreateMethod = lMacro.GetType().GetMethod("CreateIcon");
+                        var icon = (Icon)iconCreateMethod?.Invoke(lMacro, new object[] { new Size(28, 28), true });
+                        if (icon != null)
+                        {
+                            // Get the LEFT macro "script" and tooltip
+                            var leftMacroScript = ""; var leftMacroTooltip = "";
+                            if (lMacro != null)
+                            {
+                                leftMacroScript = (string)lMacro.GetType().GetProperty("Script").GetValue(lMacro, null);
+                                leftMacroTooltip = (string)lMacro.GetType().GetProperty("HelpText").GetValue(lMacro, null);
+                            }
+
+                            // Get the RIGHT macro "script" and tooltip
+                            var rightMacroScript = ""; var rightMacroTooltip = "";
+                            if (rMacro != null)
+                            {
+                                rightMacroScript = (string)rMacro.GetType().GetProperty("Script").GetValue(rMacro, null);
+                                rightMacroTooltip = (string)rMacro.GetType().GetProperty("HelpText").GetValue(rMacro, null);
+
+                            }
+                            // Get macro GUID
+                            var macroGuidProperty = lMacro.GetType().GetProperty("Id");
+                            var GUID = macroGuidProperty.GetValue(lMacro, null);
+
+                            return new ButtonProperties(
+                                new Macro(leftMacroScript, leftMacroTooltip),
+                                new Macro(rightMacroScript, rightMacroTooltip),
+                                icon, true, false, (Guid)GUID);
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
-                    else
+                    catch (Exception exception)
                     {
-                        return null;
+                        Logger.Fatal(exception);
                     }
 
                 }
