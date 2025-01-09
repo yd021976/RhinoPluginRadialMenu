@@ -491,8 +491,8 @@ namespace RadialMenuPlugin.Controls
         protected void _OnDoDragStart(MenuButton sender)
         {
             var eventObj = new DataObject(); // Empty dataobject
-            eventObj.SetString(_Buttons[(MenuButton)sender].GUID.ToString(), "MODEL_GUID");
-            sender.DoDragDrop(eventObj, DragEffects.All, _Buttons[(MenuButton)sender].Data.Properties.Icon, new PointF(10, 10));
+            eventObj.SetString(_Buttons[sender].GUID.ToString(), "MODEL_GUID");
+            sender.DoDragDrop(eventObj, DragEffects.All, _Buttons[sender].Data.Properties.Icon, new PointF(10, 10));
         }
         /// <summary>
         /// Handler when button drag ended and no drop target has accepted icon

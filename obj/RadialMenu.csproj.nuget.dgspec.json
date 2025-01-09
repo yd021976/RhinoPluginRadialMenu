@@ -47,6 +47,10 @@
               "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "target": "Package",
               "version": "[8.0.23304.9001, )"
+            },
+            "NLog": {
+              "target": "Package",
+              "version": "[5.3.4, )"
             }
           },
           "imports": [

@@ -239,7 +239,8 @@ namespace RadialMenuPlugin.Data
             _Data.Properties.IsActive = false;
             _Data.Properties.IsFolder = false;
             _Data.Properties.Icon = null;
-            _Data.Properties.RhinoScript = "";
+            _Data.Properties.LeftMacro = new Macro();
+            _Data.Properties.RightMacro = new Macro();
         }
 
     }
