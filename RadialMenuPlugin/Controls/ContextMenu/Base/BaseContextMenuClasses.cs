@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using AppKit;
 using Eto.Forms;
 using RadialMenuPlugin.Data;
 
@@ -20,7 +21,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
     /// <summary>
     /// Abstract class for contextual menu contents
     /// </summary>
-    public abstract class ContextMenuContent<D> : Panel, IContextMenuBinding<ContextMenuContent<D>, D> where D : Model
+    public abstract class ContextMenuContent<D> : StackLayout, IContextMenuBinding<ContextMenuContent<D>, D> where D : Model, new()
     {
         #region  public properties
         public BindableBinding<ContextMenuContent<D>, D> ModelBinding => _ModelBinding;
@@ -29,11 +30,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
         /// <summary>
         /// 
         /// </summary>
-        protected StackLayout _Layout = new StackLayout();
-        /// <summary>
-        /// 
-        /// </summary>
-        protected D _Model;
+        protected D _Model = new D();
         /// <summary>
         /// 
         /// </summary>
@@ -89,9 +86,18 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
     /// T is the type of contents
     /// </para>
     /// </summary>
-    public abstract class ContextMenuForm<CONTENTS, DATA> : Form where CONTENTS : ContextMenuContent<DATA> where DATA : Model
+    public abstract class ContextMenuForm<CONTENTS, DATA> : Form where CONTENTS : ContextMenuContent<DATA> where DATA : Model, new()
     {
         #region public properties
+        public new ContextMenuContent<DATA> Content
+        {
+            get => _Contents;
+            set
+            {
+                _Contents = value;
+                base.Content = _Contents;
+            }
+        }
         public DATA Model
         {
             get => _Model;
@@ -111,11 +117,20 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
         #region public methods
         public ContextMenuForm() : base()
         {
-            WindowStyle = WindowStyle.None;
+            WindowStyle = WindowStyle.None;// No border/decoration
             AutoSize = false;
             Resizable = false;
             Topmost = true;
             ShowActivated = false;
+            // Set context menu always above other windows. i.e. the radialmenu shouldn't overlap context menu
+            var ctrlProp = Handler.GetType().GetProperty("Control");
+            var nsWindow = (NSWindow)ctrlProp.GetValue(Handler, null);
+            nsWindow.Level = NSWindowLevel.PopUpMenu;
+
+            MouseLeave += (s, e) =>
+            {
+                Close();
+            };
         }
         #endregion
         #region protected/private methods

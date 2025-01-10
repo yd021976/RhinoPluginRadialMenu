@@ -55,12 +55,26 @@ namespace RadialMenuPlugin.Controls
     /// </summary>
     public struct ButtonMouseEventArgs
     {
+        /// <summary>
+        /// Mouse event from original sender (button)
+        /// </summary>
         public MouseEventArgs MouseEventArgs;
+        /// <summary>
+        /// Screen location of click event
+        /// <para>
+        /// REMARK: When mouse event is triggered, location is in Control coordinates. But it is usefull to have screen location of click event, i.e. To display something not related to control)
+        /// </para>
+        /// </summary>
+        public Point ScreenLocation;
+        /// <summary>
+        /// Model associated to the button
+        /// </summary>
         public Model Model;
-        public ButtonMouseEventArgs(MouseEventArgs mouseEventArgs, Model model)
+        public ButtonMouseEventArgs(MouseEventArgs mouseEventArgs, Point screenlocation, Model model)
         {
             MouseEventArgs = mouseEventArgs;
             Model = model;
+            ScreenLocation = screenlocation;
         }
     }
     #endregion
@@ -419,7 +433,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseEnter(MenuButton sender, MouseEventArgs e)
         {
-            _RaiseEvent(MouseEnterButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
+            _RaiseEvent(MouseEnterButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }
         /// <summary>
         /// 
@@ -428,7 +442,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseMove(MenuButton sender, MouseEventArgs e)
         {
-            _RaiseEvent(MouseMoveButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
+            _RaiseEvent(MouseMoveButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }
         /// <summary>
         /// 
@@ -437,7 +451,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseLeave(MenuButton sender, MouseEventArgs e)
         {
-            _RaiseEvent(MouseLeaveButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
+            _RaiseEvent(MouseLeaveButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }
         /// <summary>
         /// 
@@ -446,7 +460,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseClick(MenuButton sender, MouseEventArgs e)
         {
-            _RaiseEvent(MouseClickButton, new ButtonMouseEventArgs(e, _Buttons[sender]));
+            _RaiseEvent(MouseClickButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }
         /// <summary>
         /// 
@@ -511,7 +525,9 @@ namespace RadialMenuPlugin.Controls
         protected void _OnButtonContextMenu(MenuButton sender, MouseEventArgs e)
         {
             var model = _Buttons[sender];
-            _RaiseEvent(ButtonContextMenu, new ButtonMouseEventArgs(e, model));
+            var location = sender.PointToScreen(e.Location); // convert location to screen coordinates
+
+            _RaiseEvent(ButtonContextMenu, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), model));
         }
         /// <summary>
         /// 
