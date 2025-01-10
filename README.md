@@ -5,7 +5,7 @@
    
 For now, there is no package installer (coming later)
 
-Just move the *.rhp file from the folder /bin/Release/net7.0-macos12.0/RadialMenu.rhp to your Rhino 8.0.x MacPlugins folder on your mac.
+Just move the *.rhp and *.dll files from the folder /bin/Release/net7.0-macos12.0/RadialMenu.rhp to your Rhino 8.0.x MacPlugins folder on your mac.
 
 The Rhino 8 path on MacOS should be at : ~/Library/Application Support/McNeel/Rhinoceros/8.0/MacPlugIns
 <br/><br/>
