@@ -7,6 +7,8 @@ using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Controls.Buttons;
 using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using System;
+using RadialMenuPlugin.Controls.ContextMenu;
+using AppKit;
 
 namespace RadialMenuPlugin.Controls
 {
@@ -30,6 +32,7 @@ namespace RadialMenuPlugin.Controls
         /// Keep track of drag source Control to register/unregister "dragEnd" event
         /// </summary>
         protected Control _Dragsource;
+        protected ButtonSettingEditorForm _ContextMenuForm;
         /// <summary>
         /// Current radial menu mode : true=>Edit mode, false=>normal mode 
         /// </summary>
@@ -48,6 +51,9 @@ namespace RadialMenuPlugin.Controls
         {
             Size = new Size(s_menuSize.Width, s_menuSize.Height);
             _InitLevels(); // Create "blank" radial menu controls (i.e. no button IDs, blank models)
+
+            // Init the context menu Form
+            _ContextMenuForm = new ButtonSettingEditorForm();
 
             // Ensure when form is shown that we display only first menu level
             Shown += (o, e) =>
@@ -601,13 +607,17 @@ namespace RadialMenuPlugin.Controls
             model.Clear();
         }
         /// <summary>
-        /// 
+        /// Shows context menu event handler
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
         protected void _RadialControlContextMenu(object sender, ButtonMouseEventArgs eventArgs)
         {
-
+            _ContextMenuForm.Model = eventArgs.Model;
+            var location = new Point(eventArgs.ScreenLocation);
+            location.X = location.X - 8;
+            location.Y = location.Y - 8;
+            _ContextMenuForm.Show(location);
         }
         #endregion
     }

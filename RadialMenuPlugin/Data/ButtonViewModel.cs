@@ -172,7 +172,11 @@ namespace RadialMenuPlugin.Data
         {
             SettingsHelper.Instance.SetProperties(_RhinoPersistentSettingsNode, _Data);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public Model() { }
+        
         /// <summary>
         /// Constructor without a GUID. Properties will no be initialized from Rhino Persistent settings
         /// <para>
