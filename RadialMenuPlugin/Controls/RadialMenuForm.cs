@@ -465,6 +465,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseLeaveButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
+            if (_ContextMenuForm.Visible) return; // Don't give Rhino main window focus if we're showing context menu
             Rhino.RhinoApp.SetFocusToMainWindow(); // Give Rhino main window focus when no button is over
         }
 

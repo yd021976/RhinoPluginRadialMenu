@@ -5,6 +5,7 @@ using RadialMenuPlugin.Data;
 using AppKit;
 using System.Collections.Generic;
 using RadialMenuPlugin.Controls.ContextMenu.Base.Editors;
+using System;
 
 namespace RadialMenuPlugin.Controls.ContextMenu
 {
@@ -15,7 +16,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu
     {
         public ButtonSettingEditorForm() : base()
         {
-            Size = new Size(300, 200);
+            Size = new Size(150, 150);
             Content = new ButtonSettingEditorContents();
         }
         public ButtonSettingEditorForm(Model data) : this()
@@ -26,6 +27,11 @@ namespace RadialMenuPlugin.Controls.ContextMenu
         {
             Location = location;
             Show();
+        }
+        protected override void OnShown(EventArgs e)
+        {
+            Focus();
+            base.OnShown(e);
         }
     }
 
@@ -39,21 +45,39 @@ namespace RadialMenuPlugin.Controls.ContextMenu
         {
             Orientation = Orientation.Vertical;
             Padding = new Padding(16);
+            _InitTriggerEditor();
 
-            _TriggerEditor = new TextBox(); _TriggerEditor.MaxLength = 1; _TriggerEditor.ShowBorder = false;
             var triggerStackField = new StackField("Trigger", _TriggerEditor);
             Items.Add(new StackLayoutItem(triggerStackField));
         }
         /// <summary>
         /// Update binding when Model object is updated
         /// </summary>
-        protected override void _UpdateModelBindings() {
+        protected override void _UpdateModelBindings()
+        {
             _TriggerEditor.Unbind();
             _TriggerEditor.TextBinding.Bind(_Model.Data.Properties, nameof(_Model.Data.Properties.Trigger));
         }
         protected override void _ModelChangedHandler(object sender, PropertyChangedEventArgs e)
+        { }
+        protected override void OnShown(EventArgs e)
         {
-
+            _TriggerEditor.Focus();
+            base.OnShown(e);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        protected void _InitTriggerEditor()
+        {
+            _TriggerEditor = new TextBox();
+            _TriggerEditor.MaxLength = 1;
+            _TriggerEditor.ShowBorder = false;
+            _TriggerEditor.Size = new Size(25, 20);
+            _TriggerEditor.TextChanged += (s, e) =>
+            {
+                _TriggerEditor.Text = _TriggerEditor.Text.ToUpper();
+            };
         }
     }
 }
