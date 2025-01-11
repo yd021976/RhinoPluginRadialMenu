@@ -18,15 +18,15 @@ namespace RadialMenuPlugin.Controls
         #endregion
 
         #region Protected/Private properties
-        protected static int s_defaultInnerRadius = 50;
-        protected static int s_defaultThickness = 60;
+        protected static int s_defaultInnerRadius = 40;
+        protected static int s_defaultThickness = 65;
         protected static int s_maxLevels = 3;
         protected static Size s_menuSize = new Size(800, 800);
         protected PixelLayout _Layout = new PixelLayout();
         protected List<RadialMenuLevel> _Levels = new List<RadialMenuLevel>() {
                 new RadialMenuLevel(1,s_defaultInnerRadius,s_defaultThickness),
                 new RadialMenuLevel(2,s_defaultInnerRadius+s_defaultThickness+8,s_defaultThickness,(360/8)/2), // For this one, start angle at 45° to alternate buttons
-                new RadialMenuLevel(3,(s_defaultInnerRadius+s_defaultThickness)*2+8,s_defaultThickness),
+                new RadialMenuLevel(3,((s_defaultInnerRadius+s_defaultThickness)+8)+s_defaultThickness+8,s_defaultThickness),
             };
         /// <summary>
         /// Keep track of drag source Control to register/unregister "dragEnd" event
@@ -51,7 +51,17 @@ namespace RadialMenuPlugin.Controls
         {
             Size = new Size(s_menuSize.Width, s_menuSize.Height);
             _InitLevels(); // Create "blank" radial menu controls (i.e. no button IDs, blank models)
-
+            KeyUp += (s, e) =>
+            {
+                // React to key press only when no context menu is shown and if the key is not "escape"
+                // We will manage here key press for button trigger by keyboard
+                // REMARK:"escape" keyup event is managed in "_OnEscapePressed" handler and is also fired by the RadialMenuCommand class
+                if (e.Key == Keys.Escape) return;
+                if (_ContextMenuForm.Visible == false)
+                {
+                    _OnKeyPressed(s, e);
+                }
+            };
             // Init the context menu Form
             _ContextMenuForm = new ButtonSettingEditorForm();
 
@@ -257,6 +267,12 @@ namespace RadialMenuPlugin.Controls
             }
             return ctrl;
         }
+        protected void _RunRhinoCommand(string command)
+        {
+            _OnCloseClickEvent(this); // close radial menu
+            Rhino.RhinoApp.SetFocusToMainWindow();
+            Rhino.RhinoApp.RunScript(command, false); // Run Rhino command
+        }
         /// <summary>
         /// Open a submenu from an opened menu control and given a button ID
         /// </summary>
@@ -317,6 +333,12 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected override void _OnEscapePressed(object sender, KeyEventArgs e)
         {
+            // First check if contextmenu is opened. If so, close it
+            if (_ContextMenuForm.Visible)
+            {
+                _ContextMenuForm.Close();
+                return;
+            }
             if (Visible) // Ensure radial menu is currently running
             {
                 RadialMenuLevel topMostOpenedLevel = null;
@@ -338,6 +360,47 @@ namespace RadialMenuPlugin.Controls
                     else
                     {
                         _Controls[topMostOpenedLevel].Show(false);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void _OnKeyPressed(object sender, KeyEventArgs e)
+        {
+            RadialMenuControl? openedControl = null; // Current highest opened menu
+
+            // Get the current shown level and the parent model from the selected button of parent model
+            foreach (var control in _Controls)
+            {
+                if (control.Value.IsVisible)
+                {
+                    if (control.Value.Level.Level > (openedControl?.Level.Level ?? 0))
+                    {
+                        openedControl = control.Value;
+                    }
+                }
+            }
+            if (openedControl != null)
+            {
+                foreach (var model in openedControl.GetModels())
+                {
+                    if (model.Data.Properties.Trigger.ToUpper() == e.KeyChar.ToString().ToUpper())
+                    {
+                        if (model.Data.Properties.IsFolder)
+                        {
+                            _ShowSubmenu(openedControl, model);
+                        }
+                        else
+                        {
+                            if (model.Data.Properties.LeftMacro.Script != "")
+                            {
+                                _RunRhinoCommand(model.Data.Properties.LeftMacro.Script);
+                            }
+                        }
                     }
                 }
             }
@@ -373,7 +436,10 @@ namespace RadialMenuPlugin.Controls
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseMoveButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
-            Focus(); // Give radial menu focus when mouse overs a button
+            if (_ContextMenuForm.Visible == false)
+            {
+                Focus(); // Give radial menu focus when mouse overs a button
+            }
         }
         protected void _RadialControlMouseClickHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
@@ -382,17 +448,13 @@ namespace RadialMenuPlugin.Controls
                 case MouseButtons.Primary:
                     if (e.Model.Data.Properties.LeftMacro.Script != "")
                     {
-                        _OnCloseClickEvent(this); // close radial menu
-                        Rhino.RhinoApp.SetFocusToMainWindow();
-                        Rhino.RhinoApp.RunScript(e.Model.Data.Properties.LeftMacro.Script, false); // Run Rhino command
+                        _RunRhinoCommand(e.Model.Data.Properties.LeftMacro.Script);
                     }
                     break;
                 case MouseButtons.Alternate:
                     if (e.Model.Data.Properties.RightMacro.Script != "")
                     {
-                        _OnCloseClickEvent(this); // close radial menu
-                        Rhino.RhinoApp.SetFocusToMainWindow();
-                        Rhino.RhinoApp.RunScript(e.Model.Data.Properties.RightMacro.Script, false); // Run Rhino command
+                        _RunRhinoCommand(e.Model.Data.Properties.RightMacro.Script);
                     }
                     break;
             }

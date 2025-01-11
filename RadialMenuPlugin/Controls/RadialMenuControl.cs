@@ -237,6 +237,15 @@ namespace RadialMenuPlugin.Controls
                 button.States.IsEditMode = editMode;
             }
         }
+        /// <summary>
+        /// Get models currently associated to control buttons
+        /// </summary>
+        /// <param name="buttonID"></param>
+        /// <returns></returns>
+        public List<Model> GetModels() 
+        {
+            return _Buttons.Values.ToList();
+        }
         public ButtonProperties GetButtonProperties(string buttonID)
         {
             try
@@ -527,7 +536,7 @@ namespace RadialMenuPlugin.Controls
             var model = _Buttons[sender];
             var location = sender.PointToScreen(e.Location); // convert location to screen coordinates
 
-            _RaiseEvent(ButtonContextMenu, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), model));
+            _RaiseEvent(ButtonContextMenu, new ButtonMouseEventArgs(e, new Point(location), model));
         }
         /// <summary>
         /// 

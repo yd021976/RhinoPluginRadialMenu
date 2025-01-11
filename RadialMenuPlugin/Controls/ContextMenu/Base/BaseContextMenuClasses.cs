@@ -53,6 +53,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
                                _Model.PropertyChanged += _ModelChangedHandler;
                                _Model.Data.PropertyChanged += _ModelChangedHandler;
                                _Model.Data.Properties.PropertyChanged += _ModelChangedHandler;
+                               _UpdateModelBindings();
                            },
                            // Add change event handler
                            delegate (ContextMenuContent<D> menu, EventHandler<EventArgs> changeEventHandler)
@@ -61,6 +62,10 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
                            delegate (ContextMenuContent<D> menu, EventHandler<EventArgs> changeEventHandler)
                            { }
                            );
+        /// <summary>
+        /// Model object reference changed
+        /// </summary>
+        protected abstract void _UpdateModelBindings();
         #endregion
         #region public methods
         /// <summary>
@@ -105,7 +110,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
             {
                 _Contents.ModelBinding.Unbind();
                 _Model = value;
-                _Contents.ModelBinding.Bind(this, obj => obj.Model);
+                _Contents.ModelBinding.Bind(this, "Model");
             }
         }
         #endregion

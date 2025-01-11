@@ -4,6 +4,7 @@ using Eto.Drawing;
 using RadialMenuPlugin.Data;
 using AppKit;
 using System.Collections.Generic;
+using RadialMenuPlugin.Controls.ContextMenu.Base.Editors;
 
 namespace RadialMenuPlugin.Controls.ContextMenu
 {
@@ -14,7 +15,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu
     {
         public ButtonSettingEditorForm() : base()
         {
-            Size = new Size(150, 200);
+            Size = new Size(300, 200);
             Content = new ButtonSettingEditorContents();
         }
         public ButtonSettingEditorForm(Model data) : this()
@@ -33,23 +34,22 @@ namespace RadialMenuPlugin.Controls.ContextMenu
     /// </summary>
     public class ButtonSettingEditorContents : Base.ContextMenuContent<Model>
     {
+        protected TextBox _TriggerEditor;
         public ButtonSettingEditorContents() : base()
         {
             Orientation = Orientation.Vertical;
             Padding = new Padding(16);
 
-            var isFolderEditor = new StackLayout();
-            isFolderEditor.Orientation = Orientation.Horizontal;
-            isFolderEditor.VerticalContentAlignment = VerticalAlignment.Center;
-            isFolderEditor.Padding = new Padding(16, 0);
-            isFolderEditor.Spacing = 32;
-
-            var isFolderLabel = new Label(); isFolderLabel.Text = "Is folder";
-            var isFolderValue = new CheckBox(); isFolderValue.CheckedBinding.Bind(_Model.Data.Properties, obj => obj.IsFolder);
-            isFolderEditor.Items.Add(new StackLayoutItem(isFolderLabel));
-            isFolderEditor.Items.Add(new StackLayoutItem(isFolderValue));
-
-            Items.Add(new StackLayoutItem(isFolderEditor));
+            _TriggerEditor = new TextBox(); _TriggerEditor.MaxLength = 1; _TriggerEditor.ShowBorder = false;
+            var triggerStackField = new StackField("Trigger", _TriggerEditor);
+            Items.Add(new StackLayoutItem(triggerStackField));
+        }
+        /// <summary>
+        /// Update binding when Model object is updated
+        /// </summary>
+        protected override void _UpdateModelBindings() {
+            _TriggerEditor.Unbind();
+            _TriggerEditor.TextBinding.Bind(_Model.Data.Properties, nameof(_Model.Data.Properties.Trigger));
         }
         protected override void _ModelChangedHandler(object sender, PropertyChangedEventArgs e)
         {
