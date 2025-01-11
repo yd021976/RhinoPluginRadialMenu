@@ -111,6 +111,16 @@ namespace RadialMenuPlugin.Data
         /// Define if icon/command is active in the UI
         /// </summary>
         public bool IsActive { get => _IsActive; set { _IsActive = value; OnPropertyChanged(nameof(IsActive)); } }
+        protected string _Trigger="";
+        public string Trigger
+        {
+            get => _Trigger;
+            set
+            {
+                _Trigger = value;
+                OnPropertyChanged(nameof(Trigger));
+            }
+        }
         /// <summary>
         /// Ctor
         /// </summary>
@@ -181,6 +191,7 @@ namespace RadialMenuPlugin.Data
                 LeftMacro = new Macro(rhinoSettings["LeftMacroScript"], rhinoSettings["LeftMacroTooltip"]);
                 RightMacro = new Macro(rhinoSettings["RightMacroScript"], rhinoSettings["RightMacroTooltip"]);
                 CommandGUID = Guid.Parse(rhinoSettings[nameof(CommandGUID)]);
+                Trigger = rhinoSettings[nameof(Trigger)];
             }
             catch (Exception e)
             {
@@ -196,14 +207,15 @@ namespace RadialMenuPlugin.Data
             var commandGUID = CommandGUID.ToString();
             var list = new ButtonPropertiesList
             {
-                new KeyValuePair<string, string>(nameof(Icon),commandGUID ), // Sets the name of the icon
-                new KeyValuePair<string, string>(nameof(CommandGUID),commandGUID ), // Sets the guid of the command
-                new KeyValuePair<string, string>("LeftMacroScript",LeftMacro.Script ),
-                new KeyValuePair<string, string>("LeftMacroTooltip",LeftMacro.Tooltip ), 
-                new KeyValuePair<string, string>("RightMacroScript",RightMacro.Script ), 
-                new KeyValuePair<string, string>("RightMacroTooltip",RightMacro.Tooltip ),
+                new KeyValuePair<string, string>(nameof(Icon),commandGUID), // Sets the name of the icon
+                new KeyValuePair<string, string>(nameof(CommandGUID),commandGUID), // Sets the guid of the command
+                new KeyValuePair<string, string>("LeftMacroScript",LeftMacro.Script),
+                new KeyValuePair<string, string>("LeftMacroTooltip",LeftMacro.Tooltip),
+                new KeyValuePair<string, string>("RightMacroScript",RightMacro.Script),
+                new KeyValuePair<string, string>("RightMacroTooltip",RightMacro.Tooltip),
                 new KeyValuePair<string, string>(nameof(IsActive), IsActive.ToString()),
-                new KeyValuePair<string, string>(nameof(IsFolder), IsFolder.ToString())
+                new KeyValuePair<string, string>(nameof(IsFolder), IsFolder.ToString()),
+                new KeyValuePair<string, string>(nameof(Trigger), Trigger)
             };
             return list;
         }

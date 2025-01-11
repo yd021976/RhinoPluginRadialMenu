@@ -277,6 +277,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             icon = 4,
             folderIcon = 5,
             editmode = 6,
+            trigger = 7
         }
 
         protected SectorData _SectorData = new SectorData();
@@ -315,6 +316,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 _Model.PropertyChanged += _ModelChangedHandler;
                 _Model.Properties.PropertyChanged += _ModelChangedHandler;
                 _UpdateIcon();
+                _UpdateTriggerIcon();
             },
             // Add change event handler
             delegate (MenuButton btn, EventHandler<EventArgs> changeEventHandler)
@@ -333,14 +335,14 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
 
         public MenuButton() : base()
         {
-            var w = Stopwatch.StartNew();
+            // var w = Stopwatch.StartNew();
             Size = _SectorData.Size;
             _InitButtons();
             _InitEventHandlers();
             _InitStatesChangeHandler();
-            w.Stop();
-            Console.SetOut(RhinoApp.CommandLineOut);
-            Console.WriteLine("SectorArcButton takes:" + w.ElapsedMilliseconds);
+            // w.Stop();
+            // Console.SetOut(RhinoApp.CommandLineOut);
+            // Console.WriteLine("SectorArcButton takes:" + w.ElapsedMilliseconds);
         }
         protected void _InitStatesChangeHandler()
         {
@@ -374,6 +376,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _Buttons[_ButtonType.disabled] = new ImageButton();
             _Buttons[_ButtonType.icon] = new ImageButton();
             _Buttons[_ButtonType.selected] = new ImageButton();
+            _Buttons[_ButtonType.trigger] = new ImageButton();
             // edit mode image
             var iconSize = new Size(44, 44);
             var img = Bitmap.FromResource("RadialMenu.Bitmaps.dashed-circle.png").WithSize(iconSize);
@@ -391,7 +394,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             Add(_Buttons[_ButtonType.icon], 0, 0);
             Add(_Buttons[_ButtonType.folderIcon], 0, 0);
             Add(_Buttons[_ButtonType.editmode], 0, 0);
-
+            Add(_Buttons[_ButtonType.trigger], 0, 0);
 
             _Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
             _Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
@@ -443,43 +446,16 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 case nameof(ButtonProperties.IsFolder):
                     _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon, _SectorData.Size);
                     _UpdateIcon();
+                    _UpdateTriggerIcon();
+                    break;
+                case nameof(ButtonProperties.Trigger):
+                    _UpdateTriggerIcon();
                     break;
                 default: break;
             }
         }
 
-        /// <summary>
-        /// Update button images and size
-        /// </summary>
-        /// <param name="data"></param>
-        protected void _UpdateSectorData(SectorData data)
-        {
-            // Update self data
-            Size = data.Size;
-            // Update buttons image
-            _Buttons[_ButtonType.normal].SetImage(data.Images.NormalStateImage, data.Size);
-            _Buttons[_ButtonType.over].SetImage(data.Images.OverStateImage, data.Size);
-            _Buttons[_ButtonType.disabled].SetImage(data.Images.DisabledStateImage, data.Size);
-            _Buttons[_ButtonType.selected].SetImage(data.Images.SelectedStateImage, data.Size);
-            _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon, data.Size);
-        }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        protected void _UpdateIconEditmode()
-        {
-            // When in edit mode update edit icon position
-            if (States.IsEditMode)
-            {
-                // Compute icon position in layout
-                var arcCenterWorld = _SectorData.SectorCenter();
-                var arcCenterLocal = _SectorData.ConvertWorldToLocal(arcCenterWorld);
-                var posX = arcCenterLocal.X - (_Buttons[_ButtonType.editmode].Width / 2);
-                var posY = arcCenterLocal.Y - (_Buttons[_ButtonType.editmode].Height / 2);
-                Move(_Buttons[_ButtonType.editmode], (int)posX, (int)posY); // update icon location
-            }
-        }
         /// <summary>
         /// 
         /// </summary>
@@ -487,6 +463,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// <param name="e"></param>
         protected void _MouseDownHandler(object sender, MouseEventArgs e)
         {
+            if (!States.IsHovering) return; // As buttons can overlap, react only to button that has focus
             switch (e.Buttons)
             {
                 case MouseButtons.Primary:
@@ -658,40 +635,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     break;
             }
         }
-        /// <summary>
-        /// Update icon display and position
-        /// </summary>
-        protected void _UpdateIcon()
-        {
-            // Update icon image. set to "null" if icon shouldn't be displayed
-            if (_Model.Properties.IsActive) _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon); else _Buttons[_ButtonType.icon].SetImage(null);
 
-            // if icon exists, update its position
-            if (_Model.Properties.Icon != null && _Model.Properties.IsActive)
-            {
-                // Compute icon position in layout
-                var arcCenterWorld = _SectorData.SectorCenter();
-                var arcCenterLocal = _SectorData.ConvertWorldToLocal(arcCenterWorld);
-                var posX = arcCenterLocal.X - (_Model.Properties.Icon.Size.Width / 2);
-                var posY = arcCenterLocal.Y - (_Model.Properties.Icon.Size.Height / 2);
-                Move(_Buttons[_ButtonType.icon], (int)posX, (int)posY); // update icon location
-                if (_Model.Properties.IsFolder)
-                {
-                    posX = posX + _Model.Properties.Icon.Size.Width - 4;
-                    posY = posY - 6;
-                    _Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = (float)0.4;
-                    Move(_Buttons[_ButtonType.folderIcon], (int)posX, (int)posY);
-                }
-                else
-                {
-                    _Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
-                }
-            }
-            else
-            {
-                _Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
-            }
-        }
         /// <summary>
         /// Update button Hovering state when mouse move over a button.
         /// Return the old "hovering" state to compare with new state
@@ -727,6 +671,108 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 }
             }
             return oldHovering;
+        }
+        /// <summary>
+        /// Update icon display and position
+        /// </summary>
+        protected void _UpdateIcon()
+        {
+            // Update icon image. set to "null" if icon shouldn't be displayed
+            if (_Model.Properties.IsActive) _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon); else _Buttons[_ButtonType.icon].SetImage(null);
+
+            // if icon exists, update its position
+            if (_Model.Properties.Icon != null && _Model.Properties.IsActive)
+            {
+                // Compute icon position in layout
+                var arcCenterWorld = _SectorData.SectorCenter();
+                var arcCenterLocal = _SectorData.ConvertWorldToLocal(arcCenterWorld);
+                var posX = arcCenterLocal.X - (_Model.Properties.Icon.Size.Width / 2);
+                var posY = arcCenterLocal.Y - (_Model.Properties.Icon.Size.Height / 2);
+                Move(_Buttons[_ButtonType.icon], (int)posX, (int)posY); // update icon location
+                if (_Model.Properties.IsFolder)
+                {
+                    // posX = posX + _Model.Properties.Icon.Size.Width - 4;
+                    // posY = posY - 6;
+                    var outerCenterLocationWorld = _SectorData.GetPoint(_SectorData.SweepAngle / 2, _SectorData.Thickness - (_Buttons[_ButtonType.folderIcon].Width / 2) - 2);
+                    var outerCenterLocationLocal = _SectorData.ConvertWorldToLocal(outerCenterLocationWorld);
+                    posX = outerCenterLocationLocal.X - (_Buttons[_ButtonType.folderIcon].Width / 2);
+                    posY = outerCenterLocationLocal.Y - (_Buttons[_ButtonType.folderIcon].Height / 2);
+                    _Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = (float)0.4;
+                    Move(_Buttons[_ButtonType.folderIcon], (int)posX, (int)posY);
+                }
+                else
+                {
+                    _Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
+                }
+            }
+            else
+            {
+                _Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
+            }
+        }
+        /// <summary>
+        /// Update button images and size
+        /// </summary>
+        /// <param name="data"></param>
+        protected void _UpdateSectorData(SectorData data)
+        {
+            // Update self data
+            Size = data.Size;
+            // Update buttons image
+            _Buttons[_ButtonType.normal].SetImage(data.Images.NormalStateImage, data.Size);
+            _Buttons[_ButtonType.over].SetImage(data.Images.OverStateImage, data.Size);
+            _Buttons[_ButtonType.disabled].SetImage(data.Images.DisabledStateImage, data.Size);
+            _Buttons[_ButtonType.selected].SetImage(data.Images.SelectedStateImage, data.Size);
+            _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon, data.Size);
+
+            // Update position
+            _UpdateIcon();
+            _UpdateTriggerIcon();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected void _UpdateIconEditmode()
+        {
+            // When in edit mode update edit icon position
+            if (States.IsEditMode)
+            {
+                // Compute icon position in layout
+                var arcCenterWorld = _SectorData.SectorCenter();
+                var arcCenterLocal = _SectorData.ConvertWorldToLocal(arcCenterWorld);
+                var posX = arcCenterLocal.X - (_Buttons[_ButtonType.editmode].Width / 2);
+                var posY = arcCenterLocal.Y - (_Buttons[_ButtonType.editmode].Height / 2);
+                Move(_Buttons[_ButtonType.editmode], (int)posX, (int)posY); // update icon location
+            }
+        }
+        /// <summary>
+        /// Update trigger key icon
+        /// </summary>
+        protected void _UpdateTriggerIcon()
+        {
+            Bitmap bm = null;
+            if (_Model.Properties.Trigger != "")
+            {
+                // Create Text image
+                var fontSize = 8;
+                var bitmapSize = new Size(fontSize + 2, fontSize + 2); // +2 because of underlined font
+                bm = new Bitmap(bitmapSize, PixelFormat.Format32bppRgba);
+                var g = new Graphics(bm); g.PixelOffsetMode = PixelOffsetMode.Half; g.AntiAlias = true;
+                var font = Fonts.Sans(fontSize, FontStyle.None, FontDecoration.Underline);
+                g.DrawText(font, Colors.Black, 0, 0, _Model.Properties.Trigger.ToUpper());
+                // g.DrawRectangle(Colors.Black, 0, 0, 15, 15);
+                g.Dispose();
+                // Compute icon position in layout
+                var sectorTopLeft = _SectorData.GetPoint(_SectorData.SweepAngle / 2, 10);
+                var sectorTopLeftLocal = _SectorData.ConvertWorldToLocal(sectorTopLeft);
+                var posX = sectorTopLeftLocal.X - (fontSize / 2);
+                var posY = sectorTopLeftLocal.Y - ((fontSize + 2) / 2);
+                Move(_Buttons[_ButtonType.trigger], (int)posX, (int)posY);
+            }
+
+            // Update icon image and position
+            _Buttons[_ButtonType.trigger].SetImage(bm, new Size(16, 16));
         }
     }
 }

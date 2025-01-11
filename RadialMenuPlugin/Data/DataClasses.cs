@@ -116,6 +116,8 @@ namespace RadialMenuPlugin.Data
         public Point ArcCenter;
         public int StartAngle;
         public int SweepAngle;
+        public int InnerRadius = 50;
+        public int Thickness = 30;
 
         /// <summary>
         /// State images
@@ -123,8 +125,6 @@ namespace RadialMenuPlugin.Data
         public ButtonStateImages Images;
 
         #region Arc radius and thickness
-        protected int _InnerRadius = 50;
-        protected int _Thickness = 30;
         #endregion
 
         /// <summary>
@@ -132,20 +132,33 @@ namespace RadialMenuPlugin.Data
         /// </summary>
         public PointF SectorCenter()
         {
-            var centerRadius = _InnerRadius + (_Thickness / 2);
+            var centerRadius = InnerRadius + (Thickness / 2);
             var bisectorAngle = StartAngle + (SweepAngle / 2);
             float X = (float)(ArcCenter.X + centerRadius * Math.Cos(bisectorAngle * (Math.PI / 180)));
             float Y = (float)(ArcCenter.Y + centerRadius * Math.Sin(bisectorAngle * (Math.PI / 180)));
             return new PointF(X, Y);
         }
-
+        /// <summary>
+        /// Get a point in the sector
+        /// </summary>
+        /// <param name="angleFromStart">Angle from start angle of sector</param>
+        /// <param name="radiusFromInner">Radius from inner radius</param>
+        /// <returns></returns>
+        public PointF GetPoint(int angleFromStart, int radiusFromInner)
+        {
+            var atAngle = StartAngle + angleFromStart;
+            var atRadius = InnerRadius + radiusFromInner;
+            float X = (float)(ArcCenter.X + atRadius * Math.Cos(atAngle * (Math.PI / 180)));
+            float Y = (float)(ArcCenter.Y + atRadius * Math.Sin(atAngle * (Math.PI / 180)));
+            return new PointF(X, Y);
+        }
         public int EndAngle { get { return StartAngle + SweepAngle; } }
 
         public SectorData() { }
         public SectorData(RadialMenuLevel level)
         {
-            _InnerRadius = level.InnerRadius;
-            _Thickness = level.Thickness;
+            InnerRadius = level.InnerRadius;
+            Thickness = level.Thickness;
         }
 
         /// <summary>
