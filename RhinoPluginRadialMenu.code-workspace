@@ -13,8 +13,8 @@
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
 			"**/Properties": true,
-			"**/bin": false,
-			"bin": false,
+			"**/bin": true,
+			"bin": true,
 			"**/obj": true
 		},
 		"explorerExclude.backup": {}
