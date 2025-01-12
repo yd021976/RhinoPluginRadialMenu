@@ -17,9 +17,8 @@
     <!-- Specifies information for Assembly and Yak -->
     <Version>1.1.2</Version>
     <Title>RadialMenu</Title>
-    <Company>Tigrou_Home_Office</Company>
-    <Description>[MacOS Only] Radial Menu</Description>
-    <url>https://github.com/yd021976/RhinoPluginRadialMenu/tree/main</url>
+    <Company>Tigrou</Company>
+    <Description>Radial Menu</Description>
   </PropertyGroup>
   
   <ItemGroup>

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Rhino.PlugIns;
 
 // Plug-in Description Attributes - all of these are optional.
@@ -10,12 +8,12 @@ using Rhino.PlugIns;
 [assembly: PlugInDescription(DescriptionType.Email, "")]
 [assembly: PlugInDescription(DescriptionType.Phone, "")]
 [assembly: PlugInDescription(DescriptionType.Fax, "")]
-[assembly: PlugInDescription(DescriptionType.Organization, "")]
-[assembly: PlugInDescription(DescriptionType.UpdateUrl, "https://github.com/yd021976/RhinoPluginRadialMenu/tree/main")]
-[assembly: PlugInDescription(DescriptionType.WebSite, "https://github.com/yd021976/RhinoPluginRadialMenu/tree/main")]
+[assembly: PlugInDescription(DescriptionType.Organization, "Tigrou")]
+[assembly: PlugInDescription(DescriptionType.UpdateUrl, "")]
+[assembly: PlugInDescription(DescriptionType.WebSite, "https://github.com/yd021976/RhinoPluginRadialMenu/tree/button-context-menu")]
 
 // Icons should be Windows .ico files and contain 32-bit images in the following sizes: 16, 24, 32, 48, and 256.
-[assembly: PlugInDescription(DescriptionType.Icon, "RhinoPluginRadialMenu.EmbeddedResources.plugin-utility.ico")]
+[assembly: PlugInDescription(DescriptionType.Icon, "RhinoPluginRadialMenu.Bitmaps.icon.png")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 // This will also be the Guid of the Rhino plug-in

@@ -17,6 +17,17 @@
 			"bin": false,
 			"**/obj": false
 		},
-		"explorerExclude.backup": {}
+		"explorerExclude.backup": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"**/Properties": true,
+			"**/bin": true,
+			"bin": true,
+			"**/obj": true
+		}
 	}
 }
