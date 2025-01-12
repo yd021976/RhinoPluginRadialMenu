@@ -18,7 +18,7 @@
     <Version>1.0</Version>
     <Title>RadialMenu</Title>
     <Company>Tigrou</Company>
-    <Description>Radial Menu description</Description>
+    <Description>Radial Menu</Description>
   </PropertyGroup>
   
   <ItemGroup>

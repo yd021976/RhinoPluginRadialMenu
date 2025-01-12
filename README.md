@@ -3,10 +3,14 @@
 
 ## How to install
    
-For now, there is no package installer (coming later)
+The easiest way to install the plugin is to use Rhino package installer :
 
-- The files to install are in the folder : /bin/Release/net7.0-macos12.0/
-- Copy/Paste *.rhp and *.dll files to your local ~/Library/Application Support/McNeel/Rhinoceros/8.0/MacPlugIns folder
+* You can find the package installer file in this repository in folder `/bin/Release/net7.0-macos12.0/`
+* The file is named `radialmenu-1.0.0-rh8_0-any.yak`
+
+Alternatively you can also copy the plugin files manually. Follow the steps below :
+* The files to install are in the folder : `/bin/Release/net7.0-macos12.0/`
+* Copy/Paste *.rhp and *.dll files to your local ~/Library/Application Support/McNeel/Rhinoceros/8.0/MacPlugIns folder
 <br/><br/>
 
 ## Launch the menu
