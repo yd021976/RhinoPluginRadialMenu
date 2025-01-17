@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
-using Rhino;
 using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Utilities.Events;
 
@@ -517,18 +515,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
 
                 if (States.IsHovering) // Mouse overs the button
                 {
-                    // Show tooltip
-                    var tooltipText = "";
-                    if (_Model.Properties.LeftMacro.Tooltip != "")
-                    {
-                        tooltipText = "Left click:" + _Model.Properties.LeftMacro.Tooltip;
-                    }
-                    if (_Model.Properties.RightMacro.Tooltip != "")
-                    {
-                        tooltipText += "\nRight click:" + _Model.Properties.RightMacro.Tooltip;
-                    }
-                    if (tooltipText != "") { ToolTip = tooltipText; }
-
                     if (oldHovering) // Mouse was already over the button -> Invoke event mouse over
                     {
                         _RaiseEvent(OnButtonMouseMove, e); // Notify mouse is over the button

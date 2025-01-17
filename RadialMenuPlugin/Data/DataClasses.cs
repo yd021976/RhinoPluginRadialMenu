@@ -1,8 +1,36 @@
 using System;
+using System.Collections.Generic;
 using Eto.Drawing;
+using Eto.Forms;
 
 namespace RadialMenuPlugin.Data
 {
+    /// <summary>
+    /// Class to convert Rhino keyboard "key" (int) value to ETO Keys value
+    /// </summary>
+    public static class RhinoKeyToEto
+    {
+        private static readonly Dictionary<int, Keys> match = new Dictionary<int, Keys>
+        {
+            {55,Keys.Application},
+            {58,Keys.Alt},
+            {59,Keys.Control},
+        };
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rhinoKey"></param>
+        /// <returns></returns>
+        public static Keys toEtoKey(int rhinoKey)
+        {
+            if (match.ContainsKey(rhinoKey))
+            {
+                return match[rhinoKey];
+            }
+            return Keys.None;
+        }
+    }
     /// <summary>
     /// 
     /// </summary>

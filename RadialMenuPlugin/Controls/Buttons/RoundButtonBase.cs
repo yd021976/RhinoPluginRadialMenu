@@ -3,9 +3,8 @@ using Eto.Forms;
 
 namespace RadialMenuPlugin.Controls.Buttons
 {
-    public class RoundButton : Drawable
+    public class RoundButtonBase : Drawable
     {
-        protected Icon _Icon;
         protected int _PenSize = 2;
         protected Color _BorderColor;
 
@@ -17,9 +16,9 @@ namespace RadialMenuPlugin.Controls.Buttons
         /// Event for button click
         /// </summary>
         /// <param name="sender"></param>
-        public delegate void ButtonClickEvent(RoundButton sender, MouseEventArgs e);
+        public delegate void ButtonClickEvent(RoundButtonBase sender, MouseEventArgs e);
 
-        public RoundButton() : base()
+        public RoundButtonBase() : base()
         {
             MouseDown += _OnMouseDown;
             MouseEnter += _OnMouseEnter;
@@ -27,17 +26,16 @@ namespace RadialMenuPlugin.Controls.Buttons
             _BorderColor = RadialMenuPlugin.Instance.SettingsHelper.Settings.ButtonColors.Normal.Pen;
         }
 
-        public void SetButtonIcon(Icon icon)
-        {
-            _Icon = icon;
-            Invalidate();
-        }
         /**
          Draw the control
         **/
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+            _DrawCircle(e);
+        }
+        protected void _DrawCircle(PaintEventArgs e)
+        {
             var innerBrushColor = new SolidBrush(RadialMenuPlugin.Instance.SettingsHelper.Settings.ButtonColors.Normal.Fill);
             var borderBrushColor = new SolidBrush(_BorderColor);
             var borderSize = new Rectangle(0, 0, Width, Height);
@@ -47,12 +45,7 @@ namespace RadialMenuPlugin.Controls.Buttons
             e.Graphics.FillEllipse(borderBrushColor, borderSize);
             e.Graphics.FillEllipse(innerBrushColor, innerSize);
 
-            if (_Icon != null)
-            {
-                e.Graphics.DrawImage(_Icon, Width / 2 - _Icon.Width / 2, Height / 2 - _Icon.Height / 2);
-            }
         }
-
         protected void _OnMouseDown(object sender, MouseEventArgs e)
         {
             OnclickEvent?.Invoke(this, e); // Raise onclick event to be handled by delegate
