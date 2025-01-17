@@ -33,6 +33,47 @@
         "clear": true
       },
       "group": "build"
+    },
+    {
+      "label":"Create YAK package",
+      "command":"/Applications/Rhino\\ 8.app/Contents/Resources/bin/yak build --platform mac",
+      "type":"shell",
+      "options": {
+        "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
+      },
+      "dependsOn":["Create YAK manifest"],
+      "group": "build"
+    },
+    {
+      "label":"Create YAK manifest",
+      "command":"/Applications/Rhino\\ 8.app/Contents/Resources/bin/yak spec",
+      "type":"shell",
+      "options": {
+        "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
+      },
+      "dependsOn":["Clear YAK Manifest"],
+      "group": "build"
+    },
+    {
+      "label":"Clear YAK Manifest",
+      "command":"rm *.yml -f || true",
+      "type":"shell",
+      "options": {
+        "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
+      },
+      "group": "build"
+    },
+    {
+      "label":"Package plugin",
+      "command":"mv *.yak ${workspaceFolder}/yak_package/ && rm *.yml || true",
+      "type":"shell",
+      "options": {
+        "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
+      },
+      "dependsOn":[
+        "Create YAK package"
+      ],
+      "group": "build"
     }
   ]
 }
