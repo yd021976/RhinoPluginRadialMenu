@@ -6,18 +6,6 @@
 	],
 	"settings": {
 		"files.exclude": {
-			"**/.git": false,
-			"**/.svn": false,
-			"**/.hg": false,
-			"**/CVS": false,
-			"**/.DS_Store": false,
-			"**/Thumbs.db": false,
-			"**/Properties": false,
-			"**/bin": false,
-			"bin": false,
-			"**/obj": false
-		},
-		"explorerExclude.backup": {
 			"**/.git": true,
 			"**/.svn": true,
 			"**/.hg": true,
@@ -28,6 +16,7 @@
 			"**/bin": true,
 			"bin": true,
 			"**/obj": true
-		}
+		},
+		"explorerExclude.backup": {}
 	}
 }

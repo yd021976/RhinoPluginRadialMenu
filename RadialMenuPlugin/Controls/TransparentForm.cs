@@ -37,9 +37,13 @@ namespace RadialMenuPlugin.Controls
                 }
             };
         }
+        /// <summary>
+        /// Send a key down event to form
+        /// </summary>
+        /// <param name="e"></param>
         public void KeyPress(KeyEventArgs e)
         {
-            OnKeyUp(e);
+            OnKeyDown(e);
         }
         /// <summary>
         /// 

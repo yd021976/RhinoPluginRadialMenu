@@ -13,10 +13,12 @@ namespace RadialMenuPlugin.Data
     {
         public string Script = "";
         public string Tooltip = "";
+        public Macro()
+        { }
         public Macro(string script, string tooltip)
         {
-            Script = script;
-            Tooltip = tooltip;
+            Script = script == null ? "" : script;
+            Tooltip = tooltip == null ? "" : tooltip;
         }
     }
     /// <summary>
@@ -111,7 +113,7 @@ namespace RadialMenuPlugin.Data
         /// Define if icon/command is active in the UI
         /// </summary>
         public bool IsActive { get => _IsActive; set { _IsActive = value; OnPropertyChanged(nameof(IsActive)); } }
-        protected string _Trigger="";
+        protected string _Trigger = "";
         public string Trigger
         {
             get => _Trigger;
@@ -129,6 +131,7 @@ namespace RadialMenuPlugin.Data
             Icon = null;
             IsActive = false;
             LeftMacro = new Macro();
+            RightMacro = new Macro();
         }
         /// <summary>
         /// Ctor
