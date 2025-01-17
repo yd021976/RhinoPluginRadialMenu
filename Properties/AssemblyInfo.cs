@@ -11,8 +11,8 @@ using Rhino.PlugIns;
 [assembly: PlugInDescription(DescriptionType.Phone, "")]
 [assembly: PlugInDescription(DescriptionType.Fax, "")]
 [assembly: PlugInDescription(DescriptionType.Organization, "")]
-[assembly: PlugInDescription(DescriptionType.UpdateUrl, "")]
-[assembly: PlugInDescription(DescriptionType.WebSite, "")]
+[assembly: PlugInDescription(DescriptionType.UpdateUrl, "https://github.com/yd021976/RhinoPluginRadialMenu/tree/main")]
+[assembly: PlugInDescription(DescriptionType.WebSite, "https://github.com/yd021976/RhinoPluginRadialMenu/tree/main")]
 
 // Icons should be Windows .ico files and contain 32-bit images in the following sizes: 16, 24, 32, 48, and 256.
 [assembly: PlugInDescription(DescriptionType.Icon, "RhinoPluginRadialMenu.EmbeddedResources.plugin-utility.ico")]
