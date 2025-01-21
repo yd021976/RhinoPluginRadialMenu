@@ -42,7 +42,7 @@
         "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
       },
       "dependsOn":["Create YAK manifest"],
-      "group": "build"
+      "group": "none"
     },
     {
       "label":"Create YAK manifest",
@@ -52,7 +52,7 @@
         "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
       },
       "dependsOn":["Clear YAK Manifest"],
-      "group": "build"
+      "group": "none"
     },
     {
       "label":"Clear YAK Manifest",
@@ -61,10 +61,10 @@
       "options": {
         "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
       },
-      "group": "build"
+      "group": "none"
     },
     {
-      "label":"Package plugin",
+      "label":"Build YAK package",
       "command":"mv *.yak ${workspaceFolder}/yak_package/ && rm *.yml || true",
       "type":"shell",
       "options": {
