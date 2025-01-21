@@ -86,7 +86,7 @@ namespace RadialMenuPlugin.Controls
                     _OnKeyPressed(s, e);
                 }
             };
-            // Init the context menu Form
+            // Init the button context menu Form
             _ContextMenuForm = new ButtonSettingEditorForm();
 
             // Ensure when form is shown that we display only first menu level
@@ -103,7 +103,6 @@ namespace RadialMenuPlugin.Controls
             // Create close button
             _CenterMenuButton = new CenterMenuButton();
             _CenterMenuButton.Size = new Size(s_defaultInnerRadius * 2, s_defaultInnerRadius * 2);
-            _CenterMenuButton.NsView.AlphaValue = (float)0.6;
             _CenterMenuButton.MouseEnter += (o, e) =>
             {
                 Focus(); // Get menu focus

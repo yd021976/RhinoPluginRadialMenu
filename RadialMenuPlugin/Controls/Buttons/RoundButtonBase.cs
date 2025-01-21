@@ -23,6 +23,7 @@ namespace RadialMenuPlugin.Controls.Buttons
             MouseDown += _OnMouseDown;
             MouseEnter += _OnMouseEnter;
             MouseLeave += _OnMouseLeave;
+            MouseMove += _OnMouseMove;
             _BorderColor = RadialMenuPlugin.Instance.SettingsHelper.Settings.ButtonColors.Normal.Pen;
         }
 
@@ -32,34 +33,42 @@ namespace RadialMenuPlugin.Controls.Buttons
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            _DrawCircle(e);
-        }
-        protected void _DrawCircle(PaintEventArgs e)
-        {
             var innerBrushColor = new SolidBrush(RadialMenuPlugin.Instance.SettingsHelper.Settings.ButtonColors.Normal.Fill);
             var borderBrushColor = new SolidBrush(_BorderColor);
-            var borderSize = new Rectangle(0, 0, Width, Height);
-            var innerSize = new Rectangle(_PenSize, _PenSize, Width - (_PenSize * 2), Height - (_PenSize * 2));
 
-            // Draw the icon shape
-            e.Graphics.FillEllipse(borderBrushColor, borderSize);
-            e.Graphics.FillEllipse(innerBrushColor, innerSize);
-
+            var outerCircleGp = _DrawSingleCircle(new Point(0, 0), Width);
+            var innerCircleGp = _DrawSingleCircle(new Point(_PenSize / 2, _PenSize / 2), Width - _PenSize);
+            e.Graphics.PixelOffsetMode = PixelOffsetMode.None;
+            e.Graphics.FillPath(borderBrushColor, outerCircleGp);
+            e.Graphics.FillPath(innerBrushColor, innerCircleGp);
         }
-        protected void _OnMouseDown(object sender, MouseEventArgs e)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="radius"></param>
+        /// <returns></returns>
+        protected GraphicsPath _DrawSingleCircle(Point location, int radius)
+        {
+            var gp = new GraphicsPath();
+            // Draw shape
+            gp.AddEllipse(location.X, location.Y, radius, radius);
+            return gp;
+        }
+        protected virtual void _OnMouseDown(object sender, MouseEventArgs e)
         {
             OnclickEvent?.Invoke(this, e); // Raise onclick event to be handled by delegate
         }
-        protected void _OnMouseEnter(object sender, MouseEventArgs e)
+        protected virtual void _OnMouseEnter(object sender, MouseEventArgs e)
         {
-
             _BorderColor = RadialMenuPlugin.Instance.SettingsHelper.Settings.ButtonColors.Hover.Pen;
             Invalidate(false); // redraw button
         }
-        protected void _OnMouseLeave(object sender, MouseEventArgs e)
+        protected virtual void _OnMouseLeave(object sender, MouseEventArgs e)
         {
             _BorderColor = RadialMenuPlugin.Instance.SettingsHelper.Settings.ButtonColors.Normal.Pen;
             Invalidate(false); // redraw button
         }
+        protected virtual void _OnMouseMove(object sender, MouseEventArgs e)
+        { }
     }
 }
