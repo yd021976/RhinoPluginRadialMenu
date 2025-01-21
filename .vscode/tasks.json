@@ -65,7 +65,7 @@
     },
     {
       "label":"Build YAK package",
-      "command":"mv *.yak ${workspaceFolder}/yak_package/ && rm *.yml || true",
+      "command":"mv *.yak ${workspaceFolder}/Package/ && rm *.yml || true",
       "type":"shell",
       "options": {
         "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
