@@ -27,9 +27,8 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-**/yak*/
-**.yak
 Package/
+*.yak
 #[Bb]in/
 #[Oo]bj/
 #[Ll]og/
