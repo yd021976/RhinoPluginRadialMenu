@@ -29,6 +29,7 @@ x86/
 bld/
 **/yak*/
 **.yak
+Package/
 #[Bb]in/
 #[Oo]bj/
 #[Ll]og/
