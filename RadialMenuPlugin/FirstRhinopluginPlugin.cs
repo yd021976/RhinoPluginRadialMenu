@@ -1,6 +1,5 @@
 ﻿using RadialMenuPlugin.Utilities.Settings;
 using Rhino.PlugIns;
-using Rhino.UI;
 
 namespace RadialMenuPlugin
 {
@@ -35,7 +34,6 @@ namespace RadialMenuPlugin
             var filetarget = new NLog.Targets.FileTarget("logfile") { FileName = logfile };
             config.AddRuleForAllLevels(filetarget); // Log all level into file
             NLog.LogManager.Configuration = config;
-           
             return LoadReturnCode.Success;
         }
     }

@@ -14,9 +14,19 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
     using DragDropStartHandler = AppEventHandler<MenuButton>; // Used for DoDrag start event
     using MouseEventHandler = AppEventHandler<MenuButton, MouseEventArgs>; // Used for mouse events
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class DropTargetArgs : DragEventArgs
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public bool acceptTarget = true;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="d"></param>
         public DropTargetArgs(DragEventArgs d) : base(d.Source, d.Data, d.AllowedEffects, d.Location, d.Modifiers, d.Buttons, d.ControlObject)
         { }
     }
@@ -73,7 +83,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         public event MouseEventHandler OnButtonContextMenu;
         #endregion
-
         #region Button States
         public struct ButtonStates : INotifyPropertyChanged
         {
@@ -133,7 +142,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             public ButtonStates() { }
         }
         #endregion
-
         #region Button animations
         /// <summary>
         /// Duration of animations
@@ -245,7 +253,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 });
         }
         #endregion
-
         #region Button Properties
         public new string ID
         {
@@ -324,13 +331,10 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             { });
 
         #endregion
-
-
         /// <summary>
         /// Custom and override of ID to generate button ID
         /// </summary>
         // public new string ID { get { return model.buttonID; } set { base.ID = value; } }
-
         public MenuButton() : base()
         {
             // var w = Stopwatch.StartNew();
@@ -400,7 +404,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _Buttons[_ButtonType.normal].NsViewObject.AlphaValue = _ButtonAlpha;
             _Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = 0;
         }
-
         /// <summary>
         /// Init event handlers
         /// </summary>
@@ -442,7 +445,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 case nameof(ButtonProperties.Icon):
                 case nameof(ButtonProperties.IsActive):
                 case nameof(ButtonProperties.IsFolder):
-                    _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon, _SectorData.Size);
+                    // _Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon, _SectorData.Size);
                     _UpdateIcon();
                     _UpdateTriggerIcon();
                     break;
@@ -452,8 +455,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 default: break;
             }
         }
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -534,9 +535,11 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 }
             }
         }
-
-
-        // TODO: Check if it is relevant as leave event is handled in "onMouseMove" event
+        /// <summary>
+        /// TODO: Check if it is relevant as leave event is handled in "onMouseMove" event 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void _MouseLeaveHandler(object sender, MouseEventArgs e)
         {
             if (States.IsHovering) // Avoid sending "leave" event twice
@@ -545,7 +548,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 _RaiseEvent(OnButtonMouseLeave, e);
             }
         }
-
         protected void _DragEnterHandler(object sender, DragEventArgs e)
         {
             _RaiseEvent(OnButtonDragEnter, e);
@@ -565,7 +567,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _RaiseEvent(OnButtonDragLeave, e);
             States.IsHovering = false;
         }
-
         protected void _DragOverHandler(object sender, DragEventArgs e)
         {
             _RaiseEvent(OnButtonDragOver, e);
@@ -621,7 +622,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     break;
             }
         }
-
         /// <summary>
         /// Update button Hovering state when mouse move over a button.
         /// Return the old "hovering" state to compare with new state
@@ -715,7 +715,6 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _UpdateIcon();
             _UpdateTriggerIcon();
         }
-
         /// <summary>
         /// 
         /// </summary>

@@ -56,9 +56,13 @@ Alternatively you can also copy the plugin files manually. Follow the steps belo
    * [x] Make settings persistent to keep menu configuration between Rhino launches
    * [x] Add hability to remove icons from menu
    * [ ] Improve UI visual changes when changing sub menu (i.e. Add soft fade in/out)
+   * [x] Improved tooltip. They now are displayed in radial menu center, with mouse button indicator (left / right) 
    * [x] Context menu to configure manually a button : Choose other icons, type in the Rhino command
      * [x] Hability to set a trigger key for each button
+     * [x] Hability to manually set Rhino command to execute for left and right click
+     * [x] Hability to manually set Rhino tooltip text for left and right "command"
+     * [x] Hability to manually set the button icon
      * [ ] Hability to choose menu colors
      * Other improvements will come later
    * [ ] Create Setting panel to choose shortcuts to launch radial menu
-   * [ ] Create plugin package installer
+   * [x] Create plugin package installer

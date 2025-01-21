@@ -134,7 +134,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
 
             MouseLeave += (s, e) =>
             {
-                Close();
+                if (_ShouldClose()) Close();
             };
         }
         #endregion
@@ -153,6 +153,17 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
                     break;
                 default: break;
             }
+        }
+        /// <summary>
+        /// Method is requested when menu should close. Default behavior is "true"
+        /// <para>
+        /// Override this method to change the behavior
+        /// </para> 
+        /// </summary>
+        /// <returns>True if menu can close, false</returns>
+        protected virtual bool _ShouldClose()
+        {
+            return true;
         }
         #endregion
     }

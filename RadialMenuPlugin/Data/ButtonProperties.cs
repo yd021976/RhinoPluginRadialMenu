@@ -9,16 +9,50 @@ namespace RadialMenuPlugin.Data
     /// 
     /// </summary>
     public sealed class ButtonPropertiesList : List<KeyValuePair<string, string>> { }
-    public struct Macro
+    public class Macro : INotifyPropertyChanged
     {
-        public string Script = "";
-        public string Tooltip = "";
+
+        /// <summary>
+        /// Event to notigy a property has changed
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+        public string Script
+        {
+            get => _Script;
+            set
+            {
+                _Script = value;
+                OnPropertyChanged(nameof(Script));
+            }
+        }
+        public string Tooltip
+        {
+            get => _Tooltip;
+            set
+            {
+                _Tooltip = value;
+                OnPropertyChanged(nameof(Tooltip));
+            }
+        }
+
+        protected string _Script = "";
+        protected string _Tooltip = "";
         public Macro()
         { }
         public Macro(string script, string tooltip)
         {
-            Script = script == null ? "" : script;
-            Tooltip = tooltip == null ? "" : tooltip;
+            _Script = script == null ? "" : script;
+            _Tooltip = tooltip == null ? "" : tooltip;
+        }
+
+        /// <summary>
+        /// Method to raise property changed event
+        /// </summary>
+        /// <param name="propertyName"></param>
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
     /// <summary>
@@ -47,8 +81,11 @@ namespace RadialMenuPlugin.Data
         /// </summary>
         protected Guid _CommandGUID;
         /// <summary>
-        /// GUID of Rhino command
+        /// GUID of Rhino command OR new generated Guid if icon is manually chosen
         /// <para>Used to define icon filename</para>
+        /// <para>
+        /// REMARKS: DO NOT USE THIS TO IDENTIFY RHINO COMMAND
+        /// </para>
         /// </summary>
         public Guid CommandGUID
         {
@@ -207,6 +244,12 @@ namespace RadialMenuPlugin.Data
         /// <returns></returns>
         public ButtonPropertiesList toList()
         {
+            // Ensure we have a valid command guid.
+            // REMARK: It can occurs for manual settings of command and icon via contextual menu
+            if (CommandGUID == Guid.Empty) {
+                CommandGUID = Guid.NewGuid();
+            }
+
             var commandGUID = CommandGUID.ToString();
             var list = new ButtonPropertiesList
             {
