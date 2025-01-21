@@ -5,7 +5,7 @@
   },
   "projects": {
     "/Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/RadialMenu.csproj": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "restore": {
         "projectUniqueName": "/Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/RadialMenu.csproj",
         "projectName": "RadialMenu",
