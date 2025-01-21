@@ -48,7 +48,7 @@ namespace RadialMenuPlugin.Controls.Buttons
         /// </summary>
         /// <param name="ctrl"></param>
         /// <returns></returns>
-        private NSView _GetNSView()
+        protected NSView _GetNSView()
         {
             var ctrlProp = Handler.GetType().GetProperty("Control");
             return (NSView)ctrlProp.GetValue(Handler, null);

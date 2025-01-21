@@ -20,6 +20,7 @@ namespace RadialMenuPlugin.Utilities
     }
     public static class DragDropUtilities
     {
+        public static readonly Size IconSize = new Size(28, 28);
         /// <summary>
         /// Logger
         /// </summary>
@@ -45,7 +46,7 @@ namespace RadialMenuPlugin.Utilities
 
                         // Seems that "CreateIcon" is a good condidate to get the Rhino toolbar item icon
                         var iconCreateMethod = lMacro.GetType().GetMethod("CreateIcon");
-                        var icon = (Icon)iconCreateMethod?.Invoke(lMacro, new object[] { new Size(28, 28), true });
+                        var icon = (Icon)iconCreateMethod?.Invoke(lMacro, new object[] { IconSize, true });
                         if (icon != null)
                         {
                             // Get the LEFT macro "script" and tooltip

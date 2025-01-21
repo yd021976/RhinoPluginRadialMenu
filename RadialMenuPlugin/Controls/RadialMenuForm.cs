@@ -7,9 +7,8 @@ using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Controls.Buttons;
 using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using System;
-using RadialMenuPlugin.Controls.ContextMenu;
-using AppKit;
 using Rhino;
+using RadialMenuPlugin.Controls.ContextMenu.MenuButton;
 
 namespace RadialMenuPlugin.Controls
 {
@@ -26,8 +25,8 @@ namespace RadialMenuPlugin.Controls
         protected PixelLayout _Layout = new PixelLayout();
         protected List<RadialMenuLevel> _Levels = new List<RadialMenuLevel>() {
                 new RadialMenuLevel(1,s_defaultInnerRadius,s_defaultThickness),
-                new RadialMenuLevel(2,s_defaultInnerRadius+s_defaultThickness+8,s_defaultThickness,(360/8)/2), // For this one, start angle at 45° to alternate buttons
-                new RadialMenuLevel(3,((s_defaultInnerRadius+s_defaultThickness)+8)+s_defaultThickness+8,s_defaultThickness),
+                new RadialMenuLevel(2,s_defaultInnerRadius+s_defaultThickness+8,s_defaultThickness,360/8/2), // For this one, start angle at 45° to alternate buttons
+                new RadialMenuLevel(3,s_defaultInnerRadius+s_defaultThickness+8+s_defaultThickness+8,s_defaultThickness),
             };
         /// <summary>
         /// Keep track of drag source Control to register/unregister "dragEnd" event
@@ -50,7 +49,7 @@ namespace RadialMenuPlugin.Controls
         /// </para>
         /// </summary>
         protected Model _CurrentButtonModel;
-        
+
         /// <summary>
         /// Current radial menu mode : true=>Edit mode, false=>normal mode 
         /// </summary>
@@ -66,6 +65,12 @@ namespace RadialMenuPlugin.Controls
         #endregion
 
         #region Public methods
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plugin"></param>
         public RadialMenuForm(PlugIn plugin) : base(plugin)
         {
             Size = new Size(s_menuSize.Width, s_menuSize.Height);
@@ -95,14 +100,10 @@ namespace RadialMenuPlugin.Controls
                 radialControl.Show(true);
             };
 
-            // Get ressource icon for close button
-            var img = Bitmap.FromResource("RadialMenu.Bitmaps.close-icon.png");
-            var icon = img.WithSize(16, 16);
-
             // Create close button
             _CenterMenuButton = new CenterMenuButton();
             _CenterMenuButton.Size = new Size(s_defaultInnerRadius * 2, s_defaultInnerRadius * 2);
-            // closeBtn.SetButtonIcon(icon);
+            _CenterMenuButton.NsView.AlphaValue = (float)0.6;
             _CenterMenuButton.MouseEnter += (o, e) =>
             {
                 Focus(); // Get menu focus
@@ -137,6 +138,16 @@ namespace RadialMenuPlugin.Controls
             // Add layout to content of form
             Content = _Layout;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="owner"></param>
+        public RadialMenuForm(PlugIn plugin, Window owner) : this(plugin)
+        {
+            Owner = owner;
+        }
+
         #endregion
 
         #region Protected/Private methods
@@ -289,8 +300,8 @@ namespace RadialMenuPlugin.Controls
         protected void _RunRhinoCommand(string command)
         {
             _OnCloseClickEvent(this); // close radial menu
-            Rhino.RhinoApp.SetFocusToMainWindow();
-            Rhino.RhinoApp.RunScript(command, false); // Run Rhino command
+            RhinoApp.SetFocusToMainWindow();
+            RhinoApp.RunScript(command, false); // Run Rhino command
         }
         /// <summary>
         /// Open a submenu from an opened menu control and given a button ID
@@ -456,11 +467,17 @@ namespace RadialMenuPlugin.Controls
             }
             else
             {
-                if (e.Application || e.Control || e.Alt)
-                {
-                    e.Handled = true;
-                    Focus();
-                }
+                //FIXME: Not great feature. Find another way to do this
+                // if (e.Application || e.Control || e.Alt)
+                // {
+                //     if (!HasFocus)
+                //     {
+                //         Focus();
+                //         Console.SetOut(RhinoApp.CommandLineOut);
+                //         Console.WriteLine("Form give focus");
+                //         e.Handled = true;
+                //     }
+                // }
             }
 
         }
@@ -638,12 +655,12 @@ namespace RadialMenuPlugin.Controls
                                         sourceDragModel.Data.Properties.CommandGUID);
 
                                     // Clear source model data
+                                    sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
                                     sourceDragModel.Data.Properties.Icon = null;
                                     sourceDragModel.Data.Properties.IsActive = false;
                                     sourceDragModel.Data.Properties.IsFolder = false;
                                     sourceDragModel.Data.Properties.LeftMacro = new Macro();
                                     sourceDragModel.Data.Properties.RightMacro = new Macro();
-                                    sourceDragModel.Data.Properties.CommandGUID = Guid.Empty;
 
                                     // (Recursive) Check each source item parent submenus still contains children. If not, clear parent model
                                     var parent = sourceDragModel.Parent;

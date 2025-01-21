@@ -25,6 +25,7 @@
     <PackageReference Include="Grasshopper" Version="8.0.23304.9001" ExcludeAssets="runtime" />
     <EmbeddedResource Include="Bitmaps/*.*" />
     <PackageReference Include="NLog" Version="5.3.4" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
   </ItemGroup>
   
 </Project>

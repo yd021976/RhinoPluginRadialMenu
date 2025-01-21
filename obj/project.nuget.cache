@@ -1,12 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "U68G1uqLZfbuQDkr9XyGJuZzJnHAGVpC4tonXpLChXaIrYOF8KF+OleW995MF0PYzSEGuc91ZGwjNTn4LqkDnw==",
+  "dgSpecHash": "HJZkzkl6U91PSg2nbC4CBg3vAFPVQyG4vBREzqueYS74KbiYEZZkRv4PEerweQjKh2G/z7LAkyIuFljmOD0LfA==",
   "success": true,
   "projectFilePath": "/Volumes/Travail/Programming/macos/CSharp/RhinoPlugins/RhinoPluginRadialMenu/RadialMenu.csproj",
   "expectedPackageFiles": [
     "/Users/tigrou/.nuget/packages/grasshopper/8.0.23304.9001/grasshopper.8.0.23304.9001.nupkg.sha512",
+    "/Users/tigrou/.nuget/packages/microsoft.win32.systemevents/7.0.0/microsoft.win32.systemevents.7.0.0.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/nlog/5.3.4/nlog.5.3.4.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/rhinocommon/8.0.23304.9001/rhinocommon.8.0.23304.9001.nupkg.sha512",
+    "/Users/tigrou/.nuget/packages/system.drawing.common/7.0.0/system.drawing.common.7.0.0.nupkg.sha512",
     "/Users/tigrou/.nuget/packages/microsoft.macos.ref/13.3.7142/microsoft.macos.ref.13.3.7142.nupkg.sha512"
   ],
   "logs": []

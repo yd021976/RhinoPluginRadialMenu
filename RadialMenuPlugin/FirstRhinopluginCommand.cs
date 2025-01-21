@@ -3,7 +3,6 @@ using Rhino.Commands;
 using RadialMenuPlugin.Controls;
 using Eto.Forms;
 using Rhino.UI;
-using System;
 using RadialMenuPlugin.Data;
 
 namespace RadialMenuPlugin
@@ -27,17 +26,17 @@ namespace RadialMenuPlugin
                 if (etoKey != Keys.None)
                 {
                     //TODO: Add hability to customize wich keyboard special key to give menu focus back
-                    if (etoKey == Keys.Application) // If "command" key is pressed, give menu focus 
-                    {
-                        // FIXME: for special keys like Command, Control, Option, Rhino send the event twice.
-                        // Check previous key press was not the same to avoid sending Menu the event twice
-                        if (_PrevKeyPress != key)
-                        {
-                            _Form.KeyPress(new KeyEventArgs(etoKey, KeyEventType.KeyDown)); // No char as we only send special key
-                        }
-                    }
+                    // if (etoKey == Keys.Application) // If "command" key is pressed, give menu focus 
+                    // {
+                    //     // FIXME: for special keys like Command, Control, Option, Rhino send the event twice.
+                    //     // Check previous key press was not the same to avoid sending Menu the event twice
+                    //     _Form.KeyPress(new KeyEventArgs(etoKey, KeyEventType.KeyDown)); // No char as we only send special key
+                    //     // if (_PrevKeyPress != key)
+                    //     // {
+                    //     // }
+                    // }
                 }
-                 _PrevKeyPress = key;
+                _PrevKeyPress = key;
                 // Console.SetOut(RhinoApp.CommandLineOut);
                 // Console.WriteLine("Key code: " + key.ToString());
             };
@@ -71,8 +70,9 @@ namespace RadialMenuPlugin
         protected override Result RunCommand(RhinoDoc doc, RunMode mode)
         {
             // RhinoApp.CommandWindowCaptureEnabled = false;
-            _Form = _Form == null ? new RadialMenuForm(PlugIn) : _Form;
-            var m = MouseCursor.Location;
+            _Form = _Form == null ? new RadialMenuForm(PlugIn,RhinoEtoApp.MainWindow) : _Form;
+            // var m = MouseCursor.Location;
+            var m = Mouse.Position;
             var formSize = _Form.Size;
             _Form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
             _Form.Show();

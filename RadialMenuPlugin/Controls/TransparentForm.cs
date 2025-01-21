@@ -16,7 +16,7 @@ namespace RadialMenuPlugin.Controls
             WindowStyle = WindowStyle.None;
             AutoSize = false;
             Resizable = false;
-            Topmost = true;
+            // Topmost = true;
             ShowActivated = true;
             Padding = new Padding(0);
             MovableByWindowBackground = false;
@@ -37,6 +37,7 @@ namespace RadialMenuPlugin.Controls
                 }
             };
         }
+       
         /// <summary>
         /// Send a key down event to form
         /// </summary>

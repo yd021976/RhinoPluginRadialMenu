@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
 using RadialMenuPlugin.Data;
@@ -10,6 +11,7 @@ namespace RadialMenuPlugin.Controls.Buttons
         protected Icon _LeftMouseClick;
         protected Icon _RightMouseClick;
         protected ButtonModelData _ButtonModelData;
+        public NSView NsView { get => _GetNSView(); }
         public BindableBinding<CenterMenuButton, ButtonModelData> modelBinding => new BindableBinding<CenterMenuButton, ButtonModelData>(
             this,
             (CenterMenuButton obj) => obj._ButtonModelData,
@@ -49,8 +51,11 @@ namespace RadialMenuPlugin.Controls.Buttons
             var font = Fonts.Sans(fontSize);
             var brush = new SolidBrush(Colors.Black);
 
-            var iconPosX = 10; var iconWidth = iconPosX + _LeftMouseClick.Width;
-            var posY = (Height / 2) - fontSize; var posYinc = 18; var posX = iconWidth + 3;
+            var iconPosX = 10; 
+            var iconWidth = iconPosX + _LeftMouseClick.Width;
+            var posY = (Height / 2) - fontSize; 
+            var posYinc = 18; 
+            var posX = iconWidth + 3;
 
             var text = new FormattedText();
             text.ForegroundBrush = brush;
@@ -64,18 +69,16 @@ namespace RadialMenuPlugin.Controls.Buttons
             {
                 text.Text = _ButtonModelData.Properties.LeftMacro.Tooltip;
                 var textSize = text.Measure();
-                var centeredX = (Width - textSize.Width - iconWidth - 3) / 2;
                 g.DrawText(text, new PointF(posX, posY));
-                g.DrawImage(_LeftMouseClick, new PointF(centeredX, posY + (textSize.Height / 2) - (_LeftMouseClick.Height / 2)));
+                g.DrawImage(_LeftMouseClick, new PointF(iconPosX, posY + (textSize.Height / 2) - (_LeftMouseClick.Height / 2)));
                 posY += posYinc;
             }
             if (_ButtonModelData.Properties.RightMacro.Tooltip != "")
             {
                 text.Text = _ButtonModelData.Properties.RightMacro.Tooltip;
                 var textSize = text.Measure();
-                var centeredX = (Width - textSize.Width - iconWidth - 3) / 2;
                 g.DrawText(text, new PointF(posX, posY));
-                g.DrawImage(_RightMouseClick, new PointF(centeredX, posY + (textSize.Height / 2) - (_LeftMouseClick.Height / 2)));
+                g.DrawImage(_RightMouseClick, new PointF(iconPosX, posY + (textSize.Height / 2) - (_LeftMouseClick.Height / 2)));
             }
         }
         /// <summary>
@@ -94,6 +97,17 @@ namespace RadialMenuPlugin.Controls.Buttons
                 default:
                     break;
             }
+        }
+
+        /// <summary>
+        /// Return the native MacOS NSView object
+        /// </summary>
+        /// <param name="ctrl"></param>
+        /// <returns></returns>
+        protected NSView _GetNSView()
+        {
+            var ctrlProp = Handler.GetType().GetProperty("Control");
+            return (NSView)ctrlProp.GetValue(Handler, null);
         }
     }
 }

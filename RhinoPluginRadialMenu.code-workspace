@@ -17,6 +17,13 @@
 			"bin": true,
 			"**/obj": true
 		},
-		"explorerExclude.backup": {}
+		"explorerExclude.backup": {},
+		"editor.showFoldingControls": "always",
+		"notebook.showFoldingControls": "always",
+		"editor.defaultFoldingRangeProvider": "ms-dotnettools.csharp",
+		"foldToDefinitions.foldSummaries": true,
+		"foldToDefinitions.foldProperties": true,
+		"foldToDefinitions.retainSelection": false,
+		"foldToDefinitions.unfoldFirst": true
 	}
 }
