@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using AppKit;
 using Eto.Drawing;
@@ -8,6 +9,10 @@ namespace RadialMenuPlugin.Controls.Buttons
 {
     public class CenterMenuButton : RoundButtonBase
     {
+        protected readonly float _HoverAlpha = (float)0.8;
+        protected readonly float _BaseAlpha = (float)0.4;
+        protected readonly double _AnimationDuration = (double)0.3;
+        protected bool _HoverState = false;
         protected Icon _LeftMouseClick;
         protected Icon _RightMouseClick;
         protected ButtonModelData _ButtonModelData;
@@ -31,6 +36,11 @@ namespace RadialMenuPlugin.Controls.Buttons
             _LeftMouseClick = Bitmap.FromResource("RadialMenu.Bitmaps.mouse_left_click.png").WithSize(16, 16);
             _RightMouseClick = Bitmap.FromResource("RadialMenu.Bitmaps.mouse_right_click.png").WithSize(16, 16);
         }
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            NsView.AlphaValue = _BaseAlpha;
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -39,6 +49,45 @@ namespace RadialMenuPlugin.Controls.Buttons
         {
             base.OnPaint(e);
             _DrawMacroTooltips(e.Graphics);
+        }
+        protected override void _OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            base._OnMouseEnter(sender, e);
+            _HoverState = true;
+            _AnimateFadeEffect();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected override void _OnMouseLeave(object sender, MouseEventArgs e)
+        {
+            base._OnMouseEnter(sender, e);
+            _HoverState = false;
+            _AnimateFadeEffect();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hover"></param>
+        protected void _AnimateFadeEffect()
+        {
+            NSAnimationContext.RunAnimation(
+                (context) =>
+                {
+                    context.Duration = _AnimationDuration;
+                    context.AllowsImplicitAnimation = true;
+                    if (_HoverState)
+                    {
+                        NsView.AlphaValue = _HoverAlpha;
+                    }
+                    else
+                    {
+                        NsView.AlphaValue = _BaseAlpha;
+                    }
+                }
+            );
         }
         /// <summary>
         /// 
@@ -51,10 +100,10 @@ namespace RadialMenuPlugin.Controls.Buttons
             var font = Fonts.Sans(fontSize);
             var brush = new SolidBrush(Colors.Black);
 
-            var iconPosX = 10; 
+            var iconPosX = 10;
             var iconWidth = iconPosX + _LeftMouseClick.Width;
-            var posY = (Height / 2) - fontSize; 
-            var posYinc = 18; 
+            var posY = (Height / 2) - fontSize;
+            var posYinc = 18;
             var posX = iconWidth + 3;
 
             var text = new FormattedText();

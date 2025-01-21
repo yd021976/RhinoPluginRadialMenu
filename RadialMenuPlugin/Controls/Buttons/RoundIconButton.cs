@@ -21,7 +21,6 @@ namespace RadialMenuPlugin.Controls.Buttons
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            _DrawCircle(e);
         }
         protected void _DrawIcon(Graphics g)
         {

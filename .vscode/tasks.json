@@ -61,7 +61,10 @@
       "options": {
         "cwd": "${workspaceFolder}/bin/release/net7.0-macos12.0"
       },
-      "group": "none"
+      "group": {
+        "kind": "none",
+        "isDefault": false
+      }
     },
     {
       "label":"Build YAK package",
