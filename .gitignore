@@ -29,10 +29,10 @@ x86/
 bld/
 Package/
 *.yak
-#[Bb]in/
-#[Oo]bj/
-#[Ll]og/
-#[Ll]ogs/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
 # Folders & Files we don't want to publish
 UI_Design/
