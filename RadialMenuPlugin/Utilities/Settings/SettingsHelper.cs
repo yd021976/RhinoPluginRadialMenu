@@ -175,13 +175,16 @@ namespace RadialMenuPlugin.Utilities.Settings
             var list = modelData.Properties.toList();
             node.SetStringDictionary("Properties", list.ToArray());
 
-            // Update icon file if not already exist
+            // Save icon file if not already exist
             // REMARK: The <SetProperties> method is called each time a property changed in<ButtonModelData>. So it is possible <CommandGUID> is not already sets
-            if (modelData.Properties.CommandGUID != Guid.Empty) // Check we have a valid GUID
+            if (modelData.Properties.Icon != null) // Check button has an icon to save
             {
-                if (!System.IO.File.Exists(_IconFileFullPath(modelData)))
+                if (modelData.Properties.CommandGUID != Guid.Empty) // Check we have a valid GUID
                 {
-                    new Bitmap(modelData.Properties.Icon).Save(_IconFileFullPath(modelData), ImageFormat.Png);
+                    if (!System.IO.File.Exists(_IconFileFullPath(modelData)))
+                    {
+                        new Bitmap(modelData.Properties.Icon).Save(_IconFileFullPath(modelData), ImageFormat.Png);
+                    }
                 }
             }
         }
