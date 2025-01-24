@@ -27,6 +27,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
         protected OpenFileDialog _IconFileChooser;
         public bool FileSelectorOpened = false;
 
+
         public ButtonSettingEditorContents() : base()
         {
             _DefaultIcon = Bitmap.FromResource("RadialMenu.Bitmaps.question-mark-circle-outline-icon.png");
