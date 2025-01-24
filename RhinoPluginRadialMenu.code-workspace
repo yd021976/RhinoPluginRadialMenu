@@ -12,11 +12,11 @@
 			"**/CVS": true,
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
-			"**/Properties": true,
+			"**/Properties": false,
 			"**/bin": true,
 			"bin": true,
 			"**/obj": true,
-			"Package": true,
+			"Package": false,
 			"UI_Design": true
 		},
 		"explorerExclude.backup": {},
