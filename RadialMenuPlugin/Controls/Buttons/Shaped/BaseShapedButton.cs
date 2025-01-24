@@ -9,7 +9,8 @@ namespace RadialMenuPlugin.Controls.Buttons.Base
         normal = 1,
         hover = 2,
         selected = 3,
-        mask = 3
+        disabled = 4,
+        mask = 5
     }
     public sealed class BaseShapeButtonImages : Dictionary<EType, Bitmap>
     { }
