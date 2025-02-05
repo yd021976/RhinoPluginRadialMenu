@@ -9,11 +9,15 @@ using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using System;
 using Rhino;
 using RadialMenuPlugin.Controls.ContextMenu.MenuButton;
+using RadialMenuPlugin.Controls.Buttons.Shaped.Form;
+using NLog;
 
 namespace RadialMenuPlugin.Controls
 {
     public class RadialMenuForm : TransparentForm
     {
+        public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         #region Public properties
         #endregion
 
@@ -58,7 +62,10 @@ namespace RadialMenuPlugin.Controls
         /// Associate a menu level to a Control of type <SectorArcRadialControl>
         /// </summary>
         protected Dictionary<RadialMenuLevel, RadialMenuControl> _Controls = new Dictionary<RadialMenuLevel, RadialMenuControl>();
-        protected CenterMenuButton _CenterMenuButton;
+        protected FormCenterButton _CenterMenuButton;
+        protected readonly Macro MouseHoverLeftTooltip = new Macro("", "Close");
+        protected readonly Macro MouseHoverRightTooltip = new Macro("", "Edit radial menu");
+
         /// <summary>
         /// Ref to Model object when button is dragged
         /// </summary>
@@ -101,33 +108,7 @@ namespace RadialMenuPlugin.Controls
             };
 
             // Create close button
-            _CenterMenuButton = new CenterMenuButton();
-            _CenterMenuButton.Size = new Size(s_defaultInnerRadius * 2, s_defaultInnerRadius * 2);
-            _CenterMenuButton.MouseEnter += (o, e) =>
-            {
-                Focus(); // Get menu focus
-            };
-            _CenterMenuButton.MouseLeave += (o, e) =>
-            {
-                // Rhino.RhinoApp.SetFocusToMainWindow(); // Give Rhino app focus
-            };
-            _CenterMenuButton.OnclickEvent += (sender, args) =>
-            {
-                // Right click on close button toggles edit mode
-                if (args.Buttons == MouseButtons.Alternate)
-                {
-                    _EditMode = !_EditMode;
-                    foreach (var control in _Controls.Values)
-                    {
-                        if (control.Level.Level != 1) control.Show(false); // Hide current opened sub menu
-                        control.SwitchEditMode(_EditMode);
-                    }
-                }
-                else if (args.Buttons == MouseButtons.Primary)
-                {
-                    _OnCloseClickEvent(sender);
-                }
-            };
+            InitCenterButton();
             _Layout.Add(_CenterMenuButton, (Size.Width / 2) - _CenterMenuButton.Size.Width / 2, (Size.Height / 2) - (_CenterMenuButton.Size.Height / 2));
 
             // Create and add RadialMenu Control for 1st level
@@ -361,11 +342,13 @@ namespace RadialMenuPlugin.Controls
         /// <param name="model"></param>
         protected void _UpdateTooltipBinding(Model model = null)
         {
-            if (_CurrentButtonModel != model)
+            if (model == null)
             {
-                _CenterMenuButton.Unbind();
-                _CenterMenuButton.modelBinding.Bind(model, nameof(Model.Data));
-                _CurrentButtonModel = model;
+                _CenterMenuButton.SetTooltip();
+            }
+            else
+            {
+                _CenterMenuButton.SetTooltip(model.Data.Properties.LeftMacro, model.Data.Properties.RightMacro);
             }
         }
         /// <summary>
@@ -375,8 +358,9 @@ namespace RadialMenuPlugin.Controls
         /// <returns></returns>
         protected bool _TriggerMenuItem(char key)
         {
+#nullable enable
             RadialMenuControl? openedControl = null; // Current highest opened menu
-
+#nullable disable
             // Get the current shown level and the parent model from the selected button of parent model
             foreach (var control in _Controls)
             {
@@ -472,8 +456,6 @@ namespace RadialMenuPlugin.Controls
                 //     if (!HasFocus)
                 //     {
                 //         Focus();
-                //         Console.SetOut(RhinoApp.CommandLineOut);
-                //         Console.WriteLine("Form give focus");
                 //         e.Handled = true;
                 //     }
                 // }
@@ -490,6 +472,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseEnterButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
+            logger.Debug($"mouse enter button {e.Model.Data.ButtonID}");
             if (e.Model.Data.Properties.IsFolder)
             {
                 var newSubmenu = _ShowSubmenu(radialMenuControl, e.Model);
@@ -516,7 +499,7 @@ namespace RadialMenuPlugin.Controls
             {
                 Focus(); // Give radial menu focus when mouse overs a button
             }
-            _UpdateTooltipBinding(e.Model); // update tooltip
+            // _UpdateTooltipBinding(e.Model); // update tooltip
         }
         protected void _RadialControlMouseClickHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
@@ -542,6 +525,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseLeaveButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
+            logger.Debug($"{e.Model.Data.ButtonID}");
             _UpdateTooltipBinding(); // Update tooltip
             if (_ContextMenuForm.Visible) return; // Don't give Rhino main window focus if we're showing context menu
             RhinoApp.SetFocusToMainWindow(); // Give Rhino main window focus when no button is over
@@ -759,6 +743,37 @@ namespace RadialMenuPlugin.Controls
             location.X = location.X - 8;
             location.Y = location.Y - 8;
             _ContextMenuForm.Show(location);
+        }
+        void InitCenterButton()
+        {
+            _CenterMenuButton = new FormCenterButton(new Size(s_defaultInnerRadius * 2, s_defaultInnerRadius * 2));
+            _CenterMenuButton.OnButtonMouseEnter += (o, e) =>
+            {
+                Focus(); // Get menu focus
+                _CenterMenuButton.SetTooltip(MouseHoverLeftTooltip, MouseHoverRightTooltip);
+            };
+            _CenterMenuButton.OnButtonMouseLeave += (o, e) =>
+            {
+                _CenterMenuButton.SetTooltip(); // Clear tooltip as we leave button
+            };
+            _CenterMenuButton.OnButtonClickEvent += (sender, args) =>
+            {
+                // Right click on close button toggles edit mode
+                if (args.Buttons == MouseButtons.Alternate)
+                {
+                    _EditMode = !_EditMode;
+                    foreach (var control in _Controls.Values)
+                    {
+                        if (control.Level.Level != 1) control.Show(false); // Hide current opened sub menu
+                        control.SwitchEditMode(_EditMode);
+                    }
+                }
+                else if (args.Buttons == MouseButtons.Primary)
+                {
+                    _OnCloseClickEvent(sender);
+                }
+            };
+
         }
         #endregion
     }

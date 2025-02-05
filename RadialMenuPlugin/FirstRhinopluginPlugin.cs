@@ -1,4 +1,9 @@
-﻿using RadialMenuPlugin.Utilities.Settings;
+﻿using System;
+using System.Diagnostics;
+using NLog;
+using NLog.Layouts;
+using RadialMenuPlugin.Utilities.Settings;
+using Rhino;
 using Rhino.PlugIns;
 
 namespace RadialMenuPlugin
@@ -11,8 +16,9 @@ namespace RadialMenuPlugin
     /// attributes in AssemblyInfo.cs (you might need to click "Project" ->
     /// "Show All Files" to see it in the "Solution Explorer" window).</para>
     ///</summary>
-    public class RadialMenuPlugin : Rhino.PlugIns.PlugIn
+    public class RadialMenuPlugin : PlugIn
     {
+        public static readonly string IsDebugEnvName = "DEBUG_PLUGIN";
         public SettingsHelper SettingsHelper;
         public RadialMenuPlugin()
         {
@@ -28,13 +34,48 @@ namespace RadialMenuPlugin
         // and maintain plug-in wide options in a document.
         protected override LoadReturnCode OnLoad(ref string errorMessage)
         {
+            InitNLog();
+            return LoadReturnCode.Success;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        protected void InitNLog()
+        {
             // configure NLog logger
             var config = new NLog.Config.LoggingConfiguration();
             var logfile = SettingsDirectoryAllUsers + "/logfile.txt";
             var filetarget = new NLog.Targets.FileTarget("logfile") { FileName = logfile };
-            config.AddRuleForAllLevels(filetarget); // Log all level into file
-            NLog.LogManager.Configuration = config;
-            return LoadReturnCode.Success;
+            var n = System.Reflection.Assembly.GetExecutingAssembly();
+            var consoleTargetDebug = new NLog.Targets.MethodCallTarget()
+            {
+                Name = "RhinoCommandHistory",
+                ClassName = "RadialMenuPlugin.NLogClassLogger, RadialMenu, Version=1.1.1.0, Culture=neutral, PublicKeyToken=null",
+                MethodName = "log",
+            };
+            consoleTargetDebug.Parameters.Add(new NLog.Targets.MethodCallParameter("${level}"));
+            consoleTargetDebug.Parameters.Add(new NLog.Targets.MethodCallParameter("${callsite:includeNamespace=false}"));
+            consoleTargetDebug.Parameters.Add(new NLog.Targets.MethodCallParameter("${message}"));
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, filetarget); // Log all except debug and trace level into file
+
+            // Log trace and debug level into rhino console ONLY when in debug mode
+            var isDebug = Environment.GetEnvironmentVariable(RadialMenuPlugin.IsDebugEnvName);
+            if (isDebug == "1")
+            {
+                config.AddRule(LogLevel.Trace, LogLevel.Debug, consoleTargetDebug);
+            }
+            LogManager.Configuration = config;
+        }
+    }
+    public class NLogClassLogger
+    {
+
+        public static void log(string level, string callsite, string message)
+        {
+            Console.SetOut(RhinoApp.CommandLineOut);
+            var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            var threadID = System.Threading.Thread.CurrentThread.ManagedThreadId.ToString();
+            Console.WriteLine($"{level}|{timestamp}|#{threadID}|{callsite}|{message}");
         }
     }
 }

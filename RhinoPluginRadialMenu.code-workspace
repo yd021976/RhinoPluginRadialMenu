@@ -6,6 +6,20 @@
 	],
 	"settings": {
 		"files.exclude": {
+			"**/.git": false,
+			"**/.svn": false,
+			"**/.hg": false,
+			"**/CVS": false,
+			"**/.DS_Store": false,
+			"**/Thumbs.db": false,
+			"**/Properties": false,
+			"**/bin": false,
+			"bin": false,
+			"**/obj": false,
+			"Package": false,
+			"UI_Design": false
+		},
+		"explorerExclude.backup": {
 			"**/.git": true,
 			"**/.svn": true,
 			"**/.hg": true,
@@ -19,7 +33,6 @@
 			"Package": false,
 			"UI_Design": true
 		},
-		"explorerExclude.backup": {},
 		"editor.showFoldingControls": "always",
 		"notebook.showFoldingControls": "always",
 		"editor.defaultFoldingRangeProvider": "ms-dotnettools.csharp",

@@ -37,8 +37,6 @@ namespace RadialMenuPlugin
                     // }
                 }
                 _PrevKeyPress = key;
-                // Console.SetOut(RhinoApp.CommandLineOut);
-                // Console.WriteLine("Key code: " + key.ToString());
             };
             // When ESC is pressed in rhino AND command is running -> Send keyUp to radial menu
             RhinoApp.EscapeKeyPressed += (s, e) =>

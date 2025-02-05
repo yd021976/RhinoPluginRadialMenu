@@ -5,6 +5,7 @@ using System.Linq;
 using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
+using NLog;
 using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Utilities;
@@ -87,6 +88,8 @@ namespace RadialMenuPlugin.Controls
     /// </summary>
     public class RadialMenuControl : PixelLayout
     {
+        public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         #region Events declaration
         public event MouseEventHandler MouseEnterButton;
         public event MouseEventHandler MouseMoveButton;
@@ -160,6 +163,13 @@ namespace RadialMenuPlugin.Controls
         /// The current selected button ID
         /// </summary>
         protected string _SelectedButtonID;
+        /// <summary>
+        /// Current button ID mouse's over
+        /// <para>
+        /// HACK: Mouse enter/leave can be in not order (e.g "leave" button #1 triggers after "enter" button #2). This property allow us to ensure a leave event match the current "mouse over" button
+        /// </para>
+        /// </summary>
+        protected string _HoverButtonID;
         #endregion
 
         #region Animations
@@ -185,7 +195,8 @@ namespace RadialMenuPlugin.Controls
         /// <param name="level"></param>
         public RadialMenuControl(RadialMenuLevel level) : base()
         {
-            var w = Stopwatch.StartNew(); //DEBUG Method measure
+            // DEBUG Method measure
+            var w = Stopwatch.StartNew();
             Level = level;
             Size = new Size((level.InnerRadius + level.Thickness) * 2, (level.InnerRadius + level.Thickness) * 2);
             var sectors = _BuildSectors();
@@ -220,8 +231,7 @@ namespace RadialMenuPlugin.Controls
             Visible = true;
             //DEBUG Method measure
             w.Stop();
-            Console.SetOut(RhinoApp.CommandLineOut);
-            Console.WriteLine("SectorArcRadialControl constructor:" + w.ElapsedMilliseconds);
+            logger.Debug($"SectorArcRadialControl constructor takes {w.ElapsedMilliseconds}");
         }
         /// <summary>
         /// 
@@ -242,7 +252,7 @@ namespace RadialMenuPlugin.Controls
         /// </summary>
         /// <param name="buttonID"></param>
         /// <returns></returns>
-        public List<Model> GetModels() 
+        public List<Model> GetModels()
         {
             return _Buttons.Values.ToList();
         }
@@ -252,10 +262,9 @@ namespace RadialMenuPlugin.Controls
             {
                 return _Buttons.First(entry => entry.Key.ID == buttonID).Value.Data.Properties;
             }
-            catch
+            catch (Exception e)
             {
-                Console.SetOut(RhinoApp.CommandLineOut);
-                Console.WriteLine($"SectorArcRadialControl get button {buttonID} properties error");
+                logger.Error(e, $"SectorArcRadialControl get button {buttonID} properties error");
                 return null;
             }
         }
@@ -265,10 +274,9 @@ namespace RadialMenuPlugin.Controls
             {
                 _Buttons.First(entry => entry.Key.ID == buttonID).Value.Data.Properties = properties;
             }
-            catch
+            catch (Exception e)
             {
-                Console.SetOut(RhinoApp.CommandLineOut);
-                Console.WriteLine($"SectorArcRadialControl set button {buttonID} properties error");
+                logger.Error(e, $"SectorArcRadialControl set button {buttonID} properties error");
             }
             finally { }
         }
@@ -316,7 +324,6 @@ namespace RadialMenuPlugin.Controls
         /// <param name="forButtonID"></param>
         public void SetMenuForButtonID(Model parent = null)
         {
-            // var w = Stopwatch.StartNew();   //DEBUG: Method measure
             SelectedButtonID = ""; // As we build new layout, unselect any button
 
             // Iterate on each sector data to update button
@@ -329,9 +336,6 @@ namespace RadialMenuPlugin.Controls
                 button.ID = model.Data.ButtonID; // Update button ID
 
             }
-            // w.Stop();
-            // Console.SetOut(RhinoApp.CommandLineOut);
-            // Console.WriteLine("SetMenuForButtonID takes:" + w.ElapsedMilliseconds);
         }
         #endregion
 
@@ -389,6 +393,7 @@ namespace RadialMenuPlugin.Controls
             int angleStart;
             List<SectorData> sectors = new List<SectorData>();
 
+            var sectorDrawer = new ArcSectorDrawer();
             var sweepAngle = 360 / Level.SectorsNumber;
 
             for (int i = 0; i < Level.SectorsNumber; i++)
@@ -398,15 +403,11 @@ namespace RadialMenuPlugin.Controls
                 if (angleStart > 360) Level.StartAngle -= 360;
 
                 // Draw one sector
-                var _graphicsPath = new GraphicsPath();
-                var sectorDrawer = new ArcSectorDrawer();
-                var sectorData = sectorDrawer.DrawSector(_graphicsPath, Size.Width / 2, Size.Height / 2, Level, angleStart, sweepAngle);
+
+                var sectorData = sectorDrawer.CreateSectorImages(Size.Width / 2, Size.Height / 2, Level, angleStart, sweepAngle);
 
                 // add sector infos to list
                 sectors.Add(sectorData);
-
-                // Release resources
-                _graphicsPath.Dispose();
             }
             return sectors;
         }
@@ -442,6 +443,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseEnter(MenuButton sender, MouseEventArgs e)
         {
+            _HoverButtonID = sender.ID;
             _RaiseEvent(MouseEnterButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }
         /// <summary>
@@ -460,7 +462,19 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseLeave(MenuButton sender, MouseEventArgs e)
         {
-            _RaiseEvent(MouseLeaveButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
+            /// HACK: Prevent raising "leave" event of another button than the one currently "hover"
+            /// If we move the mouse quickly from a button to another one, the "leave" event triggers AFTER the "enter" event
+            /// It is buggy for example to update and display tooltip <seealso cref="RadialMenuForm"/>
+            if (sender.ID != _HoverButtonID)
+            {
+                logger.Debug($"Mouse leave not triggered");
+            }
+            else
+            {
+                logger.Debug($"Mouse leave triggered");
+                _HoverButtonID = null;
+                _RaiseEvent(MouseLeaveButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
+            }
         }
         /// <summary>
         /// 
