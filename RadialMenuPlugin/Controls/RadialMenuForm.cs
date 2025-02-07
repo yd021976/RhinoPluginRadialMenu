@@ -1,22 +1,22 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Eto.Drawing;
 using Eto.Forms;
-using Rhino.PlugIns;
-using RadialMenuPlugin.Data;
-using RadialMenuPlugin.Controls.Buttons;
-using RadialMenuPlugin.Controls.Buttons.MenuButton;
-using System;
 using Rhino;
-using RadialMenuPlugin.Controls.ContextMenu.MenuButton;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Form;
+using Rhino.PlugIns;
 using NLog;
+using RadialMenuPlugin.Data;
+using RadialMenuPlugin.Controls.Buttons.MenuButton;
+using RadialMenuPlugin.Controls.ContextMenu.MenuButton;
+using RadialMenuPlugin.Controls.Buttons.Shaped.Base;
+using RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center;
 
 namespace RadialMenuPlugin.Controls
 {
     public class RadialMenuForm : TransparentForm
     {
-        public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         #region Public properties
         #endregion
@@ -65,7 +65,6 @@ namespace RadialMenuPlugin.Controls
         protected FormCenterButton _CenterMenuButton;
         protected readonly Macro MouseHoverLeftTooltip = new Macro("", "Close");
         protected readonly Macro MouseHoverRightTooltip = new Macro("", "Edit radial menu");
-
         /// <summary>
         /// Ref to Model object when button is dragged
         /// </summary>
@@ -472,7 +471,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseEnterButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
-            logger.Debug($"mouse enter button {e.Model.Data.ButtonID}");
+            Logger.Debug($"Mouse enter button {e.Model.Data.ButtonID}");
             if (e.Model.Data.Properties.IsFolder)
             {
                 var newSubmenu = _ShowSubmenu(radialMenuControl, e.Model);
@@ -525,8 +524,14 @@ namespace RadialMenuPlugin.Controls
         /// <param name="radialMenuControl"></param>
         protected void _RadialControlMouseLeaveButtonHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
-            logger.Debug($"{e.Model.Data.ButtonID}");
-            _UpdateTooltipBinding(); // Update tooltip
+            Logger.Debug($"Mouse leave button {e.Model.Data.ButtonID}");
+
+            //HACK: We can't leave a button if mouse is hover center button. This hack is because sometimes the "leave" event of a button can trigger AFTER the center button "ENTER" event
+            if (_CenterMenuButton.CurrentButtonState.GetType() == typeof(HoverState)) { }
+            else
+            {
+                _UpdateTooltipBinding(); // Update tooltip
+            }
             if (_ContextMenuForm.Visible) return; // Don't give Rhino main window focus if we're showing context menu
             RhinoApp.SetFocusToMainWindow(); // Give Rhino main window focus when no button is over
         }
@@ -749,11 +754,13 @@ namespace RadialMenuPlugin.Controls
             _CenterMenuButton = new FormCenterButton(new Size(s_defaultInnerRadius * 2, s_defaultInnerRadius * 2));
             _CenterMenuButton.OnButtonMouseEnter += (o, e) =>
             {
+                Logger.Debug($"Center button mouse Enter");
                 Focus(); // Get menu focus
                 _CenterMenuButton.SetTooltip(MouseHoverLeftTooltip, MouseHoverRightTooltip);
             };
             _CenterMenuButton.OnButtonMouseLeave += (o, e) =>
             {
+                Logger.Debug($"Center button mouse Leave");
                 _CenterMenuButton.SetTooltip(); // Clear tooltip as we leave button
             };
             _CenterMenuButton.OnButtonClickEvent += (sender, args) =>

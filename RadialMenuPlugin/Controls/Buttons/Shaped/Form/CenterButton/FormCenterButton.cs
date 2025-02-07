@@ -1,22 +1,27 @@
 using System;
 using System.Collections.Generic;
+using AppKit;
 using Eto.Drawing;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Base;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Base.States;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types.Images;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Form.States;
+using RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center.States;
 using RadialMenuPlugin.Data;
 
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
+namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center
 {
     public class FormCenterTooltipNames : EnumKey
     {
-        public static readonly FormCenterTooltipNames Tooltip = new FormCenterTooltipNames("tooltip");
+        public static readonly FormCenterTooltipNames Tooltip1 = new FormCenterTooltipNames("tooltip_1");
+        public static readonly FormCenterTooltipNames Tooltip2 = new FormCenterTooltipNames("tooltip_2");
         protected FormCenterTooltipNames(string key) : base(key) { }
     }
-    public class FormCenterButton : BaseShapedButton
+    public class FormCenterButton : ShapedButton
     {
+        #region Public Properties
+        public State CurrentButtonState { get => CurrentState; }
+        #endregion
         #region Protected properties
         /// <summary>
         /// Current tootltip left macro
@@ -38,6 +43,10 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
         /// Current state for tooltip display
         /// </summary>
         protected State CurrentTooltipState;
+        /// <summary>
+        /// Currently displayed tooltip control (used to swap tooltip display)
+        /// </summary>
+        protected FormCenterTooltipNames CurrentDisplayedTooltip;
         /// <summary>
         /// List of state instances
         /// </summary>
@@ -70,10 +79,10 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
             // 2 - 
             TooltipStatePool = new StatePool() {
                 {
-                    typeof(States.DefaultState), new States.DefaultState(RunAnimation, new List<Action>(){HideTooltip}.ToArray())
+                    typeof(States.DefaultState), new States.DefaultState(AnimateDefault, new List<Action>(){}.ToArray())
                 },
                 {
-                    typeof(TooltipState), new TooltipState(RunAnimation, new List<Action>(){BuildTooltipImage,ShowTooltip}.ToArray())
+                    typeof(TooltipState), new TooltipState(SwapTooltips, new List<Action>(){}.ToArray())
                 },
             };
 
@@ -92,13 +101,15 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
         {
             LeftTooltip = leftAction;
             RightTooltip = rightAction;
-            if (LeftTooltip == null && RightTooltip == null) // if no tooltip, hide tooltip control
+            if ((LeftTooltip == null && RightTooltip == null) || (LeftTooltip?.Tooltip == "" && RightTooltip?.Tooltip == "")) // if no tooltip, hide tooltip control
             {
+                Logger.Debug($"Tooltip is empty");
                 CurrentTooltipState = CurrentTooltipState.NextState(TooltipEvent.Default, TooltipStatePool);
             }
             else
             {
                 // Switch to next step depending if we want to display button tooltip or if we want to display a radial menu tooltip
+                Logger.Debug($"Tooltip is NOT empty");
                 CurrentTooltipState = CurrentTooltipState.NextState(TooltipEvent.Tooltip, TooltipStatePool);
             }
         }
@@ -136,7 +147,7 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
                 ft.Text = RightTooltip.Tooltip;
                 gc.DrawText(ft, new Point(TooltipIconHeight + 3, ypos));
             }
-            Buttons[FormCenterTooltipNames.Tooltip].SetImage(bitmap, bitmap.Size);
+            Buttons[CurrentDisplayedTooltip].SetImage(bitmap, bitmap.Size);
             gc.Dispose();
         }
         ShapedButtonImageList CreateImages()
@@ -157,9 +168,63 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
         protected override void InitButtons()
         {
             base.InitButtons();
-            var tooltipButton = new ImageButton();
-            Buttons.Add(FormCenterTooltipNames.Tooltip, tooltipButton);
-            Add(Buttons[FormCenterTooltipNames.Tooltip], new Point(5, (Height / 2) - ((TooltipIconHeight * 2 + 4) / 2)));
+            Buttons.Add(FormCenterTooltipNames.Tooltip1, new ImageButton());
+            Buttons.Add(FormCenterTooltipNames.Tooltip2, new ImageButton());
+            Add(Buttons[FormCenterTooltipNames.Tooltip1], new Point(5, (Height / 2) - ((TooltipIconHeight * 2 + 4) / 2)));
+            Add(Buttons[FormCenterTooltipNames.Tooltip2], new Point(5, (Height / 2) - ((TooltipIconHeight * 2 + 4) / 2)));
+        }
+        protected void SwapTooltips(Action[] animators)
+        {
+            Logger.Debug($"Current tooltip : {CurrentDisplayedTooltip?.Key}");
+            if (CurrentDisplayedTooltip != null)
+            {
+                var a = Buttons[CurrentDisplayedTooltip].NsViewObject.Animator;
+                ((NSView)a).AlphaValue = 0;
+
+                if (CurrentDisplayedTooltip == FormCenterTooltipNames.Tooltip1)
+                {
+                    CurrentDisplayedTooltip = FormCenterTooltipNames.Tooltip2;
+                }
+                else
+                {
+                    CurrentDisplayedTooltip = FormCenterTooltipNames.Tooltip1;
+                }
+            }
+            else
+            {
+                CurrentDisplayedTooltip = FormCenterTooltipNames.Tooltip1;
+            }
+
+            // Update tooltip image
+            BuildTooltipImage();
+            Logger.Debug($"Switch to displayed tooltip {CurrentDisplayedTooltip.Key}");
+
+            // Animate tooltip
+            // RunAnimation(animators);
+            NSAnimationContext.RunAnimation((context) =>
+            {
+                Logger.Debug($"Start show tooltip animation");
+                context.Duration = AnimationProperties.AnimationDuration;
+                context.AllowsImplicitAnimation = true;
+                ShowTooltip();
+            },
+            () =>
+            {
+                Logger.Debug("Animation show tooltip ended");
+            });
+        }
+        protected void AnimateDefault(Action[] animators)
+        {
+            NSAnimationContext.RunAnimation((context) =>
+           {
+               Logger.Debug($"Start hide tooltip animation");
+               context.Duration = AnimationProperties.AnimationDuration;
+               context.AllowsImplicitAnimation = true;
+               HideTooltip();
+           }, () =>
+            {
+                Logger.Debug("Animation hide tooltip ended");
+            });
         }
         #endregion
 
@@ -198,14 +263,22 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form
         /// </summary>
         protected void HideTooltip()
         {
-            Buttons[FormCenterTooltipNames.Tooltip].NsViewObject.AlphaValue = 0;
+            Buttons[FormCenterTooltipNames.Tooltip1].NsViewObject.AlphaValue = 0;
+            Buttons[FormCenterTooltipNames.Tooltip2].NsViewObject.AlphaValue = 0;
         }
         /// <summary>
         /// Animation context rule : Fade in/out by switch first <--> second button controls to smooth fade in/out
         /// </summary>
         protected void ShowTooltip()
         {
-            Buttons[FormCenterTooltipNames.Tooltip].NsViewObject.AlphaValue = 1;
+            // Show the current tooltip control
+            Buttons[CurrentDisplayedTooltip].NsViewObject.AlphaValue = 1;
+
+            // Hide the other tooltip control
+            // if (CurrentDisplayedTooltip == FormCenterTooltipNames.Tooltip1)
+            //     Buttons[FormCenterTooltipNames.Tooltip2].NsViewObject.AlphaValue = 0;
+            // else
+            //     Buttons[FormCenterTooltipNames.Tooltip1].NsViewObject.AlphaValue = 0;
         }
         #endregion
 

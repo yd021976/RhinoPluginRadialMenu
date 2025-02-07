@@ -88,7 +88,7 @@ namespace RadialMenuPlugin.Controls
     /// </summary>
     public class RadialMenuControl : PixelLayout
     {
-        public static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         #region Events declaration
         public event MouseEventHandler MouseEnterButton;
@@ -231,7 +231,7 @@ namespace RadialMenuPlugin.Controls
             Visible = true;
             //DEBUG Method measure
             w.Stop();
-            logger.Debug($"SectorArcRadialControl constructor takes {w.ElapsedMilliseconds}");
+            Logger.Debug($"SectorArcRadialControl constructor takes {w.ElapsedMilliseconds}");
         }
         /// <summary>
         /// 
@@ -264,7 +264,7 @@ namespace RadialMenuPlugin.Controls
             }
             catch (Exception e)
             {
-                logger.Error(e, $"SectorArcRadialControl get button {buttonID} properties error");
+                Logger.Error(e, $"SectorArcRadialControl get button {buttonID} properties error");
                 return null;
             }
         }
@@ -276,7 +276,7 @@ namespace RadialMenuPlugin.Controls
             }
             catch (Exception e)
             {
-                logger.Error(e, $"SectorArcRadialControl set button {buttonID} properties error");
+                Logger.Error(e, $"SectorArcRadialControl set button {buttonID} properties error");
             }
             finally { }
         }
@@ -467,11 +467,10 @@ namespace RadialMenuPlugin.Controls
             /// It is buggy for example to update and display tooltip <seealso cref="RadialMenuForm"/>
             if (sender.ID != _HoverButtonID)
             {
-                logger.Debug($"Mouse leave not triggered");
+                Logger.Debug($"Mouse leave not triggered");
             }
             else
             {
-                logger.Debug($"Mouse leave triggered");
                 _HoverButtonID = null;
                 _RaiseEvent(MouseLeaveButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
             }

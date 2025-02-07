@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Base.States;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types;
 
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.States
+namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center.States
 {
     public class TooltipEvent : EnumKey
     {
         private TooltipEvent(string key) : base(key) { }
         public static readonly TooltipEvent Default = new TooltipEvent("default");
-        public static readonly TooltipEvent Hover = new TooltipEvent("hover");
+        // public static readonly TooltipEvent Hover = new TooltipEvent("hover");
         public static readonly TooltipEvent Tooltip = new TooltipEvent("tooltip");
     }
     public class ConcurrentStates : EnumKey
@@ -31,12 +30,6 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.States
             State nextState = this;
             switch (action)
             {
-                case IBaseEnumKey i when i == TooltipEvent.Hover:
-                    Logger.Debug("Switch from default to hover");
-                    nextState = statePool[typeof(HoverState)];
-                    nextState.PreviousState = this;
-                    nextState.EnterState();
-                    break;
                 case IBaseEnumKey i when i == TooltipEvent.Tooltip:
                     Logger.Debug("Switch from default to tooltip");
                     nextState = statePool[typeof(TooltipState)];
@@ -61,22 +54,17 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.States
             State nextState = this;
             switch (action)
             {
-                case IBaseEnumKey i when i == TooltipEvent.Hover:
-                    Logger.Debug("Switch from Tooltip to Hover");
-                    nextState = statePool[typeof(HoverState)];
-                    nextState.PreviousState = this;
-                    nextState.EnterState();
-                    break;
                 case IBaseEnumKey i when i == TooltipEvent.Default:
                     Logger.Debug("Switch from Tooltip to default");
                     nextState = statePool[typeof(DefaultState)];
-                    nextState.PreviousState = this;
+                    PreviousState = null;
                     nextState.EnterState();
                     break;
 
                 case IBaseEnumKey i when i == TooltipEvent.Tooltip:
                     Logger.Debug("Switch from Tooltip to Tooltip");
-                    nextState.EnterState();
+                    PreviousState = this;
+                    EnterState();
                     break;
                 default:
                     break;

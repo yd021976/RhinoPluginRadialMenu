@@ -77,6 +77,9 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base
                     typeof(HoverState), new HoverState(RunAnimation, new List<Action>{AnimationHoverHandler}.ToArray())
                 },
                 {
+                    typeof(MouseDownState), new MouseDownState(RunAnimation, new List<Action>{AnimationHoverHandler}.ToArray())
+                },
+                {
                     typeof(DisableState), new DisableState(RunAnimation, new List<Action>(){AnimationDisabledHandler}.ToArray())
                 },
             };
@@ -112,6 +115,10 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base
                {
                    renderFx();
                }
+           },
+           () =>
+           {
+            //    Logger.Debug("Animation ended");
            });
         }
         public virtual ShapedButtonImageList ImageList { get; protected set; }
