@@ -14,7 +14,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
         protected ButtonSettingEditorContents _SettingsEditorContents;
         public ButtonSettingEditorForm() : base()
         {
-            Size = new Size(450, 200);
+            Size = new Size(450, 250);
             _SettingsEditorContents = new ButtonSettingEditorContents();
             Content = _SettingsEditorContents;
         }

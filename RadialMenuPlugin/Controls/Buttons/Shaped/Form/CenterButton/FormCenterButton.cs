@@ -115,7 +115,7 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center
         }
         #endregion
 
-        #region  Protected methods
+        #region Protected methods
         /// <summary>
         /// Build tooltip image
         /// </summary>
@@ -131,13 +131,13 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center
                 Trimming = FormattedTextTrimming.CharacterEllipsis,
                 Font = Fonts.Sans(8),
                 ForegroundBrush = new SolidBrush(Colors.Black),
-                MaximumWidth = bitmap.Width - LeftMouseIcon.Width - 3
+                MaximumWidth = bitmap.Width - LeftMouseIcon.Width - 7
             };
             var ypos = 0;
             if (LeftTooltip != null && LeftTooltip?.Tooltip != "")
             {
-                gc.DrawImage(LeftMouseIcon, 0, ypos);
                 ft.Text = LeftTooltip.Tooltip;
+                gc.DrawImage(LeftMouseIcon, 0, ypos);
                 gc.DrawText(ft, new Point(TooltipIconHeight + 3, ypos));
             }
             if (RightTooltip != null && RightTooltip?.Tooltip != "")
@@ -273,12 +273,6 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center
         {
             // Show the current tooltip control
             Buttons[CurrentDisplayedTooltip].NsViewObject.AlphaValue = 1;
-
-            // Hide the other tooltip control
-            // if (CurrentDisplayedTooltip == FormCenterTooltipNames.Tooltip1)
-            //     Buttons[FormCenterTooltipNames.Tooltip2].NsViewObject.AlphaValue = 0;
-            // else
-            //     Buttons[FormCenterTooltipNames.Tooltip1].NsViewObject.AlphaValue = 0;
         }
         #endregion
 

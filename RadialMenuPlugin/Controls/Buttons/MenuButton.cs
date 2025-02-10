@@ -83,6 +83,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         public event MouseEventHandler OnButtonContextMenu;
         #endregion
+
         #region Button States
         public struct ButtonStates : INotifyPropertyChanged
         {
@@ -142,6 +143,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             public ButtonStates() { }
         }
         #endregion
+
         #region Button animations
         /// <summary>
         /// Duration of animations
@@ -167,19 +169,19 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     context.AllowsImplicitAnimation = true;
                     if (!States.IsHovering)
                     {
-                        Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.normal].NsViewObject.AlphaValue = Enabled ? (States.IsSelected ? 0 : _ButtonAlpha) : 0;
-                        Buttons[_ButtonType.selected].NsViewObject.AlphaValue = Enabled ? (States.IsSelected ? _ButtonAlpha : 0) : 0;
-                        Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = Enabled ? 0 : _DisabledAlpha;
+                        _Buttons[ButtonType.over].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.normal].NsViewObject.AlphaValue = Enabled ? (States.IsSelected ? 0 : _ButtonAlpha) : 0;
+                        _Buttons[ButtonType.selected].NsViewObject.AlphaValue = Enabled ? (States.IsSelected ? _ButtonAlpha : 0) : 0;
+                        _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = Enabled ? 0 : _DisabledAlpha;
                     }
                     else
                     {
-                        Buttons[_ButtonType.over].NsViewObject.AlphaValue = _ButtonAlpha;
-                        Buttons[_ButtonType.normal].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.selected].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.over].NsViewObject.AlphaValue = _ButtonAlpha;
+                        _Buttons[ButtonType.normal].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.selected].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = 0;
                     }
-                    Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
+                    _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
                 });
         }
         private void _AnimateSelectedEffect()
@@ -189,11 +191,11 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 {
                     context.Duration = _AnimationDuration;
                     context.AllowsImplicitAnimation = true;
-                    Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.normal].NsViewObject.AlphaValue = States.IsSelected ? 0 : _ButtonAlpha;
-                    Buttons[_ButtonType.selected].NsViewObject.AlphaValue = States.IsSelected ? _ButtonAlpha : 0;
-                    Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
+                    _Buttons[ButtonType.over].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.normal].NsViewObject.AlphaValue = States.IsSelected ? 0 : _ButtonAlpha;
+                    _Buttons[ButtonType.selected].NsViewObject.AlphaValue = States.IsSelected ? _ButtonAlpha : 0;
+                    _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
                 });
         }
         private void _AnimateDisableEffect()
@@ -203,11 +205,11 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 {
                     context.Duration = _AnimationDuration;
                     context.AllowsImplicitAnimation = true;
-                    Buttons[_ButtonType.normal].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.selected].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = _DisabledAlpha;
-                    Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? _ButtonAlpha : 0;
+                    _Buttons[ButtonType.normal].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.over].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.selected].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = _DisabledAlpha;
+                    _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? _ButtonAlpha : 0;
                 });
         }
         private void _AnimateEnableEffect()
@@ -219,19 +221,19 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                     context.AllowsImplicitAnimation = true;
                     if (States.IsHovering)
                     {
-                        Buttons[_ButtonType.normal].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.over].NsViewObject.AlphaValue = _ButtonAlpha;
-                        Buttons[_ButtonType.selected].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
+                        _Buttons[ButtonType.normal].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.over].NsViewObject.AlphaValue = _ButtonAlpha;
+                        _Buttons[ButtonType.selected].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
                     }
                     else
                     {
-                        Buttons[_ButtonType.normal].NsViewObject.AlphaValue = States.IsSelected ? 0 : _ButtonAlpha;
-                        Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.selected].NsViewObject.AlphaValue = States.IsSelected ? _ButtonAlpha : 0;
-                        Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
-                        Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
+                        _Buttons[ButtonType.normal].NsViewObject.AlphaValue = States.IsSelected ? 0 : _ButtonAlpha;
+                        _Buttons[ButtonType.over].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.selected].NsViewObject.AlphaValue = States.IsSelected ? _ButtonAlpha : 0;
+                        _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = 0;
+                        _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
                     }
                 });
         }
@@ -242,16 +244,20 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 {
                     context.Duration = _AnimationDuration;
                     context.AllowsImplicitAnimation = true;
-                    Buttons[_ButtonType.normal].NsViewObject.AlphaValue = _ButtonAlpha;
-                    Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.selected].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
-                    Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
+                    _Buttons[ButtonType.normal].NsViewObject.AlphaValue = _ButtonAlpha;
+                    _Buttons[ButtonType.over].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.selected].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = States.IsEditMode ? 1 : 0;
 
                 });
         }
         #endregion
+
         #region Button Properties
+        /// <summary>
+        /// Custom and override of ID to generate button ID
+        /// </summary>
         public new string ID
         {
             get { return base.ID; }
@@ -271,7 +277,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 if (value == false) _AnimateDisableEffect(); else _AnimateEnableEffect();
             }
         }
-        protected enum _ButtonType
+        private enum ButtonType
         {
             normal = 0,
             over = 1,
@@ -283,7 +289,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             trigger = 7
         }
 
-        protected SectorData _SectorData = new SectorData();
+        private SectorData _SectorData = new SectorData();
         public SectorData SectorData
         {
             get => _SectorData;
@@ -296,12 +302,12 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// <summary>
         /// Drawables used for animating button UI state changes
         /// </summary>
-        protected Dictionary<_ButtonType, ImageButton> Buttons = new Dictionary<_ButtonType, ImageButton>();
+        private Dictionary<ButtonType, ImageButton> _Buttons = new Dictionary<ButtonType, ImageButton>();
 
         /// <summary>
         /// Data Model Binding
         /// </summary>
-        ButtonModelData _Model = new ButtonModelData();
+        private ButtonModelData _Model = new ButtonModelData();
         public ButtonStates States = new ButtonStates();
 
         public BindableBinding<MenuButton, ButtonModelData> ButtonModelBinding => new BindableBinding<MenuButton, ButtonModelData>(
@@ -329,10 +335,8 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             { });
 
         #endregion
-        /// <summary>
-        /// Custom and override of ID to generate button ID
-        /// </summary>
-        // public new string ID { get { return model.buttonID; } set { base.ID = value; } }
+
+        #region Constructor
         public MenuButton() : base()
         {
             Size = _SectorData.Size;
@@ -340,7 +344,10 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _InitEventHandlers();
             _InitStatesChangeHandler();
         }
-        protected void _InitStatesChangeHandler()
+        #endregion
+
+        #region Private Methods
+        private void _InitStatesChangeHandler()
         {
             // States property change handler
             States.PropertyChanged += (obj, prop) =>
@@ -364,44 +371,44 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// <summary>
         /// Init layout buttons
         /// </summary>
-        protected void _InitButtons()
+        private void _InitButtons()
         {
             // Create buttons
-            Buttons[_ButtonType.normal] = new ImageButton();
-            Buttons[_ButtonType.over] = new ImageButton();
-            Buttons[_ButtonType.disabled] = new ImageButton();
-            Buttons[_ButtonType.icon] = new ImageButton();
-            Buttons[_ButtonType.selected] = new ImageButton();
-            Buttons[_ButtonType.trigger] = new ImageButton();
+            _Buttons[ButtonType.normal] = new ImageButton();
+            _Buttons[ButtonType.over] = new ImageButton();
+            _Buttons[ButtonType.disabled] = new ImageButton();
+            _Buttons[ButtonType.icon] = new ImageButton();
+            _Buttons[ButtonType.selected] = new ImageButton();
+            _Buttons[ButtonType.trigger] = new ImageButton();
             // edit mode image
             var iconSize = new Size(44, 44);
             var img = Bitmap.FromResource("RadialMenu.Bitmaps.dashed-circle.png").WithSize(iconSize);
-            Buttons[_ButtonType.editmode] = new ImageButton(img, iconSize);
+            _Buttons[ButtonType.editmode] = new ImageButton(img, iconSize);
             // folder icon image
             var folderIconSize = new Size(16, 16);
             var folderIconimg = Bitmap.FromResource("RadialMenu.Bitmaps.plus_icon.png").WithSize(folderIconSize);
-            Buttons[_ButtonType.folderIcon] = new ImageButton(folderIconimg, folderIconSize);
+            _Buttons[ButtonType.folderIcon] = new ImageButton(folderIconimg, folderIconSize);
 
             // Add button to layout
-            Add(Buttons[_ButtonType.normal], 0, 0);
-            Add(Buttons[_ButtonType.over], 0, 0);
-            Add(Buttons[_ButtonType.disabled], 0, 0);
-            Add(Buttons[_ButtonType.selected], 0, 0);
-            Add(Buttons[_ButtonType.icon], 0, 0);
-            Add(Buttons[_ButtonType.folderIcon], 0, 0);
-            Add(Buttons[_ButtonType.editmode], 0, 0);
-            Add(Buttons[_ButtonType.trigger], 0, 0);
+            Add(_Buttons[ButtonType.normal], 0, 0);
+            Add(_Buttons[ButtonType.over], 0, 0);
+            Add(_Buttons[ButtonType.disabled], 0, 0);
+            Add(_Buttons[ButtonType.selected], 0, 0);
+            Add(_Buttons[ButtonType.icon], 0, 0);
+            Add(_Buttons[ButtonType.folderIcon], 0, 0);
+            Add(_Buttons[ButtonType.editmode], 0, 0);
+            Add(_Buttons[ButtonType.trigger], 0, 0);
 
-            Buttons[_ButtonType.over].NsViewObject.AlphaValue = 0;
-            Buttons[_ButtonType.disabled].NsViewObject.AlphaValue = 0;
-            Buttons[_ButtonType.selected].NsViewObject.AlphaValue = 0;
-            Buttons[_ButtonType.normal].NsViewObject.AlphaValue = _ButtonAlpha;
-            Buttons[_ButtonType.editmode].NsViewObject.AlphaValue = 0;
+            _Buttons[ButtonType.over].NsViewObject.AlphaValue = 0;
+            _Buttons[ButtonType.disabled].NsViewObject.AlphaValue = 0;
+            _Buttons[ButtonType.selected].NsViewObject.AlphaValue = 0;
+            _Buttons[ButtonType.normal].NsViewObject.AlphaValue = _ButtonAlpha;
+            _Buttons[ButtonType.editmode].NsViewObject.AlphaValue = 0;
         }
         /// <summary>
         /// Init event handlers
         /// </summary>
-        protected void _InitEventHandlers()
+        private void _InitEventHandlers()
         {
             // Mouse events
             MouseMove += _MouseMoveHandler;
@@ -410,11 +417,11 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
 
             // DragDrop events for edit mode
             AllowDrop = false;
-            Buttons[_ButtonType.editmode].AllowDrop = true;
-            Buttons[_ButtonType.editmode].DragEnter += _DragEnterHandler;
-            Buttons[_ButtonType.editmode].DragOver += _DragOverHandler;
-            Buttons[_ButtonType.editmode].DragLeave += _DragLeaveHandler;
-            Buttons[_ButtonType.editmode].DragDrop += _DragDropHandler;
+            _Buttons[ButtonType.editmode].AllowDrop = true;
+            _Buttons[ButtonType.editmode].DragEnter += _DragEnterHandler;
+            _Buttons[ButtonType.editmode].DragOver += _DragOverHandler;
+            _Buttons[ButtonType.editmode].DragLeave += _DragLeaveHandler;
+            _Buttons[ButtonType.editmode].DragDrop += _DragDropHandler;
             DragEnd += (s, e) =>
             {
                 if (e.Effects == DragEffects.None) // No drop target accepted the icon : We should remove the icon
@@ -431,7 +438,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void _ModelChangedHandler(object sender, PropertyChangedEventArgs e)
+        private void _ModelChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -454,7 +461,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void _MouseDownHandler(object sender, MouseEventArgs e)
+        private void _MouseDownHandler(object sender, MouseEventArgs e)
         {
             if (!States.IsHovering) return; // As buttons can overlap, react only to button that has focus
             switch (e.Buttons)
@@ -497,7 +504,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void _MouseMoveHandler(object sender, MouseEventArgs e)
+        private void _MouseMoveHandler(object sender, MouseEventArgs e)
         {
             if (States.IsVisible == true)
             {
@@ -532,7 +539,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void _MouseLeaveHandler(object sender, MouseEventArgs e)
+        private void _MouseLeaveHandler(object sender, MouseEventArgs e)
         {
             if (States.IsHovering) // Avoid sending "leave" event twice
             {
@@ -540,7 +547,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 _RaiseEvent(OnButtonMouseLeave, e);
             }
         }
-        protected void _DragEnterHandler(object sender, DragEventArgs e)
+        private void _DragEnterHandler(object sender, DragEventArgs e)
         {
             _RaiseEvent(OnButtonDragEnter, e);
             if (e.Effects != DragEffects.None)
@@ -554,12 +561,12 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void _DragLeaveHandler(object sender, DragEventArgs e)
+        private void _DragLeaveHandler(object sender, DragEventArgs e)
         {
             _RaiseEvent(OnButtonDragLeave, e);
             States.IsHovering = false;
         }
-        protected void _DragOverHandler(object sender, DragEventArgs e)
+        private void _DragOverHandler(object sender, DragEventArgs e)
         {
             _RaiseEvent(OnButtonDragOver, e);
             if (e.Effects != DragEffects.None)
@@ -567,7 +574,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 States.IsHovering = true;
             }
         }
-        protected void _DragDropHandler(object sender, DragEventArgs e)
+        private void _DragDropHandler(object sender, DragEventArgs e)
         {
             _RaiseEvent(OnButtonDragDrop, e);
             States.IsHovering = false;
@@ -577,7 +584,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="action"></param>
-        protected void _RaiseEvent<T>(AppEventHandler<T> action) where T : MenuButton
+        private void _RaiseEvent<T>(AppEventHandler<T> action) where T : MenuButton
         {
             action?.Invoke(this as T);
         }
@@ -586,7 +593,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="action"></param>
         /// <param name="e"></param>
-        protected void _RaiseEvent<T, E>(AppEventHandler<T, E> action, E e) where T : MenuButton
+        private void _RaiseEvent<T, E>(AppEventHandler<T, E> action, E e) where T : MenuButton
         {
             switch (typeof(E).Name)
             {
@@ -620,7 +627,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        protected bool _MouseMoveUpdate(MouseEventArgs e)
+        private bool _MouseMoveUpdate(MouseEventArgs e)
         {
             var oldHovering = States.IsHovering ? true : false;
 
@@ -653,10 +660,10 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// <summary>
         /// Update icon display and position
         /// </summary>
-        protected void _UpdateIcon()
+        private void _UpdateIcon()
         {
             // Update icon image. set to "null" if icon shouldn't be displayed
-            if (_Model.Properties.IsActive) Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon); else Buttons[_ButtonType.icon].SetImage(null);
+            if (_Model.Properties.IsActive) _Buttons[ButtonType.icon].SetImage(_Model.Properties.Icon); else _Buttons[ButtonType.icon].SetImage(null);
 
             // if icon exists, update its position
             if (_Model.Properties.Icon != null && _Model.Properties.IsActive)
@@ -666,43 +673,43 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 var arcCenterLocal = _SectorData.ConvertWorldToLocal(arcCenterWorld);
                 var posX = arcCenterLocal.X - (_Model.Properties.Icon.Size.Width / 2);
                 var posY = arcCenterLocal.Y - (_Model.Properties.Icon.Size.Height / 2);
-                Move(Buttons[_ButtonType.icon], (int)posX, (int)posY); // update icon location
+                Move(_Buttons[ButtonType.icon], (int)posX, (int)posY); // update icon location
                 if (_Model.Properties.IsFolder)
                 {
                     // posX = posX + _Model.Properties.Icon.Size.Width - 4;
                     // posY = posY - 6;
-                    var outerCenterLocationWorld = _SectorData.GetPoint(_SectorData.SweepAngle / 2, _SectorData.Thickness - (Buttons[_ButtonType.folderIcon].Width / 2) - 2);
+                    var outerCenterLocationWorld = _SectorData.GetPoint(_SectorData.SweepAngle / 2, _SectorData.Thickness - (_Buttons[ButtonType.folderIcon].Width / 2) - 2);
                     var outerCenterLocationLocal = _SectorData.ConvertWorldToLocal(outerCenterLocationWorld);
-                    posX = outerCenterLocationLocal.X - (Buttons[_ButtonType.folderIcon].Width / 2);
-                    posY = outerCenterLocationLocal.Y - (Buttons[_ButtonType.folderIcon].Height / 2);
-                    Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = (float)0.4;
-                    Move(Buttons[_ButtonType.folderIcon], (int)posX, (int)posY);
+                    posX = outerCenterLocationLocal.X - (_Buttons[ButtonType.folderIcon].Width / 2);
+                    posY = outerCenterLocationLocal.Y - (_Buttons[ButtonType.folderIcon].Height / 2);
+                    _Buttons[ButtonType.folderIcon].NsViewObject.AlphaValue = (float)0.4;
+                    Move(_Buttons[ButtonType.folderIcon], (int)posX, (int)posY);
                 }
                 else
                 {
-                    Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
+                    _Buttons[ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
                 }
             }
             else
             {
-                Buttons[_ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
+                _Buttons[ButtonType.folderIcon].NsViewObject.AlphaValue = 0;
             }
         }
         /// <summary>
         /// Update button images and size
         /// </summary>
         /// <param name="data"></param>
-        protected void _UpdateSectorData(SectorData data)
+        private void _UpdateSectorData(SectorData data)
         {
             // Update self data
             Size = data.Size;
             // Update buttons image
-            Buttons[_ButtonType.normal].SetImage(data.Images.NormalStateImage, data.Size);
+            _Buttons[ButtonType.normal].SetImage(data.Images.NormalStateImage, data.Size);
             // _Buttons[_ButtonType.normal].SetImage(data.Images.SectorMask, data.Size);
-            Buttons[_ButtonType.over].SetImage(data.Images.OverStateImage, data.Size);
-            Buttons[_ButtonType.disabled].SetImage(data.Images.DisabledStateImage, data.Size);
-            Buttons[_ButtonType.selected].SetImage(data.Images.SelectedStateImage, data.Size);
-            Buttons[_ButtonType.icon].SetImage(_Model.Properties.Icon, data.Size);
+            _Buttons[ButtonType.over].SetImage(data.Images.OverStateImage, data.Size);
+            _Buttons[ButtonType.disabled].SetImage(data.Images.DisabledStateImage, data.Size);
+            _Buttons[ButtonType.selected].SetImage(data.Images.SelectedStateImage, data.Size);
+            _Buttons[ButtonType.icon].SetImage(_Model.Properties.Icon, data.Size);
 
             // Update position
             _UpdateIcon();
@@ -711,7 +718,7 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
         /// <summary>
         /// 
         /// </summary>
-        protected void _UpdateIconEditmode()
+        private void _UpdateIconEditmode()
         {
             // When in edit mode update edit icon position
             if (States.IsEditMode)
@@ -719,15 +726,15 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 // Compute icon position in layout
                 var arcCenterWorld = _SectorData.SectorCenter();
                 var arcCenterLocal = _SectorData.ConvertWorldToLocal(arcCenterWorld);
-                var posX = arcCenterLocal.X - (Buttons[_ButtonType.editmode].Width / 2);
-                var posY = arcCenterLocal.Y - (Buttons[_ButtonType.editmode].Height / 2);
-                Move(Buttons[_ButtonType.editmode], (int)posX, (int)posY); // update icon location
+                var posX = arcCenterLocal.X - (_Buttons[ButtonType.editmode].Width / 2);
+                var posY = arcCenterLocal.Y - (_Buttons[ButtonType.editmode].Height / 2);
+                Move(_Buttons[ButtonType.editmode], (int)posX, (int)posY); // update icon location
             }
         }
         /// <summary>
         /// Update trigger key icon
         /// </summary>
-        protected void _UpdateTriggerIcon()
+        private void _UpdateTriggerIcon()
         {
             Bitmap bm = null;
             if (_Model.Properties.Trigger != "")
@@ -746,11 +753,12 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
                 var sectorTopLeftLocal = _SectorData.ConvertWorldToLocal(sectorTopLeft);
                 var posX = sectorTopLeftLocal.X - (fontSize / 2);
                 var posY = sectorTopLeftLocal.Y - ((fontSize + 2) / 2);
-                Move(Buttons[_ButtonType.trigger], (int)posX, (int)posY);
+                Move(_Buttons[ButtonType.trigger], (int)posX, (int)posY);
             }
 
             // Update icon image and position
-            Buttons[_ButtonType.trigger].SetImage(bm, new Size(16, 16));
+            _Buttons[ButtonType.trigger].SetImage(bm, new Size(16, 16));
         }
+        #endregion
     }
 }

@@ -145,7 +145,8 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
         protected void _InitIconEditor()
         {
             _CommandIconView = new ImageView();
-            _CommandIconView.BackgroundColor = Colors.Gray;
+            // _CommandIconView.BackgroundColor = Colors.Gray;
+            _CommandIconView.BackgroundColor = Colors.Transparent;
             _CommandIconView.MouseDown += (s, e) =>
             {
                 FileSelectorOpened = true;

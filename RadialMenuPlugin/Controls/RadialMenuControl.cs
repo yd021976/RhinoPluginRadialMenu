@@ -10,7 +10,6 @@ using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Utilities;
 using RadialMenuPlugin.Utilities.Events;
-using Rhino;
 
 namespace RadialMenuPlugin.Controls
 {
