@@ -533,7 +533,6 @@ namespace RadialMenuPlugin.Controls
                 _UpdateTooltipBinding(); // Update tooltip
             }
             if (_ContextMenuForm.Visible) return; // Don't give Rhino main window focus if we're showing context menu
-            RhinoApp.SetFocusToMainWindow(); // Give Rhino main window focus when no button is over
         }
 
         /// <summary>
