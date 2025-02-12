@@ -1,4 +1,5 @@
 using Eto.Drawing;
+using Eto.Forms;
 using RadialMenuPlugin.Data;
 using System;
 
@@ -12,10 +13,15 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
     // public class ButtonSettingEditorForm : Form
     {
         protected ButtonSettingEditorContents _SettingsEditorContents;
+        public event EventHandler<TextChangingEventArgs> TriggerTextChanging;
         public ButtonSettingEditorForm() : base()
         {
             Size = new Size(450, 250);
             _SettingsEditorContents = new ButtonSettingEditorContents();
+            _SettingsEditorContents.TextChanging += (s, e) =>
+            {
+                TriggerTextChanging?.Invoke(this, e);
+            };
             Content = _SettingsEditorContents;
         }
         /// <summary>

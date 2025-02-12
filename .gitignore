@@ -36,7 +36,9 @@ Package/
 
 # Folders & Files we don't want to publish
 UI_Design/
-**.drawio
+*.drawio
+*.mp4
+*.mov
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

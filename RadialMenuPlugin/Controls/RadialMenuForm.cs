@@ -94,6 +94,7 @@ namespace RadialMenuPlugin.Controls
             };
             // Init the button context menu Form
             _ContextMenuForm = new ButtonSettingEditorForm();
+            _ContextMenuForm.TriggerTextChanging += _OnContextMenuTriggerChanging; // Check trigger key is not already used in radial menu level
 
             // Ensure when form is shown that we display only first menu level
             Shown += (o, e) =>
@@ -101,13 +102,16 @@ namespace RadialMenuPlugin.Controls
                 foreach (var ctrl in _Controls.Values)
                 {
                     ctrl.Show(false); // Hide and reset radial control enable and selection
+                    ctrl.SwitchEditMode(false); // ensure disable edit mode
                 }
                 var radialControl = _Controls.First(obj => obj.Key.Level == 1).Value;
+                radialControl.SwitchEditMode(false);
+                _EditMode = false;
                 radialControl.Show(true);
             };
 
             // Create close button
-            InitCenterButton();
+            _InitCenterButton();
             _Layout.Add(_CenterMenuButton, (Size.Width / 2) - _CenterMenuButton.Size.Width / 2, (Size.Height / 2) - (_CenterMenuButton.Size.Height / 2));
 
             // Create and add RadialMenu Control for 1st level
@@ -437,6 +441,24 @@ namespace RadialMenuPlugin.Controls
             }
         }
         /// <summary>
+        /// Event handler for context menu Trigger text changing : Do not allow same trigger key at same level
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _OnContextMenuTriggerChanging(object sender, TextChangingEventArgs e)
+        {
+            if (e.NewText != "" && _ContextMenuForm.Model.Data.Properties.Trigger != e.NewText)
+            {
+                foreach (var model in ModelController.Instance.GetSiblings(_ContextMenuForm.Model))
+                {
+                    if (model.Data.Properties.Trigger == e.NewText.ToUpper())
+                    {
+                        e.Cancel = true;
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="sender"></param>
@@ -748,7 +770,7 @@ namespace RadialMenuPlugin.Controls
             location.Y = location.Y - 8;
             _ContextMenuForm.Show(location);
         }
-        void InitCenterButton()
+        private void _InitCenterButton()
         {
             _CenterMenuButton = new FormCenterButton(new Size(s_defaultInnerRadius * 2, s_defaultInnerRadius * 2));
             _CenterMenuButton.OnButtonMouseEnter += (o, e) =>

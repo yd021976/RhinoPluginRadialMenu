@@ -25,12 +25,13 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
     {
         #region  public properties
         public BindableBinding<ContextMenuContent<D>, D> ModelBinding => _ModelBinding;
-        #endregion
-        #region protected/private properties
         /// <summary>
         /// 
         /// </summary>
         protected D _Model = new D();
+        #endregion
+        #region protected/private properties
+
         /// <summary>
         /// 
         /// </summary>

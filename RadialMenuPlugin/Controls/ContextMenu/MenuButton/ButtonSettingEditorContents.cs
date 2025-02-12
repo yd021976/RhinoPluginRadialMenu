@@ -22,11 +22,12 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
         protected GroupBox _RightMacroEditor;
         protected TextBox _RhinoRightMacroCommandEditor;
         protected TextBox _RhinoRightMacroTooltipEditor;
+        protected Label _MessageLabel;
         protected ImageView _CommandIconView;
         protected Bitmap _DefaultIcon;
         protected OpenFileDialog _IconFileChooser;
         public bool FileSelectorOpened = false;
-
+        public event EventHandler<TextChangingEventArgs> TextChanging;
 
         public ButtonSettingEditorContents() : base()
         {
@@ -43,14 +44,17 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
             _InitTriggerEditor();
             _InitRhinoMacrosEditor();
             _InitIconEditor();
+            _InitLabel();
             var triggerStackField = new StackField("Trigger", _TriggerEditor);
             var rhinoLeftMacroEditor = new StackField("Rhino left command", _LeftMacroEditor);
             var rhinoRightMacroEditor = new StackField("Rhino right command", _RightMacroEditor);
             var commandIcon = new StackField("Icon", _CommandIconView);
+            var messageLabel = new StackField("", _MessageLabel);
             _containerLayout.Items.Add(triggerStackField);
             _containerLayout.Items.Add(rhinoLeftMacroEditor);
             _containerLayout.Items.Add(rhinoRightMacroEditor);
             _containerLayout.Items.Add(commandIcon);
+            _containerLayout.Items.Add(messageLabel);
 
             var mainContent = new StackLayoutItem(_containerLayout, true);
             Items.Add(mainContent);
@@ -93,6 +97,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
         }
         protected override void OnShown(EventArgs e)
         {
+            _MessageLabel.Text = "";
             _TriggerEditor.Focus();
             base.OnShown(e);
         }
@@ -105,7 +110,19 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
             _TriggerEditor.MaxLength = 1;
             _TriggerEditor.ShowBorder = false;
             _TriggerEditor.Size = new Size(-1, -1);
-
+            _TriggerEditor.TextChanging += (s, e) =>
+            {
+                // Give chance to cancel text changing to subscribers
+                TextChanging?.Invoke(this, e);
+                if (e.Cancel)
+                {
+                    _MessageLabel.Text = "Trigger already assigned";
+                }
+                else
+                {
+                    _MessageLabel.Text = "";
+                }
+            };
             // As text changes, set letter to upper case
             _TriggerEditor.TextChanged += (s, e) =>
             {
@@ -168,6 +185,11 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
                 }
                 FileSelectorOpened = false;
             };
+        }
+        protected void _InitLabel()
+        {
+            _MessageLabel = new Label();
+            _MessageLabel.Text = "";
         }
     }
 }

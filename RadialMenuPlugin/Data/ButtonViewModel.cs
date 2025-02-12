@@ -380,6 +380,15 @@ namespace RadialMenuPlugin.Data
             return _Models.FindAll(instance => instance.Parent == model);
         }
         /// <summary>
+        /// Get all model at same level
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public List<Model> GetSiblings(Model model)
+        {
+            return _Models.FindAll(instance => instance.Parent == model.Parent);
+        }
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
