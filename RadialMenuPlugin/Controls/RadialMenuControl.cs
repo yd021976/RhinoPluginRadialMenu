@@ -374,7 +374,7 @@ namespace RadialMenuPlugin.Controls
                         var startAngle = parentSectorData.StartAngle - parentSectorData.SweepAngle * 2; // 2 buttons back
                         startAngle = startAngle < 0 ? startAngle += 360 : startAngle;
 
-                        var endAngle = startAngle + parentSectorData.SweepAngle * 2; // 2 buttons forward
+                        var endAngle = parentSectorData.StartAngle + parentSectorData.SweepAngle * 2; // 2 buttons forward
                         endAngle = endAngle < 0 ? endAngle + 360 : endAngle;
 
                         // Build angle range
