@@ -15,7 +15,11 @@
   
   <PropertyGroup>
     <!-- Specifies information for Assembly and Yak -->
+<<<<<<< HEAD
     <Version>1.2.0</Version>
+=======
+    <Version>1.1.2</Version>
+>>>>>>> 0c5c825 (Change project name)
     <Title>TigrouRadialMenu</Title>
     <Company>Tigrou</Company>
     <Description>Radial Menu</Description>
