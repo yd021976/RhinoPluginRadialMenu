@@ -267,7 +267,7 @@ namespace RadialMenuPlugin.Controls
                 return null;
             }
         }
-        public MenuButton GetButtonSectorData(string buttonID)
+        public SectorData GetButtonSectorData(string buttonID)
         {
             MenuButton button = null;
             foreach (var btn in _Buttons.Keys)
@@ -278,7 +278,7 @@ namespace RadialMenuPlugin.Controls
                     break;
                 }
             }
-            return button;
+            return button.SectorData;
         }
         public void SetButtonProperties(string buttonID, Data.ButtonProperties properties)
         {
@@ -334,7 +334,7 @@ namespace RadialMenuPlugin.Controls
         /// Display list of buttons for the specified ID (i.e. ID is the ID of the previous level button that trigger opening the menu)
         /// </summary>
         /// <param name="parent">Parent model, can be null if no parent</param>
-        /// <param name="radialMenuControl">Parent radial menu control. Can be null if no parent</param>
+        /// <param name="radialMenuControl">Parent radial menu control. Can be null if no parent AND must be null if <paramref name="parent"/> is null</param>
         public void SetMenuForButtonID(Model parent, RadialMenuControl radialMenuControl)
         {
             SelectedButtonID = ""; // As we build new layout, unselect any button
@@ -357,9 +357,37 @@ namespace RadialMenuPlugin.Controls
             //         if (index == 8) index = 0;
             //     } while (index != secondbuttontodisplay);
             // }
+
+            var buttonAngleRange = new List<int>();
+            var limitDisplay = false;
             if (parent != null)
             {
-                var parentButtonID = parent.Data.ButtonID;
+                if (radialMenuControl != null)
+                {
+                    limitDisplay = true; // Will only show 4 buttons around the parent (segment circle)
+
+                    // Retrieve parent button sector data
+                    var parentSectorData = radialMenuControl.GetButtonSectorData(parent.Data.ButtonID);
+                    if (parentSectorData != null)
+                    {
+                        // Compute button to display by angle
+                        var startAngle = parentSectorData.StartAngle - parentSectorData.SweepAngle * 2; // 2 buttons back
+                        startAngle = startAngle < 0 ? startAngle += 360 : startAngle;
+
+                        var endAngle = startAngle + parentSectorData.SweepAngle * 2; // 2 buttons forward
+                        endAngle = endAngle < 0 ? endAngle + 360 : endAngle;
+
+                        // Build angle range
+                        var angleRange = startAngle;
+                        do
+                        {
+                            // var nextAngle = angleRange + parentSectorData.SweepAngle;
+                            buttonAngleRange.Add(angleRange);
+                            angleRange += parentSectorData.SweepAngle;
+                            if (angleRange > 360) angleRange -= 360;
+                        } while (angleRange != endAngle);
+                    }
+                }
             }
             // Iterate on each sector data to update button
             foreach (MenuButton button in _Buttons.Keys)
@@ -372,18 +400,23 @@ namespace RadialMenuPlugin.Controls
                 int buttonID = Int32.Parse(button.ID);
 
                 // Show only buttons in "segment circle" 
-                // if (parent != null)
-                // {
-                //     if (range.Contains(buttonID))
-                //     {
-                //         button.Visible = true;
-                //     }
-                //     else
-                //     {
-                //         button.Visible = false;
+                if (limitDisplay)
+                {
+                    var shouldDisplayButton = false;
+                    foreach (var angle in buttonAngleRange)
+                    {
+                        if (button.SectorData.StartAngle >= angle) { shouldDisplayButton = true; break; }
+                    }
+                    if (shouldDisplayButton)
+                    {
+                        button.Visible = true;
+                    }
+                    else
+                    {
+                        button.Visible = false;
 
-                //     }
-                // }
+                    }
+                }
             }
         }
         #endregion

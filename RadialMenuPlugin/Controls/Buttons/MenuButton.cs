@@ -382,11 +382,11 @@ namespace RadialMenuPlugin.Controls.Buttons.MenuButton
             _Buttons[ButtonType.trigger] = new ImageButton();
             // edit mode image
             var iconSize = new Size(44, 44);
-            var img = Bitmap.FromResource("RadialMenu.Bitmaps.dashed-circle.png").WithSize(iconSize);
+            var img = Bitmap.FromResource("TigrouRadialMenu.Bitmaps.dashed-circle.png").WithSize(iconSize);
             _Buttons[ButtonType.editmode] = new ImageButton(img, iconSize);
             // folder icon image
             var folderIconSize = new Size(16, 16);
-            var folderIconimg = Bitmap.FromResource("RadialMenu.Bitmaps.plus_icon.png").WithSize(folderIconSize);
+            var folderIconimg = Bitmap.FromResource("TigrouRadialMenu.Bitmaps.plus_icon.png").WithSize(folderIconSize);
             _Buttons[ButtonType.folderIcon] = new ImageButton(folderIconimg, folderIconSize);
 
             // Add button to layout
