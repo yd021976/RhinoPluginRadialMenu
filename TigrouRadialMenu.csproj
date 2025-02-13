@@ -15,7 +15,11 @@
   
   <PropertyGroup>
     <!-- Specifies information for Assembly and Yak -->
+<<<<<<< HEAD
     <Version>1.2.0</Version>
+=======
+    <Version>1.1.3</Version>
+>>>>>>> adda43e (v1.1.3)
     <Title>TigrouRadialMenu</Title>
     <Company>Tigrou</Company>
     <Description>Radial Menu</Description>
