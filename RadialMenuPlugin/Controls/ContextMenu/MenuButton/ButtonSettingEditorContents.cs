@@ -31,7 +31,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
 
         public ButtonSettingEditorContents() : base()
         {
-            _DefaultIcon = Bitmap.FromResource("RadialMenu.Bitmaps.question-mark-circle-outline-icon.png");
+            _DefaultIcon = Bitmap.FromResource("TigrouRadialMenu.Bitmaps.question-mark-circle-outline-icon.png");
             _IconFileChooser = new OpenFileDialog();
             var filter = new FileFilter { Name = "Images", Extensions = new string[] { ".jpeg", ".png", ".png", ".bmp" } };
             _IconFileChooser.Filters.Add(filter);

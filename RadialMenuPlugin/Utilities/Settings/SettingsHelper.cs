@@ -156,7 +156,7 @@ namespace RadialMenuPlugin.Utilities.Settings
                     modelData.Properties.Icon = new Icon(_IconFileFullPath(modelData)); // Create icon from file
                 else // if icon filename doesn't exist : Set icon to "question mark" icon
                 {
-                    var img = Bitmap.FromResource("RadialMenu.Bitmaps.question-mark-circle-outline-icon.png");
+                    var img = Bitmap.FromResource("TigrouRadialMenu.Bitmaps.question-mark-circle-outline-icon.png");
                     modelData.Properties.Icon = img.WithSize(16, 16);
                 }
             }

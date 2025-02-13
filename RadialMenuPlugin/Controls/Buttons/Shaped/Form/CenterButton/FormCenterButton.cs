@@ -70,8 +70,8 @@ namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center
         {
             Size = size;
 
-            LeftMouseIcon = Icon.FromResource("RadialMenu.Bitmaps.mouse_left_click.png").WithSize(TooltipIconHeight, TooltipIconHeight);
-            RightMouseIcon = Icon.FromResource("RadialMenu.Bitmaps.mouse_right_click.png").WithSize(TooltipIconHeight, TooltipIconHeight);
+            LeftMouseIcon = Icon.FromResource("TigrouRadialMenu.Bitmaps.mouse_left_click.png").WithSize(TooltipIconHeight, TooltipIconHeight);
+            RightMouseIcon = Icon.FromResource("TigrouRadialMenu.Bitmaps.mouse_right_click.png").WithSize(TooltipIconHeight, TooltipIconHeight);
 
             //FIXME Tooltip animation is glitchy in most of the cases
             // Two main reasons:
