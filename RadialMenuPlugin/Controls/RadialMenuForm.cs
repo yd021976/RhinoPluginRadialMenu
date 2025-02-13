@@ -116,7 +116,7 @@ namespace RadialMenuPlugin.Controls
 
             // Create and add RadialMenu Control for 1st level
             var ctrl = _Controls.First(level => level.Key.Level == 1).Value;
-            ctrl.SetMenuForButtonID(null); // Init buttons and model for 1st menu level
+            ctrl.SetMenuForButtonID(null,null); // Init buttons and model for 1st menu level
 
             // Add layout to content of form
             Content = _Layout;
@@ -298,7 +298,7 @@ namespace RadialMenuPlugin.Controls
             var ctrl = _GetControl(element => element.Level.Level == nextLevel);
             if (ctrl != null)
             {
-                ctrl.SetMenuForButtonID(model); // Update radial control buttons
+                ctrl.SetMenuForButtonID(model, radialMenuControl); // Update radial control buttons
                 ctrl.Show(true); // Ensure control is visible
             }
             return ctrl;

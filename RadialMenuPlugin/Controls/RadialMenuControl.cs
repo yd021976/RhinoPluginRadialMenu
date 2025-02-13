@@ -267,6 +267,19 @@ namespace RadialMenuPlugin.Controls
                 return null;
             }
         }
+        public MenuButton GetButtonSectorData(string buttonID)
+        {
+            MenuButton button = null;
+            foreach (var btn in _Buttons.Keys)
+            {
+                if (btn.ID == buttonID)
+                {
+                    button = btn;
+                    break;
+                }
+            }
+            return button;
+        }
         public void SetButtonProperties(string buttonID, Data.ButtonProperties properties)
         {
             try
@@ -320,11 +333,34 @@ namespace RadialMenuPlugin.Controls
         /// <summary>
         /// Display list of buttons for the specified ID (i.e. ID is the ID of the previous level button that trigger opening the menu)
         /// </summary>
-        /// <param name="forButtonID"></param>
-        public void SetMenuForButtonID(Model parent = null)
+        /// <param name="parent">Parent model, can be null if no parent</param>
+        /// <param name="radialMenuControl">Parent radial menu control. Can be null if no parent</param>
+        public void SetMenuForButtonID(Model parent, RadialMenuControl radialMenuControl)
         {
             SelectedButtonID = ""; // As we build new layout, unselect any button
+                                   // string parentButtonID = null;
+                                   // List<int> range = new List<int>();
 
+            // if (parent != null)
+            // {
+            //     parentButtonID = parent.Data.ButtonID;
+            //     var firstbuttontodisplay = Int32.Parse(parentButtonID) - 2;
+            //     firstbuttontodisplay = firstbuttontodisplay < 0 ? firstbuttontodisplay + 8 : firstbuttontodisplay;
+            //     var secondbuttontodisplay = Int32.Parse(parentButtonID) + 2;
+            //     secondbuttontodisplay = secondbuttontodisplay > 7 ? secondbuttontodisplay - 8 : secondbuttontodisplay;
+
+            //     var index = firstbuttontodisplay;
+            //     do
+            //     {
+            //         range.Add(index);
+            //         index++;
+            //         if (index == 8) index = 0;
+            //     } while (index != secondbuttontodisplay);
+            // }
+            if (parent != null)
+            {
+                var parentButtonID = parent.Data.ButtonID;
+            }
             // Iterate on each sector data to update button
             foreach (MenuButton button in _Buttons.Keys)
             {
@@ -333,7 +369,21 @@ namespace RadialMenuPlugin.Controls
                 _Buttons[button] = model; // update model
                 button.ButtonModelBinding.Bind(_Buttons, bntCollection => bntCollection[button].Data); // Bind button model
                 button.ID = model.Data.ButtonID; // Update button ID
+                int buttonID = Int32.Parse(button.ID);
 
+                // Show only buttons in "segment circle" 
+                // if (parent != null)
+                // {
+                //     if (range.Contains(buttonID))
+                //     {
+                //         button.Visible = true;
+                //     }
+                //     else
+                //     {
+                //         button.Visible = false;
+
+                //     }
+                // }
             }
         }
         #endregion
@@ -442,6 +492,7 @@ namespace RadialMenuPlugin.Controls
         /// <param name="e"></param>
         protected void _OnMouseEnter(MenuButton sender, MouseEventArgs e)
         {
+            Logger.Debug($"Enter button {sender.ID}");
             _HoverButtonID = sender.ID;
             _RaiseEvent(MouseEnterButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }

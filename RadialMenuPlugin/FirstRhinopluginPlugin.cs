@@ -59,10 +59,10 @@ namespace RadialMenuPlugin
             config.AddRule(LogLevel.Info, LogLevel.Fatal, filetarget); // Log all except debug and trace level into file
 
             // Log trace and debug level into rhino console ONLY when in debug mode
-            var isDebug = Environment.GetEnvironmentVariable(RadialMenuPlugin.IsDebugEnvName);
+            var isDebug = Environment.GetEnvironmentVariable(IsDebugEnvName);
             if (isDebug == "1")
             {
-                config.AddRule(LogLevel.Trace, LogLevel.Debug, consoleTargetDebug);
+                config.AddRule(LogLevel.Trace, LogLevel.Debug, consoleTargetDebug,"*RadialMenuControl*");
             }
             LogManager.Configuration = config;
         }
