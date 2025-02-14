@@ -27,10 +27,17 @@ namespace RadialMenuPlugin.Controls
         protected static int s_maxLevels = 3;
         protected static Size s_menuSize = new Size(1000, 1000);
         protected PixelLayout _Layout = new PixelLayout();
+        /// <summary>
+        /// Setup menu levels
+        /// <para>
+        /// REMARK It is very important to setup the start angle on each level so that the "next" button ID is always at the right of the previous (parent) button ID.
+        /// This is due to computing wich children buttons of next level should be displayed when "Segmented circle" is active <see cref="RadialMenuControl.SetMenuForButtonID(Model, RadialMenuControl)"/> 
+        /// </para>
+        /// </summary>
         protected List<RadialMenuLevel> _Levels = new List<RadialMenuLevel>() {
                 new RadialMenuLevel(1,s_defaultInnerRadius,s_defaultThickness),
-                new RadialMenuLevel(2,s_defaultInnerRadius+s_defaultThickness+8,s_defaultThickness,360/8/2), // For this one, start angle at 45° to alternate buttons
-                new RadialMenuLevel(3,s_defaultInnerRadius+s_defaultThickness+8+s_defaultThickness+8,s_defaultThickness),
+                new RadialMenuLevel(2,s_defaultInnerRadius+s_defaultThickness+8,s_defaultThickness,360-(360/8/2)), // For this one, start angle at 45° to alternate buttons
+                new RadialMenuLevel(3,s_defaultInnerRadius+s_defaultThickness+8+s_defaultThickness+8,s_defaultThickness,360-(360/8)),
             };
         /// <summary>
         /// Keep track of drag source Control to register/unregister "dragEnd" event
@@ -756,6 +763,16 @@ namespace RadialMenuPlugin.Controls
                 }
             }
             model.Clear();
+
+            // Update parent model "isFolder" property depending it still have at least one active children button
+            var parent = model.Parent;
+            children = ModelController.Instance.GetChildren(parent);
+            var isFolder = false;
+            foreach (var child in children)
+            {
+                if (child.Data.Properties.IsActive) { isFolder = true; break; }
+            }
+            parent.Data.Properties.IsFolder = isFolder;
         }
         /// <summary>
         /// Shows context menu event handler

@@ -50,7 +50,7 @@ namespace RadialMenuPlugin
             var consoleTargetDebug = new NLog.Targets.MethodCallTarget()
             {
                 Name = "RhinoCommandHistory",
-                ClassName = "RadialMenuPlugin.NLogClassLogger, RadialMenu, Version=1.1.1.0, Culture=neutral, PublicKeyToken=null",
+                ClassName = "RadialMenuPlugin.NLogClassLogger, TigrouRadialMenu, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null",
                 MethodName = "log",
             };
             consoleTargetDebug.Parameters.Add(new NLog.Targets.MethodCallParameter("${level}"));
@@ -63,6 +63,7 @@ namespace RadialMenuPlugin
             if (isDebug == "1")
             {
                 config.AddRule(LogLevel.Trace, LogLevel.Debug, consoleTargetDebug,"*RadialMenuControl*");
+                // config.AddRule(LogLevel.Trace, LogLevel.Debug, consoleTargetDebug);
             }
             LogManager.Configuration = config;
         }

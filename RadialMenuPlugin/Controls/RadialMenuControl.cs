@@ -10,6 +10,7 @@ using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Utilities;
 using RadialMenuPlugin.Utilities.Events;
+using Rhino;
 
 namespace RadialMenuPlugin.Controls
 {
@@ -338,57 +339,38 @@ namespace RadialMenuPlugin.Controls
         public void SetMenuForButtonID(Model parent, RadialMenuControl radialMenuControl)
         {
             SelectedButtonID = ""; // As we build new layout, unselect any button
-                                   // string parentButtonID = null;
-                                   // List<int> range = new List<int>();
 
-            // if (parent != null)
-            // {
-            //     parentButtonID = parent.Data.ButtonID;
-            //     var firstbuttontodisplay = Int32.Parse(parentButtonID) - 2;
-            //     firstbuttontodisplay = firstbuttontodisplay < 0 ? firstbuttontodisplay + 8 : firstbuttontodisplay;
-            //     var secondbuttontodisplay = Int32.Parse(parentButtonID) + 2;
-            //     secondbuttontodisplay = secondbuttontodisplay > 7 ? secondbuttontodisplay - 8 : secondbuttontodisplay;
+            string parentButtonID = null;
+            var limitDisplay = parent == null ? false : true; //TODO Bind this to a setting of plugin
+            List<string> buttonsRange = new List<string>();
 
-            //     var index = firstbuttontodisplay;
-            //     do
-            //     {
-            //         range.Add(index);
-            //         index++;
-            //         if (index == 8) index = 0;
-            //     } while (index != secondbuttontodisplay);
-            // }
-
-            var buttonAngleRange = new List<int>();
-            var limitDisplay = false;
             if (parent != null)
             {
-                if (radialMenuControl != null)
+                try
                 {
-                    limitDisplay = true; // Will only show 4 buttons around the parent (segment circle)
+                    parentButtonID = parent.Data.ButtonID;
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+                if (parentButtonID != null)
+                {
+                    var firstbuttontodisplay = Int32.Parse(parent.Data.ButtonID);
+                    firstbuttontodisplay = firstbuttontodisplay < 0 ? firstbuttontodisplay + 8 : firstbuttontodisplay;
+                    var secondbuttontodisplay = Int32.Parse(parent.Data.ButtonID) + 2;
+                    secondbuttontodisplay = secondbuttontodisplay > 7 ? secondbuttontodisplay - 8 : secondbuttontodisplay;
 
-                    // Retrieve parent button sector data
-                    var parentSectorData = radialMenuControl.GetButtonSectorData(parent.Data.ButtonID);
-                    if (parentSectorData != null)
+                    var index = firstbuttontodisplay;
+                    do
                     {
-                        // Compute button to display by angle
-                        var startAngle = parentSectorData.StartAngle - parentSectorData.SweepAngle * 2; // 2 buttons back
-                        startAngle = startAngle < 0 ? startAngle += 360 : startAngle;
-
-                        var endAngle = parentSectorData.StartAngle + parentSectorData.SweepAngle * 2; // 2 buttons forward
-                        endAngle = endAngle < 0 ? endAngle + 360 : endAngle;
-
-                        // Build angle range
-                        var angleRange = startAngle;
-                        do
-                        {
-                            // var nextAngle = angleRange + parentSectorData.SweepAngle;
-                            buttonAngleRange.Add(angleRange);
-                            angleRange += parentSectorData.SweepAngle;
-                            if (angleRange > 360) angleRange -= 360;
-                        } while (angleRange != endAngle);
-                    }
+                        buttonsRange.Add(index.ToString());
+                        index++;
+                        if (index == 8) index = 0;
+                    } while (index != secondbuttontodisplay);
                 }
             }
+
             // Iterate on each sector data to update button
             foreach (MenuButton button in _Buttons.Keys)
             {
@@ -402,19 +384,14 @@ namespace RadialMenuPlugin.Controls
                 // Show only buttons in "segment circle" 
                 if (limitDisplay)
                 {
-                    var shouldDisplayButton = false;
-                    foreach (var angle in buttonAngleRange)
-                    {
-                        if (button.SectorData.StartAngle >= angle) { shouldDisplayButton = true; break; }
-                    }
-                    if (shouldDisplayButton)
+
+                    if (buttonsRange.Contains(button.ID))
                     {
                         button.Visible = true;
                     }
                     else
                     {
                         button.Visible = false;
-
                     }
                 }
             }
@@ -526,6 +503,8 @@ namespace RadialMenuPlugin.Controls
         protected void _OnMouseEnter(MenuButton sender, MouseEventArgs e)
         {
             Logger.Debug($"Enter button {sender.ID}");
+            Console.SetOut(RhinoApp.CommandLineOut);
+            Console.WriteLine("hover test");
             _HoverButtonID = sender.ID;
             _RaiseEvent(MouseEnterButton, new ButtonMouseEventArgs(e, new Point(sender.PointToScreen(e.Location)), _Buttons[sender]));
         }
