@@ -4,46 +4,48 @@ using RadialMenuPlugin.Controls;
 using Eto.Forms;
 using Rhino.UI;
 using RadialMenuPlugin.Data;
+using System.Collections.Generic;
+using NLog;
+using System;
 
 namespace RadialMenuPlugin
 {
     public class RadialMenuCommand : Rhino.Commands.Command
     {
         /// <summary>
-        /// Main plugin form
+        /// Maintain list of plugin form instance associated to each opened Rhino doc (Window)
         /// </summary>
-        protected TransparentForm _Form;
-        protected int _PrevKeyPress = 0;
+        protected Dictionary<RhinoDoc, TransparentForm> PluginForms = new Dictionary<RhinoDoc, TransparentForm>();
         public RadialMenuCommand()
         {
             // Rhino only creates one instance of each command class defined in a
             // plug-in, so it is safe to store a refence in a static property.
             Instance = this;
 
-            RhinoApp.KeyboardEvent += (key) =>
-            {
-                var etoKey = RhinoKeyToEto.toEtoKey(key);
-                if (etoKey != Keys.None)
-                {
-                    //TODO: Add hability to customize wich keyboard special key to give menu focus back
-                    // if (etoKey == Keys.Application) // If "command" key is pressed, give menu focus 
-                    // {
-                    //     // FIXME: for special keys like Command, Control, Option, Rhino send the event twice.
-                    //     // Check previous key press was not the same to avoid sending Menu the event twice
-                    //     _Form.KeyPress(new KeyEventArgs(etoKey, KeyEventType.KeyDown)); // No char as we only send special key
-                    //     // if (_PrevKeyPress != key)
-                    //     // {
-                    //     // }
-                    // }
-                }
-                _PrevKeyPress = key;
-            };
             // When ESC is pressed in rhino AND command is running -> Send keyUp to radial menu
             RhinoApp.EscapeKeyPressed += (s, e) =>
             {
-                if (_Form != null && _Form.Visible) // If radial menu exist and is showing
+                TransparentForm form = GetFormInstance(RhinoDoc.ActiveDoc);
+                if (form != null)
                 {
-                    _Form.KeyPress(new KeyEventArgs(Keys.Escape, KeyEventType.KeyDown)); // Send ESC key up event to form
+                    form = PluginForms[RhinoDoc.ActiveDoc];
+                    HandleKeyPress(form, e);
+                }
+            };
+
+            /**
+            Remove radial menu form instance when document is closed
+            **/
+            RhinoDoc.CloseDocument += (s, e) =>
+            {
+                if (e.Document != null)
+                {
+                    if (PluginForms.ContainsKey(e.Document))
+                    {
+                        PluginForms[e.Document].Close();
+                        PluginForms[e.Document].Dispose();
+                        PluginForms.Remove(e.Document);
+                    }
                 }
             };
         }
@@ -67,14 +69,52 @@ namespace RadialMenuPlugin
         /// <returns></returns>
         protected override Result RunCommand(RhinoDoc doc, RunMode mode)
         {
-            // RhinoApp.CommandWindowCaptureEnabled = false;
-            _Form = _Form == null ? new RadialMenuForm(PlugIn,RhinoEtoApp.MainWindow) : _Form;
-            // var m = MouseCursor.Location;
-            var m = Mouse.Position;
-            var formSize = _Form.Size;
-            _Form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
-            _Form.Show();
+            TransparentForm form = GetFormInstance(doc);
+            if (form != null)
+            {
+                var m = Mouse.Position;
+                var formSize = form.Size;
+                form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
+                form.Show();
+            }
             return Result.Nothing;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="form"></param>
+        /// <param name="e"></param>
+        protected void HandleKeyPress(TransparentForm form, EventArgs e)
+        {
+            if (form != null && form.Visible) // If radial menu exist and is showing
+            {
+                form.KeyPress(new KeyEventArgs(Keys.Escape, KeyEventType.KeyDown)); // Send ESC key up event to form
+            }
+        }
+
+        /// <summary>
+        /// Get radial menu form instance for the provided document. If no form instance exists, create a new one
+        /// </summary>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        protected TransparentForm GetFormInstance(RhinoDoc document)
+        {
+            TransparentForm form = null;
+
+            if (document != null)
+            {
+                if (PluginForms.ContainsKey(document))
+                {
+                    form = PluginForms[document];
+                }
+                else
+                {
+                    var window = RhinoEtoApp.MainWindowForDocument(document);
+                    form = new RadialMenuForm(PlugIn, window);
+                    PluginForms.Add(document, form);
+                }
+            }
+            return form;
         }
     }
 }
