@@ -33,7 +33,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
         {
             _DefaultIcon = Bitmap.FromResource("TigrouRadialMenu.Bitmaps.question-mark-circle-outline-icon.png");
             _IconFileChooser = new OpenFileDialog();
-            var filter = new FileFilter { Name = "Images", Extensions = new string[] { ".jpeg", ".png", ".png", ".bmp" } };
+            var filter = new FileFilter { Name = "Images", Extensions = new string[] { ".jpeg", ".png", ".png", ".bmp", ".svg" } };
             _IconFileChooser.Filters.Add(filter);
 
             Orientation = Orientation.Horizontal;
@@ -166,6 +166,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
             _CommandIconView.BackgroundColor = Colors.Transparent;
             _CommandIconView.MouseDown += (s, e) =>
             {
+                Bitmap bitmap = null;
                 FileSelectorOpened = true;
 
                 _IconFileChooser.ShowDialog(ParentWindow); // Modal blocking dialog
@@ -173,14 +174,29 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
                 {
                     try
                     {
-                        var bitmap = new Bitmap(_IconFileChooser.FileName);
-                        _Model.Data.Properties.Icon = bitmap.WithSize(DragDropUtilities.IconSize);
-                        _Model.Data.Properties.CommandGUID = Guid.NewGuid(); // Generate a new Guid for this image/icon
-                        _Model.Data.Properties.IsActive = true; // Set button as active
+                        if (System.IO.Path.GetExtension(_IconFileChooser.FileName).ToString() == ".svg")
+                        {
+                            var fileContents = System.IO.File.ReadAllText(_IconFileChooser.FileName);
+                            var bitmapFromSvg = Rhino.UI.DrawingUtilities.BitmapFromSvg(fileContents, DragDropUtilities.IconSize.Width, DragDropUtilities.IconSize.Height);
+                            bitmap = Rhino.UI.EtoExtensions.ToEto(bitmapFromSvg);
+                        }
+                        else
+                        {
+                            bitmap = new Bitmap(_IconFileChooser.FileName);
+                        }
                     }
                     catch (Exception exception)
                     {
                         Logger.Error(exception);
+                    }
+                    finally
+                    {
+                        if (bitmap != null)
+                        {
+                            _Model.Data.Properties.Icon = bitmap.WithSize(DragDropUtilities.IconSize);
+                            _Model.Data.Properties.CommandGUID = Guid.NewGuid(); // Generate a new Guid for this image/icon
+                            _Model.Data.Properties.IsActive = true; // Set button as active
+                        }
                     }
                 }
                 FileSelectorOpened = false;
