@@ -351,7 +351,8 @@ namespace RadialMenuPlugin.Controls
             }
             else
             {
-                _CenterMenuButton.SetTooltip(model.Data.Properties.LeftMacro, model.Data.Properties.RightMacro);
+                // Show left/right macro tooltip, except on folder items
+                if (!model.Data.Properties.IsFolder) _CenterMenuButton.SetTooltip(model.Data.Properties.LeftMacro, model.Data.Properties.RightMacro);
             }
         }
         /// <summary>
@@ -524,6 +525,9 @@ namespace RadialMenuPlugin.Controls
         }
         protected void _RadialControlMouseClickHandler(RadialMenuControl radialMenuControl, ButtonMouseEventArgs e)
         {
+            // Do nothing on "folder" click
+            if (e.Model.Data.Properties.IsFolder) return;
+
             switch (e.MouseEventArgs.Buttons)
             {
                 case MouseButtons.Primary:
@@ -756,6 +760,19 @@ namespace RadialMenuPlugin.Controls
                 }
             }
             model.Clear();
+
+            // Update parent model "isFolder" property depending it still have at least one active children button
+            var parent = model.Parent;
+            if (parent != null)
+            {
+                children = ModelController.Instance.GetChildren(parent);
+                var isFolder = false;
+                foreach (var child in children)
+                {
+                    if (child.Data.Properties.IsActive) { isFolder = true; break; }
+                }
+                parent.Data.Properties.IsFolder = isFolder;
+            }
         }
         /// <summary>
         /// Shows context menu event handler
