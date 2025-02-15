@@ -1,16 +1,34 @@
 # Rhino Radial menu (MacOS Only)
 <br/><br/>
+## What it does
+Radial Menu for Rhinoceros V8.0 on macOS.
+The aim of this plugin is to provide a radial menu to quick access your most used command within a click or shortcut (trigger keys)
+<br>
+The menu can be configured by just drag & drop items, either from Rhino toolbars, either inside the radial menu itself to re-arrange items.
+
+The radial menu support 3 submenu levels.
+
+You can have a demo video on youtube https://www.youtube.com/watch?v=viOj8lNkz2s
 
 ## How to install
    
-The easiest way to install the plugin is to use Rhino package installer :
+There are 3 ways to get the plugin and install it.
 
-* You can find the package installer file in this repository in folder `/yak_package`
-* The file is named `radialmenu-1.0.0-rh8_0-mac.yak`
+1. From github releases
+* Go on "releases", download the binary .yak file
+* Move or copy/paste the .yak file into your Rhino MacPlugins folder
+
+2. Get the plugin on food4rhino
+* Just visit the page https://www.food4rhino.com/en/app/tigrouradialmenu?lang=fr
+
+3. Get it with Rhino package manager
+
 <br/><br/>
 
 ## Launch the menu
 - In Rhino command, type command "TigrouRadialMenu" to launch the radial menu.
+- You can also create a Rhino shortcut to this command
+- You can set this command to your middle mouse click in Rhino settings
 <br/><br/>
 
 ## Manage menu icons
@@ -48,10 +66,11 @@ The easiest way to install the plugin is to use Rhino package installer :
 <br/><br/>
 
 ## TODO (not priority ordered)
+   * [ ] Give choice to choose a "full circle" sub menu or "segmented circle" sub menu
    * [x] Hide menu and give rhino window focus when a button is clicked (Run a command)
    * [x] Make settings persistent to keep menu configuration between Rhino launches
    * [x] Add hability to remove icons from menu
-   * [ ] Improve UI visual changes when changing sub menu (i.e. Add soft fade in/out)
+   * [x] Improve UI visual changes when changing sub menu (i.e. Add soft fade in/out)
    * [x] Improved tooltip. They now are displayed in radial menu center, with mouse button indicator (left / right) 
    * [x] Context menu to configure manually a button : Choose other icons, type in the Rhino command
      * [x] Hability to set a trigger key for each button
