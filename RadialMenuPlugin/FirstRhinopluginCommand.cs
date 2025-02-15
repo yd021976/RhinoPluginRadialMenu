@@ -3,7 +3,6 @@ using Rhino.Commands;
 using RadialMenuPlugin.Controls;
 using Eto.Forms;
 using Rhino.UI;
-using RadialMenuPlugin.Data;
 using System.Collections.Generic;
 using NLog;
 using System;
@@ -12,6 +11,8 @@ namespace RadialMenuPlugin
 {
     public class RadialMenuCommand : Rhino.Commands.Command
     {
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// Maintain list of plugin form instance associated to each opened Rhino doc (Window)
         /// </summary>
@@ -77,6 +78,10 @@ namespace RadialMenuPlugin
                 form.Location = new Eto.Drawing.Point((int)m.X - (formSize.Width / 2), (int)m.Y - (formSize.Height / 2));
                 form.Show();
             }
+            else
+            {
+                Logger.Error($"No radial menu form instance found");
+            }
             return Result.Nothing;
         }
         /// <summary>
@@ -106,13 +111,19 @@ namespace RadialMenuPlugin
                 if (PluginForms.ContainsKey(document))
                 {
                     form = PluginForms[document];
+                    Logger.Info($"Found radial menu form instance for document {document.RuntimeSerialNumber}");
                 }
                 else
                 {
                     var window = RhinoEtoApp.MainWindowForDocument(document);
                     form = new RadialMenuForm(PlugIn, window);
                     PluginForms.Add(document, form);
+                    Logger.Info($"Create new radial menu form instance for document {document.RuntimeSerialNumber}");
                 }
+            }
+            else
+            {
+                Logger.Error("Document is null, no radial menu form instance found or created");
             }
             return form;
         }
