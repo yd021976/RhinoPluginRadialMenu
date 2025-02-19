@@ -1,4 +1,4 @@
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped
 {
     /// <summary>
     /// 

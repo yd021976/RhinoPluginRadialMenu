@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types.Images;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types;
 
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped
 {
     /// <summary>
     /// 

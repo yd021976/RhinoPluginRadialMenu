@@ -142,7 +142,7 @@ namespace RadialMenuPlugin.Utilities.Settings
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public ButtonModelData GetData(PersistentSettings node)
+        public ButtonModelData GetButtonData(PersistentSettings node)
         {
             ButtonModelData modelData = null;
             var hasButtonID = node.TryGetString("ButtonID", out var buttonID); // Get button ID
@@ -162,13 +162,17 @@ namespace RadialMenuPlugin.Utilities.Settings
             }
             return modelData;
         }
-
+        public SettingsClass GetSettings(PersistentSettings node)
+        {
+            SettingsClass settings = null;
+            node.TryGetChild("DisplaySegmentedCircles", out var DisplaySegmentedCircles);
+        }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="node"></param>
         /// <param name="model"></param>
-        public void SetProperties(PersistentSettings node, ButtonModelData modelData)
+        public void SetButtonProperties(PersistentSettings node, ButtonModelData modelData)
         {
             // Update settings XML file
             node.SetString("ButtonID", modelData.ButtonID);

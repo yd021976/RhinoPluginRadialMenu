@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.States;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.States;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types;
 
 namespace RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center.States
 {

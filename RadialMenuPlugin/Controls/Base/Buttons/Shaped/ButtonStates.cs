@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.States;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.States;
 
 ///
 /// State flow is described in freeform <see href="https://www.icloud.com/freeform/036L6shKtvcdN1cYQAIbx5m7A#Button_States"/>
 ///
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped
 {
     /// <summary>
     /// Default state handler

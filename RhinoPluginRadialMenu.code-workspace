@@ -26,11 +26,11 @@
 			"**/CVS": true,
 			"**/.DS_Store": true,
 			"**/Thumbs.db": true,
-			"**/Properties": false,
+			"**/Properties": true,
 			"**/bin": true,
 			"bin": true,
 			"**/obj": true,
-			"Package": false,
+			"Package": true,
 			"UI_Design": true
 		},
 		"editor.showFoldingControls": "always",

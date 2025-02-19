@@ -1,4 +1,4 @@
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types
 {
     public interface IBaseEnumKey
     {

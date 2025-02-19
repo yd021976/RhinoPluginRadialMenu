@@ -5,11 +5,12 @@ using System.Linq;
 using AppKit;
 using Eto.Drawing;
 using Eto.Forms;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.States;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types.Images;
 using RadialMenuPlugin.Utilities.Events;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.States;
+using RadialMenuPlugin.Controls.Buttons;
 
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped
 {
     using MouseEventHandler = AppEventHandler<object, MouseEventArgs>; // Used for mouse events
     public interface IButton

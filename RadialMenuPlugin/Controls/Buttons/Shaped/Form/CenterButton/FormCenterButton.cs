@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using AppKit;
 using Eto.Drawing;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.States;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types.Images;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.States;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center.States;
 using RadialMenuPlugin.Data;
 

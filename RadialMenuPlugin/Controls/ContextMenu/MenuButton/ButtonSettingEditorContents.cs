@@ -1,17 +1,17 @@
 using Eto.Forms;
 using Eto.Drawing;
 using RadialMenuPlugin.Data;
-using RadialMenuPlugin.Controls.ContextMenu.Base.Editors;
 using System.ComponentModel;
 using System;
 using RadialMenuPlugin.Utilities;
+using RadialMenuPlugin.Controls.Base.ContextMenu;
 
 namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
 {
     /// <summary>
     /// 
     /// </summary>
-    public class ButtonSettingEditorContents : Base.ContextMenuContent<Model>
+    public class ButtonSettingEditorContents : ContextMenuContent<Model>
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 

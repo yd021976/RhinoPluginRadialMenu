@@ -1,6 +1,6 @@
 using Eto.Forms;
 
-namespace RadialMenuPlugin.Controls.ContextMenu.Base.Editors
+namespace RadialMenuPlugin.Controls.Base.ContextMenu
 {
     public class StackField : StackLayoutItem
     {

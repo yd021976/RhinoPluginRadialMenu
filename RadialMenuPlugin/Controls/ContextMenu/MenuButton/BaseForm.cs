@@ -1,41 +1,28 @@
 using System;
-using System.ComponentModel;
 using AppKit;
 using Eto.Forms;
+using RadialMenuPlugin.Controls.Base.ContextMenu;
 using RadialMenuPlugin.Data;
 
-namespace RadialMenuPlugin.Controls.ContextMenu.Base
-{
+namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
+{ 
     /// <summary>
-    /// Define interface for contextual menu data bindings
+    /// Abstract class for menu contents based on data from "Model" class
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="D"></typeparam>
-    public interface IContextMenuBinding<T, D> where T : Control where D : Model
-    {
-        /// <summary>
-        /// Binding to Model object
-        /// </summary>
-        public BindableBinding<T, D> ModelBinding { get; }
-    }
-    /// <summary>
-    /// Abstract class for contextual menu contents
-    /// </summary>
-    public abstract class ContextMenuContent<D> : StackLayout, IContextMenuBinding<ContextMenuContent<D>, D> where D : Model, new()
+    public abstract class ContextMenuContent<D> : BaseContent<D> where D : Model, new()
     {
         #region  public properties
-        public BindableBinding<ContextMenuContent<D>, D> ModelBinding => _ModelBinding;
         /// <summary>
         /// 
         /// </summary>
-        protected D _Model = new D();
+        // protected D _Model = new D();
         #endregion
         #region protected/private properties
 
         /// <summary>
         /// 
         /// </summary>
-        protected BindableBinding<ContextMenuContent<D>, D> _ModelBinding => new BindableBinding<ContextMenuContent<D>, D>(
+        protected new BindableBinding<ContextMenuContent<D>, D> _ModelBinding => new BindableBinding<ContextMenuContent<D>, D>(
                            this,
                            (ContextMenuContent<D> obj) => obj._Model,
                            // Update "model" property with new value and register a property changed event handler of the "model" object
@@ -63,39 +50,28 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
                            delegate (ContextMenuContent<D> menu, EventHandler<EventArgs> changeEventHandler)
                            { }
                            );
-        /// <summary>
-        /// Model object reference changed
-        /// </summary>
-        protected abstract void _UpdateModelBindings();
         #endregion
         #region public methods
         /// <summary>
         /// 
         /// </summary>
         public ContextMenuContent() : base()
-        {
-
-        }
+        { }
         #endregion
         #region protected/private methods
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected abstract void _ModelChangedHandler(object sender, PropertyChangedEventArgs e);
         #endregion
     }
     /// <summary>
-    /// Base abstract class to display a Borderless context menu
+    /// Base abstract class to display a Borderless context menu base on Eto.Form class
     /// <para>
     /// T is the type of contents
     /// </para>
     /// </summary>
-    public abstract class ContextMenuForm<CONTENTS, DATA> : Form where CONTENTS : ContextMenuContent<DATA> where DATA : Model, new()
+    public abstract class BaseContextMenuForm<CONTENTS, DATA> : Form where CONTENTS : BaseContent<DATA> where DATA : BaseINotifyPropertyChanged, new()
     {
+
         #region public properties
-        public new ContextMenuContent<DATA> Content
+        public new BaseContent<DATA> Content
         {
             get => _Contents;
             set
@@ -118,10 +94,10 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
 
         #region protected/private properties
         protected DATA _Model;
-        protected ContextMenuContent<DATA> _Contents;
+        protected BaseContent<DATA> _Contents;
         #endregion
         #region public methods
-        public ContextMenuForm() : base()
+        public BaseContextMenuForm() : base()
         {
             WindowStyle = WindowStyle.None;// No border/decoration
             AutoSize = false;
@@ -145,16 +121,16 @@ namespace RadialMenuPlugin.Controls.ContextMenu.Base
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void _ModelChangedHandler(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Model.Data):
-                case nameof(Model.Data.Properties):
-                    break;
-                default: break;
-            }
-        }
+        // protected void _ModelChangedHandler(object sender, PropertyChangedEventArgs e)
+        // {
+        //     switch (e.PropertyName)
+        //     {
+        //         case nameof(Model.Data):
+        //         case nameof(Model.Data.Properties):
+        //             break;
+        //         default: break;
+        //     }
+        // }
         /// <summary>
         /// Method is requested when menu should close. Default behavior is "true"
         /// <para>

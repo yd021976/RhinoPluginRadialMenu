@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using NLog;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types;
 
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base.States
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped.States
 {
     /// <summary>
     /// Pool of state objects. Used to assign a state type to a state instance

@@ -9,8 +9,8 @@ using NLog;
 using RadialMenuPlugin.Data;
 using RadialMenuPlugin.Controls.Buttons.MenuButton;
 using RadialMenuPlugin.Controls.ContextMenu.MenuButton;
-using RadialMenuPlugin.Controls.Buttons.Shaped.Base;
 using RadialMenuPlugin.Controls.Buttons.Shaped.Form.Center;
+using RadialMenuPlugin.Controls.Base.Buttons.Shaped;
 
 namespace RadialMenuPlugin.Controls
 {

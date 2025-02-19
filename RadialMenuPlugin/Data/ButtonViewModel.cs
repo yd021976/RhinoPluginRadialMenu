@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using RadialMenuPlugin.Controls.Base.ContextMenu;
 using RadialMenuPlugin.Utilities.Settings;
 using Rhino;
 
@@ -79,10 +80,12 @@ namespace RadialMenuPlugin.Data
             _Properties = new ButtonProperties(rhinoSettingsData);
         }
     }
+
+
     /// <summary>
-    /// Model class for "arc buttons"
+    /// Model class for menu items
     /// </summary>
-    public class Model : INotifyPropertyChanged
+    public class Model : BaseINotifyPropertyChanged
     {
         /// <summary>
         /// Parent model
@@ -140,16 +143,6 @@ namespace RadialMenuPlugin.Data
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void _OnDataPropertiesChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
         /// <summary>
         /// Property changed event handler for properties in object "data"
         /// </summary>
@@ -170,13 +163,13 @@ namespace RadialMenuPlugin.Data
         /// <param name="e"></param>
         protected void _OnPropertiesChanged(object sender, PropertyChangedEventArgs e)
         {
-            SettingsHelper.Instance.SetProperties(_RhinoPersistentSettingsNode, _Data);
+            SettingsHelper.Instance.SetButtonProperties(_RhinoPersistentSettingsNode, _Data);
         }
         /// <summary>
         /// 
         /// </summary>
         public Model() { }
-        
+
         /// <summary>
         /// Constructor without a GUID. Properties will no be initialized from Rhino Persistent settings
         /// <para>
@@ -231,7 +224,7 @@ namespace RadialMenuPlugin.Data
             var rhinoPS = _RhinoPersistentSettingsNode;
             if (rhinoPS != null)
             {
-                _Data = SettingsHelper.Instance.GetData(rhinoPS); // Update properties from Rhino settings
+                _Data = SettingsHelper.Instance.GetButtonData(rhinoPS); // Update properties from Rhino settings
             }
         }
         /// <summary>
@@ -282,7 +275,7 @@ namespace RadialMenuPlugin.Data
         {
             foreach (var child in SettingsHelper.Instance.GetChildren(node))
             {
-                var buttonData = SettingsHelper.Instance.GetData(child.Value);
+                var buttonData = SettingsHelper.Instance.GetButtonData(child.Value);
                 var model = new Model(new RhinoPersistentSettingsCtor(child.Key, buttonData.ButtonID), parentModel); // Will load data from rhino persistent settings
                 model.Data = buttonData;
                 _Models.Add(model);

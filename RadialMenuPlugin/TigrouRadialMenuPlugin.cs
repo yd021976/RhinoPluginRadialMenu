@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using NLog;
-using NLog.Layouts;
 using RadialMenuPlugin.Utilities.Settings;
 using Rhino;
 using Rhino.PlugIns;

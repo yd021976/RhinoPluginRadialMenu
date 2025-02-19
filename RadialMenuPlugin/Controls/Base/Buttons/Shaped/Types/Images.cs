@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Eto.Drawing;
+using RadialMenuPlugin.Controls.Buttons;
 
-namespace RadialMenuPlugin.Controls.Buttons.Shaped.Base.Types.Images
+namespace RadialMenuPlugin.Controls.Base.Buttons.Shaped.Types
 {
     /// <summary>
     /// Image names

@@ -9,8 +9,7 @@ namespace RadialMenuPlugin.Controls.ContextMenu.MenuButton
     /// 
     /// 
     /// </summary>
-    public class ButtonSettingEditorForm : Base.ContextMenuForm<ButtonSettingEditorContents, Model>
-    // public class ButtonSettingEditorForm : Form
+    public class ButtonSettingEditorForm : BaseContextMenuForm<ButtonSettingEditorContents, Model>
     {
         protected ButtonSettingEditorContents _SettingsEditorContents;
         public event EventHandler<TextChangingEventArgs> TriggerTextChanging;
